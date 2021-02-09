@@ -1,6 +1,6 @@
 ## Lightstep + CockroachDB
 
-[Cockroach Labs](https://www.cockroachlabs.com/) has instrumented their database using open standards so developers and database engineers can indentify performance problems. Lightstep is natively supported by Cockroach as a source for trace data.
+[Cockroach Labs](https://www.cockroachlabs.com/) has instrumented their database using open standards so developers and database engineers can identify performance problems. Lightstep is natively supported by Cockroach as a source for trace data.
 
 This is an example of how to use metrics and traces from [CockroachDB](https://github.com/cockroachdb/cockroach) with Lightstep.
 
