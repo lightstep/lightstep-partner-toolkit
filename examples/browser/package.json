@@ -1,0 +1,36 @@
+{
+  "name": "lightstep-opentelemetry-browser-example",
+  "version": "0.0.1",
+  "description": "Demo of OpenTelemetry browser instrumentation",
+  "main": "tracer.js",
+  "scripts": {
+    "start": "webpack-dev-server -d --progress --colors --port 8090 --config webpack.config.js --hot --inline --host 0.0.0.0 --content-base .",
+    "build": "webpack -d --progress --colors --port 8090 --config webpack.config.js"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.6.0",
+    "babel-loader": "^8.0.6",
+    "ts-loader": "^6.0.4",
+    "webpack": "^4.35.2",
+    "webpack-cli": "^3.3.9",
+    "webpack-dev-server": "^3.8.1",
+    "webpack-merge": "^4.2.2"
+  },
+  "dependencies": {
+    "@opentelemetry/api": "^0.16.0",
+    "@opentelemetry/context-zone": "^0.16.0",
+    "@opentelemetry/core": "^0.16.0",
+    "@opentelemetry/exporter-collector": "^0.16.0",
+    "@opentelemetry/instrumentation": "^0.16.0",
+    "@opentelemetry/instrumentation-fetch": "^0.16.0",
+    "@opentelemetry/instrumentation-xml-http-request": "^0.16.0",
+    "@opentelemetry/metrics": "^0.16.0",
+    "@opentelemetry/plugin-document-load": "^0.12.0",
+    "@opentelemetry/plugin-user-interaction": "^0.12.0",
+    "@opentelemetry/propagator-b3": "^0.16.0",
+    "@opentelemetry/tracing": "^0.16.0",
+    "@opentelemetry/web": "^0.16.0"
+  },
+  "author": "Lightstep",
+  "license": "ISC"
+}
