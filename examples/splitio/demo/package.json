@@ -1,0 +1,30 @@
+{
+  "name": "express-template",
+  "version": "1.0.0",
+  "description": "",
+  "license": "ISC",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "nodemon src/index.js localhost 8181"
+  },
+  "dependencies": {
+    "@opentelemetry/api": "^0.15.0",
+    "@opentelemetry/core": "^0.15.0",
+    "@opentelemetry/exporter-collector": "^0.15.0",
+    "@opentelemetry/exporter-collector-proto": "^0.15.0",
+    "@opentelemetry/metrics": "^0.15.0",
+    "@opentelemetry/node": "^0.15.0",
+    "@opentelemetry/plugin-express": "^0.13.0",
+    "@opentelemetry/plugins-node-core": "^0.15.0",
+    "@opentelemetry/propagator-b3": "^0.15.0",
+    "@opentelemetry/tracing": "^0.15.0",
+    "@opentelemetry/plugin-splitio": "file:./opentelemetry-plugin-splitio",
+    "@splitsoftware/splitio": "10.15.2",
+    "express": "4.17.1",
+    "path": "0.12.7"
+  },
+  "devDependencies": {
+    "nodemon": "1.18.4"
+  },
+  "keywords": []
+}

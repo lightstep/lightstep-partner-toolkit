@@ -1,6 +1,12 @@
-### Split.io + OpenTelemetry
+### Split.io + OpenTelemetry + Lightstep
 
- [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/lightstep/lightstep-partner-sdk/blob/main/examples/splitio/splitio_opentelemetry.ipynb) [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/lightstep/lightstep-partner-sdk/main?filepath=examples%2Fsplitio)
+Code samples and demos.
+
+#### Node.js
+See a fully-working Express app in `demo/` -- to preview in the cloud, **[Run in Codesandbox](https://githubbox.com/lightstep/lightstep-partner-sdk/tree/main/examples/splitio/demo)**.
+
+#### Python
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/lightstep/lightstep-partner-sdk/blob/main/examples/splitio/splitio_opentelemetry.ipynb) [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/lightstep/lightstep-partner-sdk/main?filepath=examples%2Fsplitio)
 
 Example Python notebook that demonstrates an OpenTelemetry plugin that instruments the [Split.io Python SDK client](https://github.com/splitio/python-client).
 
