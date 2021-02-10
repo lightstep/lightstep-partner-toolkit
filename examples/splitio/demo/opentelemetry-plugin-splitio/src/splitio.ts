@@ -6,7 +6,7 @@ import { VERSION } from "./version";
 
 export class SplitioPlugin extends BasePlugin<typeof splitioTypes> {
   static readonly COMPONENT = "@splitsoftware/splitio";
-  readonly supportedVersions = ["10.15.2", "10.15.2"]; // equivalent to >= 2.6.0
+  readonly supportedVersions = ["10.15.2", "10.15.2"];
 
   constructor(readonly moduleName: string) {
     super("@opentelemetry/plugin-splitio", VERSION);
@@ -36,7 +36,7 @@ export class SplitioPlugin extends BasePlugin<typeof splitioTypes> {
     const instrumentation = this;
     instrumentation._logger.debug('Patching getTreatment function');
     return async function getTreatment(this: any, opts?: any) {
-      const span = instrumentation._tracer.startSpan('split.io/getTreatment');
+      const span = instrumentation._tracer.startSpan('getTreatment');
       const treatment = await original.apply(this, arguments);
       span.setAttributes({
         'split.io.key': arguments[0],

@@ -4,6 +4,7 @@ const { NodeTracerProvider } = require("@opentelemetry/node");
 const { SimpleSpanProcessor } = require("@opentelemetry/tracing");
 const { CollectorTraceExporter } = require("@opentelemetry/exporter-collector");
 const { B3MultiPropagator } = require("@opentelemetry/propagator-b3");
+const path = require('path');
 
 opentelemetry.propagation.setGlobalPropagator(new B3MultiPropagator());
 
@@ -11,12 +12,15 @@ module.exports = (serviceName) => {
   const provider = new NodeTracerProvider({
     plugins: {
       '@splitsoftware/splitio': {
-        path: '../opentelemetry-plugin-splitio',
+        path: path.join(__dirname, '../opentelemetry-plugin-splitio'),
         enabled: true
       }
     }
   });
 
+  // This sends data to Lightstep by default
+  // Lots of other exporters are supported, see
+  // https://opentelemetry.io/registry/
   const exporter = new CollectorTraceExporter({
     serviceName: serviceName,
     logger: new ConsoleLogger(LogLevel.DEBUG),
@@ -29,7 +33,7 @@ module.exports = (serviceName) => {
 
   provider.addSpanProcessor(new SimpleSpanProcessor(exporter));
 
-  // Initialize the OpenTelemetry APIs to use the NodeTracerProvider bindings
+  // Initialize the OpenTelemetry APIs
   provider.register();
 
   return opentelemetry.trace.getTracer(serviceName);

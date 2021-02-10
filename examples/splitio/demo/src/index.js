@@ -1,8 +1,11 @@
+// Important! Require this code before everything else
+// This configures tracing of all following dependencies
 require("./tracer")("splitio-test-app");
 
 let express = require("express");
 let splitClient = require("./split");
 
+var cors = require('cors')
 let app = express();
 const PORT = 8181;
 
@@ -29,6 +32,7 @@ router.get("/donuts", async (req, res) => {
   }
 });
 
+app.use(cors())
 app.use("/api", router);
 app.use(express.static("public"));
 
