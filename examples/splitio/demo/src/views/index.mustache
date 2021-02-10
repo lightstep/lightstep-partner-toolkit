@@ -1,0 +1,104 @@
+<html>
+  <head>
+    <title>Donut Popup Shop</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/mini.css/3.0.1/mini-default.min.css"/>
+    <style>
+      .card {
+        height: 425px;
+      }
+    </style>
+    <script>window.LS_ACCESS_TOKEN = '{{{ LS_ACCESS_TOKEN }}}'</script>
+    <script>window.LS_SERVICE_NAME = '{{{ LS_SERVICE_NAME }}}';</script>
+    <script src="https://cdn.jsdelivr.net/gh/lightstep/lightstep-partner-sdk/examples/browser/dist/tracer.js"></script>
+  </head>
+  <body>
+    <script>
+      window.getDonuts = async function() {
+        document.getElementById("spinner").className = "spinner";
+        document.getElementById("donuts-button").className = "hidden";
+        const response = await fetch("/api/donuts", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json"
+          }
+        });
+        document.getElementById("spinner").className = "spinner hidden";
+        document.getElementById("donuts-button").className = "primary";
+
+        const json = await response.json();
+        document.getElementById("log").textContent += `Donut type ordered: ${json.donuts[0].type}\n`;
+        document.getElementById("donuts-button").innerText = "Order Donuts";
+        // repeat to generate more telemetry without lots of clicks
+        if (document.getElementById('order-forever').checked) {
+          setTimeout(() => {
+            window.getDonuts();
+          }, 3000);
+        }
+      };
+    </script>
+    <div class="container">
+      <div class="row">
+        <div class="col-sm">
+          <h1>Donut Popup Shop<small>Split.io + Lightstep + OpenTelemetry</small></h1>
+          <p>This example Node.js express app generates traces annotated with <a href="https://split.io">Split.io</a> feature flags using <a href="https://opentelemetry.io">OpenTelemetry</a> every time you click the 'Order Donuts' button.</p>
+          <p>Telemetry data is configured to be sent to Lightstep.</p>
+        </div>
+      </div>
+      {{^LS_ACCESS_TOKEN}}
+      <div class="row">
+        <div class="col-sm-12">
+            <p><mark class="secondary"><span class="icon-alert inverse"></span>Warning: Missing environment variable LS_ACCESS_TOKEN</mark></p>
+        </div>
+      </div>
+      {{/LS_ACCESS_TOKEN}}
+      <div class="row">
+        <!-- Checkout Card -->
+        <div id="checkout-card" class="card">
+          <div class="section">
+            <h3 class="doc">🍩 Mystery Donuts</h3>
+          </div>
+          <img class="section media" src="https://live.staticflickr.com/1631/24454305590_ba8df11035_b.jpg" alt="donuts">
+          <div class="section">
+            <p>Artisinal donuts. Topping determined after order via feature flag.</p>
+          </div>
+          <div class="section">
+            <div id="spinner" class="spinner hidden"></div>
+            <button class="primary" id="donuts-button" onclick="getDonuts()">Order Donuts</button>
+          </div>
+        </div>
+        <!-- Telemetry Card -->
+        <div id="checkout-card" class="card">
+          <div class="section">
+            <h3 class="doc">📈 Telemetry</h3>
+          </div>
+          <textarea id="log" class="section media" style="font-family: Courier; font-size: 10px; padding: 10px">Waiting on data... order some donuts!&#10</textarea>
+          <div class="section">
+            <p>Trace data generated using OpenTelemetry instrumention.</p>
+          </div>
+          <div class="section">
+            <button class="tertiary" id="donuts-button" onclick="window.open('https://app.lightstep.com')">View Traces in Lightstep</button>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-12">
+          <input type="checkbox" id="order-forever" checked/>
+          <label for="order-forever">Repeat order every 3s</label>
+        </div>
+      </div>
+    </div>
+    <script>
+      // log trace output to textarea
+      (function(){
+          var _privateLog = console.log;
+          console.log = function (message) {
+            if (arguments && arguments[0] && arguments[0].traceId) {
+              document.getElementById('log').textContent += `TRACE: ${arguments[0].traceId}\n`
+              _privateLog('it a trace')
+            }
+            _privateLog.apply(console, arguments);
+          };
+      })();
+    </script>
+  </body>
+</html>

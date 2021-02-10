@@ -3,10 +3,10 @@ const { ConsoleLogger, LogLevel } = require("@opentelemetry/core");
 const { NodeTracerProvider } = require("@opentelemetry/node");
 const { SimpleSpanProcessor } = require("@opentelemetry/tracing");
 const { CollectorTraceExporter } = require("@opentelemetry/exporter-collector");
-const { B3MultiPropagator } = require("@opentelemetry/propagator-b3");
+const { B3Propagator } = require("@opentelemetry/propagator-b3");
 const path = require('path');
 
-opentelemetry.propagation.setGlobalPropagator(new B3MultiPropagator());
+opentelemetry.propagation.setGlobalPropagator(new B3Propagator());
 
 module.exports = (serviceName) => {
   const provider = new NodeTracerProvider({
