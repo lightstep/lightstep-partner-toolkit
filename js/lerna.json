@@ -1,0 +1,13 @@
+{
+  "lerna": "3.22.1",
+  "npmClient": "npm",
+  "packages": [
+    "packages/*"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@github.com/lightstep/lightstep-partner-sdk.git",
+    "directory": "js/packages"
+  },
+  "version": "0.0.3-alpha.0"
+}

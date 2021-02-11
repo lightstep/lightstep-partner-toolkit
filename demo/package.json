@@ -5,7 +5,7 @@
   "license": "ISC",
   "main": "src/index.js",
   "scripts": {
-    "start": "( cd opentelemetry-plugin-splitio && yarn install && yarn compile ) && nodemon src/index.js localhost 8181",
+    "start": "nodemon src/index.js localhost 8181",
     "start-fe": "nodemon src/index.js localhost 8181"
   },
   "dependencies": {
@@ -16,11 +16,13 @@
     "@opentelemetry/metrics": "^0.15.0",
     "@opentelemetry/node": "^0.15.0",
     "@opentelemetry/plugin-express": "^0.13.0",
-    "@opentelemetry/plugin-splitio": "file:./opentelemetry-plugin-splitio",
     "@opentelemetry/plugins-node-core": "^0.15.0",
     "@opentelemetry/propagator-b3": "^0.15.0",
     "@opentelemetry/tracing": "^0.15.0",
     "@splitsoftware/splitio": "10.15.2",
+    "@lightstep-partner/opentelemetry-plugin-splitio": "^0.13.0",
+    "@lightstep-partner/opentelemetry-plugin-launchdarkly-node-server": "^0.13.0",
+    "launchdarkly-node-server-sdk": "5.14.1",
     "cors": "^2.8.5",
     "express": "4.17.1",
     "mustache-express": "^1.3.0",

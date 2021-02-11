@@ -39,11 +39,18 @@
     <div class="container">
       <div class="row">
         <div class="col-sm">
-          <h1>Donut Popup Shop<small>Split.io + Lightstep + OpenTelemetry</small></h1>
-          <p>This example Node.js express app generates traces annotated with <a href="https://split.io">Split.io</a> feature flags using <a href="https://opentelemetry.io">OpenTelemetry</a> every time you click the 'Order Donuts' button.</p>
+          <h1>Donut Popup Shop<small>Lightstep Partners + OpenTelemetry Demo</small></h1>
+          <p>This example Node.js express app generates traces annotated Lightstep partner data using <a href="https://opentelemetry.io">OpenTelemetry</a> every time you click the 'Order Donuts' button.</p>
           <p>Telemetry data is configured to be sent to Lightstep.</p>
         </div>
       </div>
+      {{^LS_PROJECT_NAME}}
+      <div class="row">
+        <div class="col-sm-12">
+            <p><mark class="secondary"><span class="icon-alert inverse"></span>Warning: Missing environment variable LS_PROJECT_NAME</mark></p>
+        </div>
+      </div>
+      {{/LS_PROJECT_NAME}}
       {{^LS_ACCESS_TOKEN}}
       <div class="row">
         <div class="col-sm-12">
