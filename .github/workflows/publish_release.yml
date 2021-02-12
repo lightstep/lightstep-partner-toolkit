@@ -1,0 +1,25 @@
+name: Publish Packages
+on:
+  release:
+    types: [published]
+
+jobs:
+  # based on: https://github.com/donmahallem/js-libs
+  release_github:
+    runs-on: ubuntu-latest
+    name: Publish Package to GitHub
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Setup Node
+        uses: actions/setup-node@v2.1.4
+        with:
+          node-version: 14.x
+      - name: Install Packages
+        run: |
+          npx lerna bootstrap --ci
+      - name: Prepare Package
+        run: |
+          npm config set //npm.pkg.github.com/:_authToken ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload Package
+        run: npx lerna publish from-git --registry https://npm.pkg.github.com/lightstep --yes

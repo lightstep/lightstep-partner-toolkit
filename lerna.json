@@ -1,0 +1,21 @@
+{
+  "lerna": "3.22.1",
+  "npmClient": "npm",
+  "packages": [
+    "js/packages/*"
+  ],
+  "ignoreChanges": [
+    "js/ignored-file",
+    "js/**/*.md",
+    "js/**/*.spec.ts",
+    "js/**/tslint.json",
+    "js/**/tsconfig.json",
+    "demo/**",
+    "examples/**",
+    ".github/**",
+    "*.md",
+    "tslint.json",
+    "tsconfig.json"
+  ],
+  "version": "0.0.3"
+}

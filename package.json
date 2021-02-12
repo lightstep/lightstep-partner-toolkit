@@ -1,0 +1,18 @@
+{
+  "name": "lightstep-partner-sdk-opentelemetry",
+  "repository": "lightstep/lightstep-partner-sdk",
+  "private": true,
+  "scripts": {
+    "version:update": "npx lerna run version",
+    "bootstrap": "npx lerna bootstrap",
+    "lint": "lerna run lint",
+    "lint:changed": "lerna run --concurrency 1 --stream lint --since HEAD --exclude-dependents",
+    "lint:fix": "lerna run lint:fix",
+    "lerna:pack": "lerna run pack"
+  },
+  "devDependencies": {
+    "eslint": "7.19.0",
+    "gts": "3.1.0",
+    "lerna": "^3.22.1"
+  }
+}

@@ -1,1 +1,1 @@
-export * from "./launchdarkly";
+export * from './launchdarkly';

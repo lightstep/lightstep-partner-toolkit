@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.base.json",
+  "files": [],
+  "references": [
+    {
+      "path": "js/packages/opentelemetry-plugin-launchdarkly-node-server"
+    },
+    {
+      "path": "js/packages/opentelemetry-plugin-splitio"
+    }
+  ]
+}

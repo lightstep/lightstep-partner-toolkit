@@ -1,1 +1,1 @@
-export * from "./splitio";
+export * from './splitio';

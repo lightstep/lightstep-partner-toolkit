@@ -1,0 +1,39 @@
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+' # Push events to matching v*, i.e. v1.0, v20.15.10
+
+name: Create Release
+
+jobs:
+  build:
+    name: Create Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Setup Node
+        uses: actions/setup-node@v2.1.4
+        with:
+          node-version: 14.x
+      # - name: Create Changelog
+      #   id: create-changelog
+      #   run: |
+      #     npm install -g conventional-changelog-cli
+      #     npx conventional-changelog --preset cli --release-count 2 -u false >> tmp_readme.md
+      - name: Echo Readme
+        run: echo "$(cat ./tmp_readme.md)"
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          body: 'Automated release'
+          draft: true
+          prerelease: false

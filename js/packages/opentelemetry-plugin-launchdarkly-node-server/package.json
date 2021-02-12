@@ -9,9 +9,11 @@
     "clean": "rimraf build/*",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
+    "version": "node ../../scripts/version-update.js",
     "precompile": "tsc --version",
     "compile": "tsc -p .",
-    "prepare": "npm run compile"
+    "prepare": "npm run compile",
+    "pack": "npm pack"
   },
   "keywords": [
     "opentelemetry",
@@ -39,6 +41,8 @@
   "devDependencies": {
     "@types/node": "14.0.27",
     "@types/shimmer": "1.0.1",
+    "eslint": "7.19.0",
+    "gts": "^3.1.0",
     "ts-node": "9.0.0",
     "typescript": "4.1.3"
   },
