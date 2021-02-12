@@ -1,10 +1,13 @@
-### Split.io + OpenTelemetry + Lightstep Node.js Demo
+###  OpenTelemetry + Lightstep Partners Node.js Demo App
 
-WIP.
+WIP. To preview in the cloud, **[Run in Codesandbox](https://githubbox.com/lightstep/lightstep-partner-sdk/tree/main/demo)**.
 
-#### Setup
+#### Running locally
+
 * Set the env var `LS_ACCESS_TOKEN` to your Lightstep Access Token
-* Set the env var `SPLIT_API_KEY` to your Split.io API key
-* `yarn install && npm run start`
-* Visit `localhost:8181`
+* `yarn install && yarn start`
+* Visit `http://localhost:8181`
 
+##### Partner Environment Variables
+
+* `SPLIT_API_TOKEN`

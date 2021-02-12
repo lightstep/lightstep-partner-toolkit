@@ -12,11 +12,11 @@ module.exports = (serviceName) => {
   const provider = new NodeTracerProvider({
     plugins: {
       '@splitsoftware/splitio': {
-        path: path.join(__dirname, '../node_modules/@lightstep-partner/opentelemetry-plugin-splitio'),
+        path: path.join(__dirname, '../node_modules/@lightstep/opentelemetry-plugin-splitio'),
         enabled: true
       },
       'launchdarkly-node-server-sdk': {
-        path: path.join(__dirname, '../node_modules/@lightstep-partner/opentelemetry-plugin-launchdarkly-node-server'),
+        path: path.join(__dirname, '../node_modules/@lightstep/opentelemetry-plugin-launchdarkly-node-server'),
         enabled: true
       }
     }
