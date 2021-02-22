@@ -1,6 +1,6 @@
 {
   "name": "@lightstep/opentelemetry-plugin-launchdarkly-node-server",
-  "version": "0.0.1",
+  "version": "0.0.4",
   "description": "OpenTelemetry splitio automatic instrumentation package.",
   "main": "build/src/index.js",
   "types": "build/src/index.d.ts",
