@@ -1,7 +1,9 @@
 const express = require('express');
+const Rollbar = require('rollbar');
+
+const rollbar = new Rollbar({ accessToken: process.env.ROLLBAR_POST_ITEM_KEY });
 
 const router = express.Router();
-
 const { getFeatureFlag } = require('./feature-flags');
 
 /**
@@ -14,6 +16,11 @@ router.get('/donuts', async (req, res) => {
     customerId,
     'DONUT_EXPERIMENT',
   );
+
+  // Error ~25% of the time
+  if (Math.floor(Math.random() * 4) === 3) {
+    rollbar.error('Undercooked Donut Error');
+  }
 
   if (result === 'on') {
     // simulate slow response

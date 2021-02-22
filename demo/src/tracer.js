@@ -11,6 +11,10 @@ opentelemetry.propagation.setGlobalPropagator(new B3Propagator());
 module.exports = (serviceName) => {
   const provider = new NodeTracerProvider({
     plugins: {
+      rollbar: {
+        path: path.join(__dirname, '../node_modules/@lightstep/opentelemetry-plugin-rollbar'),
+        enabled: true,
+      },
       '@splitsoftware/splitio': {
         path: path.join(__dirname, '../node_modules/@lightstep/opentelemetry-plugin-splitio'),
         enabled: true,

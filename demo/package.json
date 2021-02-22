@@ -13,6 +13,7 @@
   "dependencies": {
     "@lightstep/opentelemetry-plugin-launchdarkly-node-server": "https://github.com/lightstep/lightstep-partner-sdk/releases/download/v0.0.1/lightstep-opentelemetry-plugin-launchdarkly-node-server-0.0.1.tgz",
     "@lightstep/opentelemetry-plugin-splitio": "https://github.com/lightstep/lightstep-partner-sdk/releases/download/v0.0.1/lightstep-opentelemetry-plugin-splitio-0.0.1.tgz",
+    "@lightstep/opentelemetry-plugin-rollbar": "*",
     "@opentelemetry/api": "^0.15.0",
     "@opentelemetry/core": "^0.15.0",
     "@opentelemetry/exporter-collector": "^0.15.0",
@@ -24,6 +25,7 @@
     "@opentelemetry/propagator-b3": "^0.15.0",
     "@opentelemetry/tracing": "^0.15.0",
     "@splitsoftware/splitio": "10.15.2",
+    "rollbar": "2.19.4",
     "cors": "^2.8.5",
     "express": "4.17.1",
     "launchdarkly-node-server-sdk": "5.14.1",
