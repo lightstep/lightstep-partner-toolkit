@@ -1,6 +1,6 @@
 {
   "name": "@lightstep/opentelemetry-plugin-rollbar",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "OpenTelemetry Rollbar automatic instrumentation package for server-side node.js.",
   "main": "build/src/index.js",
   "types": "build/src/index.d.ts",
