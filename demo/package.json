@@ -11,9 +11,9 @@
     "lint:fix": "eslint . --ext .js --fix"
   },
   "dependencies": {
-    "@lightstep/opentelemetry-plugin-launchdarkly-node-server": "https://github.com/lightstep/lightstep-partner-sdk/releases/download/v0.0.1/lightstep-opentelemetry-plugin-launchdarkly-node-server-0.0.1.tgz",
-    "@lightstep/opentelemetry-plugin-splitio": "https://github.com/lightstep/lightstep-partner-sdk/releases/download/v0.0.1/lightstep-opentelemetry-plugin-splitio-0.0.1.tgz",
-    "@lightstep/opentelemetry-plugin-rollbar": "*",
+    "@lightstep/opentelemetry-plugin-launchdarkly-node-server": "https://github.com/lightstep/lightstep-partner-sdk/releases/download/v0.0.5/lightstep-opentelemetry-plugin-launchdarkly-node-server-0.0.5.tgz",
+    "@lightstep/opentelemetry-plugin-splitio": "https://github.com/lightstep/lightstep-partner-sdk/releases/download/v0.0.5/lightstep-opentelemetry-plugin-splitio-0.0.5.tgz",
+    "@lightstep/opentelemetry-plugin-rollbar": "https://github.com/lightstep/lightstep-partner-sdk/releases/download/v0.0.5/lightstep-opentelemetry-plugin-rollbar-0.0.5.tgz",
     "@opentelemetry/api": "^0.15.0",
     "@opentelemetry/core": "^0.15.0",
     "@opentelemetry/exporter-collector": "^0.15.0",
