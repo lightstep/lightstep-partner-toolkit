@@ -1,6 +1,6 @@
 {
-  "name": "@lightstep/opentelemetry-plugin-googleanalytics",
-  "version": "0.0.5",
+  "name": "@lightstep/opentelemetry-plugin-segment-node",
+  "version": "0.0.6",
   "description": "OpenTelemetry GA automatic instrumentation package.",
   "main": "build/src/index.js",
   "types": "build/src/index.d.ts",
