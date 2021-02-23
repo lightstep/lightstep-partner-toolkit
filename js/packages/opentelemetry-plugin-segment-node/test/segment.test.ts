@@ -10,8 +10,9 @@ import {
   SimpleSpanProcessor,
 } from '@opentelemetry/tracing';
 import * as assert from 'assert';
-import * as Rollbar from 'rollbar';
-import { plugin, RollbarPlugin } from '../src';
+const Analytics = require('analytics-node');
+
+import { plugin, SegmentPlugin } from '../src';
 
 const memoryExporter = new InMemorySpanExporter();
 
@@ -20,7 +21,7 @@ describe('rollbar@2.19.x', () => {
   const tracer = provider.getTracer('external');
 
   let contextManager: AsyncHooksContextManager;
-  let rollbar: typeof Rollbar;
+  let analytics: typeof Analytics;
   beforeEach(() => {
     contextManager = new AsyncHooksContextManager().enable();
     context.setGlobalContextManager(contextManager);
@@ -31,36 +32,36 @@ describe('rollbar@2.19.x', () => {
   });
 
   before(function () {
-    rollbar = require('rollbar');
+    analytics = require('analytics-node');
     provider.addSpanProcessor(new SimpleSpanProcessor(memoryExporter));
-    plugin.enable(rollbar, provider, new NoopLogger());
+    plugin.enable(analytics, provider, new NoopLogger());
   });
 
   it('should have correct module name', () => {
-    assert.strictEqual(plugin.moduleName, RollbarPlugin.COMPONENT);
+    assert.strictEqual(plugin.moduleName, SegmentPlugin.COMPONENT);
   });
 
-  describe('#error()', () => {
-    it('should set attributes on calls to error', done => {
-      let rollbarClient = new rollbar({})
+  describe('#track()', () => {
+    it('should add events on calls to track', done => {
+      let segmentClient = new analytics('write key')
 
       const span = tracer.startSpan('test span');
       context.with(setSpan(context.active(), span), () => {
-        const span = tracer.startSpan('error span');
+        const span = tracer.startSpan('user interaction span');
         context.with(setSpan(context.active(), span), () => {
-          rollbarClient.error('this is an error');
+          segmentClient.track({ event: 'button clicked', userId: 'foo_123' });
         })
         span.end();
       });
       const endedSpans = memoryExporter.getFinishedSpans();
       assert.strictEqual(endedSpans.length, 1);
       assert.strictEqual(
-        endedSpans[0].attributes['rollbar.has_error'],
-        true
+        endedSpans[0].events.length,
+        1
       );
       assert.strictEqual(
-        endedSpans[0].attributes['error'],
-        true
+        endedSpans[0].events[0].name,
+        'button clicked'
       );
       done();
     });
@@ -73,20 +74,20 @@ describe('rollbar@2.19.x', () => {
     });
 
     it(`should not create a child span`, done => {
-      let rollbarClient = new rollbar({})
+      let segmentClient = new analytics({})
       const span = tracer.startSpan('test span');
       context.with(setSpan(context.active(), span), () => {
         const span = tracer.startSpan('error span');
         context.with(setSpan(context.active(), span), () => {
-          rollbarClient.error('this is an error');
+          segmentClient.track({ event: 'button clicked', userId: 'foo_123' });
         })
         span.end();
       });
       const endedSpans = memoryExporter.getFinishedSpans();
       assert.strictEqual(endedSpans.length, 1);
       assert.strictEqual(
-        endedSpans[0].attributes['rollbar.has_error'],
-        undefined
+        endedSpans[0].events.length,
+        0
       );
       done();
     });

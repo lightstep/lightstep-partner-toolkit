@@ -1,7 +1,7 @@
 {
-  "name": "@lightstep/opentelemetry-plugin-rollbar",
+  "name": "@lightstep/opentelemetry-plugin-googleanalytics",
   "version": "0.0.5",
-  "description": "OpenTelemetry Rollbar automatic instrumentation package for server-side node.js.",
+  "description": "OpenTelemetry GA automatic instrumentation package.",
   "main": "build/src/index.js",
   "types": "build/src/index.d.ts",
   "repository": "lightstep/lightstep-partner-sdk",
@@ -21,7 +21,6 @@
   },
   "keywords": [
     "opentelemetry",
-    "rollbar",
     "nodejs",
     "tracing",
     "profiling",
@@ -43,6 +42,7 @@
     "access": "public"
   },
   "devDependencies": {
+    "@types/analytics-node": "^3.1.4",
     "@types/mocha": "7.0.2",
     "@types/node": "14.0.27",
     "@types/shimmer": "1.0.1",
@@ -63,7 +63,7 @@
     "@opentelemetry/node": "0.15.0",
     "@opentelemetry/semantic-conventions": "0.15.0",
     "@opentelemetry/tracing": "0.15.0",
-    "rollbar": "2.19.4",
+    "analytics-node": "^4.0.0",
     "shimmer": "^1.2.1"
   }
 }

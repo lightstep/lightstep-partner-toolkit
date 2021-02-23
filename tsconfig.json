@@ -9,6 +9,9 @@
       "path": "js/packages/opentelemetry-plugin-rollbar"
     },
     {
+      "path": "js/packages/opentelemetry-plugin-segment-node"
+    },
+    {
       "path": "js/packages/opentelemetry-plugin-splitio"
     }
   ]
