@@ -1,5 +1,5 @@
 import { BasePlugin } from '@opentelemetry/core';
-import { SpanKind } from '@opentelemetry/api';
+import { SpanKind, diag } from '@opentelemetry/api';
 import type * as ldTypes from 'launchdarkly-node-server-sdk';
 
 import * as shimmer from 'shimmer';
@@ -17,7 +17,7 @@ export class LaunchDarklyNodeServerPlugin extends BasePlugin<typeof ldTypes> {
 
   protected patch() {
     if (this._moduleExports) {
-      this._logger.debug('patching launchdarkly');
+      diag.debug('patching launchdarkly');
       shimmer.wrap(this._moduleExports, 'init', this._getInitPatch.bind(this));
     }
     return this._moduleExports;
@@ -31,7 +31,7 @@ export class LaunchDarklyNodeServerPlugin extends BasePlugin<typeof ldTypes> {
 
   private _getVariationPatch(original: Function) {
     const instrumentation = this;
-    instrumentation._logger.debug('Patching variation function');
+    diag.debug('Patching variation function');
     return async function variation(this: any) {
       const span = instrumentation._tracer.startSpan(
         'launchdarkly - variation',

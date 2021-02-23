@@ -1,5 +1,5 @@
 import { BasePlugin } from '@opentelemetry/core';
-import { SpanKind } from '@opentelemetry/api';
+import { SpanKind, diag } from '@opentelemetry/api';
 import type * as splitioTypes from '@splitsoftware/splitio';
 
 import * as shimmer from 'shimmer';
@@ -17,7 +17,7 @@ export class SplitioPlugin extends BasePlugin<typeof splitioTypes> {
 
   protected patch() {
     if (this._moduleExports) {
-      this._logger.debug('patching splitio');
+      diag.debug('patching splitio');
       shimmer.wrap(
         this._moduleExports,
         'SplitFactory',
@@ -35,7 +35,7 @@ export class SplitioPlugin extends BasePlugin<typeof splitioTypes> {
 
   private _getTreatmentPatch(original: Function) {
     const instrumentation = this;
-    instrumentation._logger.debug('Patching getTreatment function');
+    diag.debug('Patching getTreatment function');
     return async function getTreatment(this: any) {
       const span = instrumentation._tracer.startSpan('splitio - getTreatment', {
         kind: SpanKind.CLIENT,

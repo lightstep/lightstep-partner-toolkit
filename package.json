@@ -1,6 +1,6 @@
 {
   "name": "lightstep-partner-sdk-opentelemetry",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "repository": "lightstep/lightstep-partner-sdk",
   "private": true,
   "scripts": {

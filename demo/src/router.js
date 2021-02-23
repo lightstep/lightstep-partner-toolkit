@@ -1,7 +1,9 @@
 const express = require('express');
 const Rollbar = require('rollbar');
+const Analytics = require('analytics-node');
 
 const rollbar = new Rollbar({ accessToken: process.env.ROLLBAR_POST_ITEM_KEY });
+const analytics = new Analytics(process.env.SEGMENT_WRITE_KEY || 'write-key', { enable: false });
 
 const router = express.Router();
 const { getFeatureFlag } = require('./feature-flags');
@@ -12,14 +14,25 @@ const { getFeatureFlag } = require('./feature-flags');
  */
 router.get('/donuts', async (req, res) => {
   const customerId = Math.floor(Math.random() * 1000);
+
   const result = await getFeatureFlag(
     customerId,
     'DONUT_EXPERIMENT',
   );
 
+  analytics.track({
+    userId: customerId,
+    event: 'Donut Ordered',
+    properties: {
+      donut_type: result,
+    },
+  });
+
   // Error ~25% of the time
   if (Math.floor(Math.random() * 4) === 3) {
     rollbar.error('Undercooked Donut Error');
+    res.status(500);
+    return res.json({ error: 'undercooked donuts' });
   }
 
   if (result === 'on') {

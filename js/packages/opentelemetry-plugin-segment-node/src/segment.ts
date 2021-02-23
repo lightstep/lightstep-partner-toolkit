@@ -1,5 +1,5 @@
 import { BasePlugin } from '@opentelemetry/core';
-import { getSpan, context } from '@opentelemetry/api';
+import { getSpan, context, diag } from '@opentelemetry/api';
 const Analytics = require('analytics-node');
 
 import * as shimmer from 'shimmer';
@@ -17,7 +17,7 @@ export class SegmentPlugin extends BasePlugin<typeof Analytics> {
 
   protected patch() {
     if (this._moduleExports) {
-      this._logger.debug('patching analytics-node');
+      diag.debug('patching analytics-node');
       shimmer.wrap(
         this._moduleExports.prototype,
         'track',
@@ -38,15 +38,15 @@ export class SegmentPlugin extends BasePlugin<typeof Analytics> {
       const span = getSpan(context.active());
       const result = original.apply(this, [message, callback]);
       if (span && message.event) {
-        span.addEvent(`segment.io track - ${message.event}`, { 
-          userId: message.userId, 
-          anonymousId: message.anonymousId, 
-          ...message.properties 
-        })
+        span.addEvent(`segment.io track - ${message.event}`, {
+          userId: message.userId,
+          anonymousId: message.anonymousId,
+          ...message.properties,
+        });
       }
-      return result
-    }
-  }    
+      return result;
+    };
+  }
 }
 
 export const plugin = new SegmentPlugin(SegmentPlugin.COMPONENT);

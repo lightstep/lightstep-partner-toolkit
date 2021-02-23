@@ -1,37 +1,22 @@
-const opentelemetry = require('@opentelemetry/api');
-const { ConsoleLogger, LogLevel } = require('@opentelemetry/core');
+const { propagation, trace } = require('@opentelemetry/api');
 const { NodeTracerProvider } = require('@opentelemetry/node');
-const { SimpleSpanProcessor } = require('@opentelemetry/tracing');
+const { SimpleSpanProcessor, ConsoleSpanExporter } = require('@opentelemetry/tracing');
 const { CollectorTraceExporter } = require('@opentelemetry/exporter-collector');
 const { B3Propagator } = require('@opentelemetry/propagator-b3');
+const { registerInstrumentations } = require('@opentelemetry/instrumentation');
+
 const path = require('path');
 
-opentelemetry.propagation.setGlobalPropagator(new B3Propagator());
+propagation.setGlobalPropagator(new B3Propagator());
 
 module.exports = (serviceName) => {
-  const provider = new NodeTracerProvider({
-    plugins: {
-      rollbar: {
-        path: path.join(__dirname, '../node_modules/@lightstep/opentelemetry-plugin-rollbar'),
-        enabled: true,
-      },
-      '@splitsoftware/splitio': {
-        path: path.join(__dirname, '../node_modules/@lightstep/opentelemetry-plugin-splitio'),
-        enabled: true,
-      },
-      'launchdarkly-node-server-sdk': {
-        path: path.join(__dirname, '../node_modules/@lightstep/opentelemetry-plugin-launchdarkly-node-server'),
-        enabled: true,
-      },
-    },
-  });
+  const provider = new NodeTracerProvider();
 
   // This sends data to Lightstep by default
   // Lots of other exporters are supported, see
   // https://opentelemetry.io/registry/
   const exporter = new CollectorTraceExporter({
     serviceName,
-    logger: new ConsoleLogger(LogLevel.DEBUG),
     url: 'https://ingest.lightstep.com/traces/otlp/v0.6',
     headers: {
       'Lightstep-Access-Token':
@@ -39,10 +24,40 @@ module.exports = (serviceName) => {
     },
   });
 
+  provider.addSpanProcessor(new SimpleSpanProcessor(new ConsoleSpanExporter()));
   provider.addSpanProcessor(new SimpleSpanProcessor(exporter));
+
+  registerInstrumentations({
+    tracerProvider: provider,
+    instrumentations: [
+      {
+        plugins: {
+          express: {
+            enabled: true,
+          },
+          rollbar: {
+            path: path.join(__dirname, '../../js/packages/opentelemetry-plugin-rollbar/build/src'),
+            enabled: true,
+          },
+          '@splitsoftware/splitio': {
+            path: path.join(__dirname, '../../js/packages/opentelemetry-plugin-splitio/build/src'),
+            enabled: true,
+          },
+          'launchdarkly-node-server-sdk': {
+            path: path.join(__dirname, '../../js/packages/opentelemetry-plugin-launchdarkly-node-server/build/src'),
+            enabled: true,
+          },
+          'analytics-node': {
+            path: path.join(__dirname, '../../js/packages/opentelemetry-plugin-segment-node/build/src'),
+            enabled: true,
+          },
+        },
+      },
+    ],
+  });
 
   // Initialize the OpenTelemetry APIs
   provider.register();
 
-  return opentelemetry.trace.getTracer(serviceName);
+  return trace.getTracer(serviceName);
 };

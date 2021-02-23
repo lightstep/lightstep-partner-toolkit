@@ -1,8 +1,4 @@
-import {
-  context,
-  NoopLogger,
-  setSpan,
-} from '@opentelemetry/api';
+import { context, setSpan } from '@opentelemetry/api';
 import { NodeTracerProvider } from '@opentelemetry/node';
 import { AsyncHooksContextManager } from '@opentelemetry/context-async-hooks';
 import {
@@ -16,7 +12,7 @@ import { plugin, SegmentPlugin } from '../src';
 
 const memoryExporter = new InMemorySpanExporter();
 
-describe('rollbar@2.19.x', () => {
+describe('segment@2.19.x', () => {
   const provider = new NodeTracerProvider();
   const tracer = provider.getTracer('external');
 
@@ -31,10 +27,10 @@ describe('rollbar@2.19.x', () => {
     context.disable();
   });
 
-  before(function () {
+  before(() => {
     analytics = require('analytics-node');
     provider.addSpanProcessor(new SimpleSpanProcessor(memoryExporter));
-    plugin.enable(analytics, provider, new NoopLogger());
+    plugin.enable(analytics, provider);
   });
 
   it('should have correct module name', () => {
@@ -43,25 +39,22 @@ describe('rollbar@2.19.x', () => {
 
   describe('#track()', () => {
     it('should add events on calls to track', done => {
-      let segmentClient = new analytics('write key')
+      const segmentClient = new analytics('write key');
 
       const span = tracer.startSpan('test span');
       context.with(setSpan(context.active(), span), () => {
         const span = tracer.startSpan('user interaction span');
         context.with(setSpan(context.active(), span), () => {
           segmentClient.track({ event: 'button clicked', userId: 'foo_123' });
-        })
+        });
         span.end();
       });
       const endedSpans = memoryExporter.getFinishedSpans();
       assert.strictEqual(endedSpans.length, 1);
-      assert.strictEqual(
-        endedSpans[0].events.length,
-        1
-      );
+      assert.strictEqual(endedSpans[0].events.length, 1);
       assert.strictEqual(
         endedSpans[0].events[0].name,
-        'button clicked'
+        'segment.io track - button clicked'
       );
       done();
     });
@@ -69,26 +62,23 @@ describe('rollbar@2.19.x', () => {
 
   describe('Removing instrumentation', () => {
     before(() => {
-      memoryExporter.reset()
+      memoryExporter.reset();
       plugin.disable();
     });
 
-    it(`should not create a child span`, done => {
-      let segmentClient = new analytics({})
+    it('should not create a child span', done => {
+      const segmentClient = new analytics({});
       const span = tracer.startSpan('test span');
       context.with(setSpan(context.active(), span), () => {
         const span = tracer.startSpan('error span');
         context.with(setSpan(context.active(), span), () => {
           segmentClient.track({ event: 'button clicked', userId: 'foo_123' });
-        })
+        });
         span.end();
       });
       const endedSpans = memoryExporter.getFinishedSpans();
       assert.strictEqual(endedSpans.length, 1);
-      assert.strictEqual(
-        endedSpans[0].events.length,
-        0
-      );
+      assert.strictEqual(endedSpans[0].events.length, 0);
       done();
     });
   });

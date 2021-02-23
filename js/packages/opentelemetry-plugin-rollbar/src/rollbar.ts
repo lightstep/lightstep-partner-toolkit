@@ -1,5 +1,5 @@
 import { BasePlugin } from '@opentelemetry/core';
-import { getSpan, context } from '@opentelemetry/api';
+import { getSpan, context, diag } from '@opentelemetry/api';
 import * as Rollbar from 'rollbar';
 
 import * as shimmer from 'shimmer';
@@ -17,7 +17,7 @@ export class RollbarPlugin extends BasePlugin<typeof Rollbar> {
 
   protected patch() {
     if (this._moduleExports) {
-      this._logger.debug('patching rollbar');
+      diag.debug('patching rollbar');
       shimmer.wrap(
         this._moduleExports.prototype,
         'error',
@@ -33,20 +33,25 @@ export class RollbarPlugin extends BasePlugin<typeof Rollbar> {
     }
   }
 
-  private _getErrorPatch(original: (...args: Rollbar.LogArgument[]) => Rollbar.LogResult) {
-    return function error(this: any, ...args: Rollbar.LogArgument[]) : Rollbar.LogResult {
+  private _getErrorPatch(
+    original: (...args: Rollbar.LogArgument[]) => Rollbar.LogResult
+  ) {
+    return function error(
+      this: any,
+      ...args: Rollbar.LogArgument[]
+    ): Rollbar.LogResult {
       const span = getSpan(context.active());
       const result = original.apply(this, args);
       if (span) {
         span.setAttributes({
           'rollbar.has_error': true,
           'rollbar.uuid': result.uuid,
-          'error': true
+          error: true,
         });
       }
-      return result
-    }
-  }    
+      return result;
+    };
+  }
 }
 
 export const plugin = new RollbarPlugin(RollbarPlugin.COMPONENT);

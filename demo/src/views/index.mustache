@@ -78,7 +78,7 @@
           <div class="section">
             <h3 class="doc">📈 Telemetry</h3>
           </div>
-          <textarea id="log" class="section media" style="font-family: Courier; font-size: 10px; padding: 10px">Waiting on data... order some donuts!&#10</textarea>
+          <textarea id="log" class="section media" readonly="" style="font-family: Courier; font-size: 10px; padding: 10px">Waiting on data... order some donuts!&#10</textarea>
           <div class="section">
             <p>Trace data generated using OpenTelemetry instrumention.</p>
           </div>
@@ -101,7 +101,6 @@
           console.log = function (message) {
             if (arguments && arguments[0] && arguments[0].traceId) {
               document.getElementById('log').textContent += `TRACE: ${arguments[0].traceId}\n`
-              _privateLog('it a trace')
             }
             _privateLog.apply(console, arguments);
           };
