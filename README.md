@@ -1,4 +1,4 @@
-# lightstep-partner-sdk
+# Lightstep Partner Toolkit
 Technical resources for Lightstep Partners. Work-in-progress.
 
 ### Observability
