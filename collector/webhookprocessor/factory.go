@@ -30,7 +30,7 @@ var processorCapabilities = component.ProcessorCapabilities{MutatesConsumedData:
 
 const (
 	// The value of extension "type" in configuration.
-	typeStr configmodels.Type = "oteltest"
+	typeStr configmodels.Type = "webhook"
 
 	// Default endpoints to bind to.
 	defaultTracesEndpoint  = ":7070"
