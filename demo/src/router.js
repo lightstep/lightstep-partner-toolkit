@@ -1,6 +1,9 @@
 const express = require('express');
 const Rollbar = require('rollbar');
 const Analytics = require('analytics-node');
+const AWS = require('aws-sdk');
+
+const s3 = new AWS.S3({ apiVersion: '2006-03-01' });
 
 const rollbar = new Rollbar({ accessToken: process.env.ROLLBAR_POST_ITEM_KEY });
 const analytics = new Analytics(process.env.SEGMENT_WRITE_KEY || 'write-key', { enable: false });
@@ -36,8 +39,13 @@ router.get('/donuts', async (req, res) => {
   }
 
   if (result === 'on') {
-    // simulate slow response
-    setTimeout(() => res.json({ donuts: [{ type: 'sprinkles' }] }), 1000);
+    // simulate slow response: calls out to public S3 bucket
+    s3.listObjectsV2({ Bucket: 'njogis-imagery' }, (err, data) => {
+      if (err) {
+        return rollbar.error(err);
+      }
+      return res.json({ donuts: [{ type: 'sprinkles' }], s3: data });
+    });
   } else {
     // simulate fast response
     setTimeout(() => res.json({ donuts: [{ type: 'chocolate' }] }), 300);

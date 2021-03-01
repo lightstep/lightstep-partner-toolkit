@@ -26,8 +26,13 @@
         document.getElementById("donuts-button").className = "primary";
 
         const json = await response.json();
-        document.getElementById("log").textContent += `Donut type ordered: ${json.donuts[0].type}\n`;
-        document.getElementById("donuts-button").innerText = "Order Donuts";
+        if (json.error) {
+          document.getElementById("log").textContent += `Error: ${json.error}\n`;
+        } else {
+          document.getElementById("log").textContent += `Donut type ordered: ${json.donuts[0].type}\n`;
+          document.getElementById("donuts-button").innerText = "Order Donuts";
+        }
+
         // repeat to generate more telemetry without lots of clicks
         if (document.getElementById('order-forever').checked) {
           setTimeout(() => {

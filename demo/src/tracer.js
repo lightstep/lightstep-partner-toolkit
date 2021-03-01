@@ -4,6 +4,7 @@ const { SimpleSpanProcessor, ConsoleSpanExporter } = require('@opentelemetry/tra
 const { CollectorTraceExporter } = require('@opentelemetry/exporter-collector');
 const { B3Propagator } = require('@opentelemetry/propagator-b3');
 const { registerInstrumentations } = require('@opentelemetry/instrumentation');
+const { AwsInstrumentation } = require('opentelemetry-instrumentation-aws-sdk');
 
 const path = require('path');
 
@@ -30,6 +31,14 @@ module.exports = (serviceName) => {
   registerInstrumentations({
     tracerProvider: provider,
     instrumentations: [
+      new AwsInstrumentation({
+        suppressInternalInstrumentation: true,
+        preRequestHook: (span, request) => {
+          if (span.attributes['aws.service.api'] === 's3') {
+            span.setAttribute('s3.bucket.name', request.params.Bucket);
+          }
+        },
+      }),
       {
         plugins: {
           express: {
