@@ -1,63 +1,53 @@
 # Lightstep Partner Toolkit
-Technical resources for Lightstep Partners. Work-in-progress.
 
-### Observability
-🏁 [What is Observability?](https://lightstep.com/observability/) — Developer Guide
+Technical resources for Lightstep Partners.
 
-### OpenTelemetry: Instrumenting Code
-##### Background documentation and examples of applications using OpenTelemetry.
+### Getting Started
 
-🏁 [OpenTelemetry Docs](https://opentelemetry.lightstep.com/) — Documentation and Getting Started Guide, including how to use OpenTelemetry with Lightstep with our easy-to-use Launchers.
+New to OpenTelemetry, Lightstep, or observability? Check out [technical resources](./resources.md) to learn more.
 
-[OpenTelemetry Examples](https://github.com/lightstep/opentelemetry-examples) — Example services in different languages instrumented using OpenTelemetry
+### OpenTelemetry Instrumentation
 
-😎 [Hipster Shop](https://github.com/lightstep/hipster-shop)—Lightstep’s example Kubernetes cluster with OpenTelemetry-instrumented microservices in Java, Python, C# and Node.js
+Demo and working examples of how to integrate external products with the OpenTelemetry standard.
 
-[AWS Distro for OpenTelemetry ](https://aws.amazon.com/otel/)— AWS’s OpenTelemetry distribution
+#### Instrumentation Plugins (Node.js)
 
+Instrumentation has been tested with OpenTelemetry `0.17.0`. Packages are available via GitHub's package registry. 
 
-### Lightstep
-##### Resources for using Lightstep.
-🏁 [Lightstep Product Sandbox](https://app.lightstep.com/play) (Demo)—Try the product, no signup or login required
+To install via npm, run:
 
-🏁 [Signup](https://app.lightstep.com/signup/developer) — Create a free community tier account
+```
+$ npm_config_registry=https://npm.pkg.github.com/lightstep npm install --save <package-name>
+```
 
-[Lightstep API Documentation](https://api-docs.lightstep.com/reference)—Docs for Lightstep’s public-facing REST API
+| Instrumentation Package | Instrumented Package |
+| --- | --- |
+| [opentelemetry-plugin-splitio](./js/packages/opentelemetry-plugin-splitio) | [`@splitsoftware/splitio`](https://github.com/splitio/javascript-client) |
+| [opentelemetry-plugin-launchdarkly-node](./js/packages/opentelemetry-plugin-launchdarkly-node) | [`launchdarkly-node-server-sdk`](https://github.com/launchdarkly/node-server-sdk) |
+| [opentelemetry-plugin-rollbar](./js/packages/opentelemetry-plugin-launchdarkly-node) | [`rollbar`](https://github.com/rollbar/rollbar.js/) |
+| [opentelemetry-plugin-segment-node](./js/packages/opentelemetry-plugin-launchdarkly-node) | [`analytics-node`](https://github.com/segmentio/analytics-node) |
 
-[Lightstep API Node.js SDK](https://github.com/lightstep/lightstep-api-js) — Node-based API client and command-line interface (CLI)
+#### OpenTelemetry Collector Processors
 
-[Lightstep API Cookbook](https://github.com/lightstep/lightstep-cs-examples) — Examples 
+Experimental processors for the [OpenTelemetry Collector](https://github.com/open-telemetry/opentelemetry-collector).
 
+| Processor | Description | Partner Integrations |
+| --- | --- | --- |
+| [webookprocessor](./collector/webhookprocessor) | Annotates spans with metadata provided by webhooks. | PagerDuty, Gremlin, GitHub Deployments |
+| [backstageprocessor](./collector/webhookprocessor) | Annotates spans with service catalog metadata. | [Backstage](https://backstage.io/) |
 
-### GitHub Actions
-##### Open-source GitHub Actions created using the Lightstep API.
+### Other OpenTelemetry Integrations
 
-😎 [Lightstep Pre-Deploy Action](https://github.com/lightstep/lightstep-action-predeploy) — Verify service health in PRs and issues.
+| Integration | Description |
+| --- | --- |
+| [AWS SDK Instrumentation (Node.js)](https://github.com/aspecto-io/opentelemetry-ext-js) | Node.js AWS SDK Instrumentation from [Aspecto](https://github.com/aspecto-io). |
+| [CockroachDB](./examples/cockroachdb) | Instructions for using CockroachDB's native OpenTracing support with Lightstep. |
+| [nginx](./examples/nginx) | Instructions for instrumenting nginx with OpenTelemetry. |
+| [Ambassador k8s Initializer](https://lightstep.com/blog/lightstep-and-ambassador/) | Automatically configure a Kubernetes cluster to emit traces using Ambassador's k8s initializer. |
 
-😎 [Lightstep Services Change Report](https://github.com/lightstep/lightstep-action-snapshot) — Understand performance change over time.
+### Demo
 
-🔬😎 [OpenTelemetry Resource Detector for GitHub Actions](https://github.com/open-telemetry/opentelemetry-js-contrib/tree/master/detectors/node/opentelemetry-resource-detector-github) — Example of a JavaScript-based OpenTelemetry Resource Detector contributed by Lightstep
-
-
-### OpenTelemetry: Contributing to the Project
-##### How to contribute to the OpenTelemetry project with new collectors or plugins.
-
-[OpenTelemetry 101: How to Start Contributing](https://lightstep.com/blog/opentelemetry-101-how-to-start-contributing/)
-
-
-[OpenTelemetry Special Interest Groups](https://github.com/open-telemetry/community#special-interest-groups) — Technology-focused OpenTelemetry communities
-
-
-[OpenTelemetry Source Code](https://github.com/open-telemetry) — GitHub repo for OpenTelemetry code and specs 
-
-
-🔬 [OpenTelemetry Plugin Developer Guide](https://github.com/open-telemetry/opentelemetry-js/blob/master/doc/plugin-guide.md) — Brief guide that describes how to write a Javascript-based OpenTelemetry plugin
+Node.js web application that uses Lightstep partner plugins. See instructions in [`./demo`](./demo) to run the app.
 
 
-🔬 [Extending the OpenTelemetry Collector](https://medium.com/opentelemetry/extending-the-opentelemetry-collector-with-your-own-components-64c10cf675db)— Technical tutorial on how to extend an OpenTelemetry Collector using Go
 
-🔬 = Advanced Topic
-
-🏁 = Start Here
-
-😎 = Example Integration

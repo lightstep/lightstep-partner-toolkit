@@ -24,7 +24,7 @@ router.get('/donuts', async (req, res) => {
   );
 
   analytics.track({
-    userId: customerId,
+    userId: customerId || 'unknown',
     event: 'Donut Ordered',
     properties: {
       donut_type: result,

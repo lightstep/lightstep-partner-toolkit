@@ -34,7 +34,7 @@ module.exports = (serviceName) => {
       new AwsInstrumentation({
         suppressInternalInstrumentation: true,
         preRequestHook: (span, request) => {
-          if (span.attributes['aws.service.api'] === 's3') {
+          if (span.attributes['aws.service.api'] === 'S3') {
             span.setAttribute('s3.bucket.name', request.params.Bucket);
           }
         },
