@@ -33,7 +33,7 @@ Experimental processors for the [OpenTelemetry Collector](https://github.com/ope
 
 | Processor | Description | Partner Integrations |
 | --- | --- | --- |
-| [webookprocessor](./collector/webhookprocessor) | Annotates spans with metadata provided by webhooks. | PagerDuty, Gremlin, GitHub Deployments |
+| [webhookprocessor](./collector/webhookprocessor) | Annotates spans with metadata provided by webhooks. | PagerDuty, Gremlin, GitHub Deployments |
 | [backstageprocessor](./collector/webhookprocessor) | Annotates spans with service catalog metadata. | [Backstage](https://backstage.io/) |
 
 ### Other OpenTelemetry Integrations
