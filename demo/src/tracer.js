@@ -1,4 +1,4 @@
-const { propagation, trace } = require('@opentelemetry/api');
+const { propagation, trace, diag, DiagConsoleLogger, DiagLogLevel } = require('@opentelemetry/api');
 const { NodeTracerProvider } = require('@opentelemetry/node');
 const { SimpleSpanProcessor, ConsoleSpanExporter } = require('@opentelemetry/tracing');
 const { CollectorTraceExporter } = require('@opentelemetry/exporter-collector');
@@ -28,6 +28,10 @@ module.exports = (serviceName) => {
   provider.addSpanProcessor(new SimpleSpanProcessor(new ConsoleSpanExporter()));
   provider.addSpanProcessor(new SimpleSpanProcessor(exporter));
 
+  // Setting the default Global logger to use the Console
+  // And optionally change the logging level (Defaults to INFO)
+  diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.DEBUG);
+
   registerInstrumentations({
     tracerProvider: provider,
     instrumentations: [
@@ -45,6 +49,23 @@ module.exports = (serviceName) => {
             enabled: true,
           },
           rollbar: {
+            path: '@lightstep/opentelemetry-plugin-rollbar',
+            enabled: true,
+          },
+          '@splitsoftware/splitio': {
+            path: '@lightstep/opentelemetry-plugin-splitio',
+            enabled: true,
+          },
+          'launchdarkly-node-server-sdk': {
+            path: '@lightstep/opentelemetry-plugin-launchdarkly-node-server',
+            enabled: true,
+          },
+          'analytics-node': {
+            path: '@lightstep/opentelemetry-plugin-segment-node',
+            enabled: true,
+          },
+          /*
+          rollbar: {
             path: path.join(__dirname, '../../js/packages/opentelemetry-plugin-rollbar/build/src'),
             enabled: true,
           },
@@ -60,6 +81,7 @@ module.exports = (serviceName) => {
             path: path.join(__dirname, '../../js/packages/opentelemetry-plugin-segment-node/build/src'),
             enabled: true,
           },
+          */
         },
       },
     ],

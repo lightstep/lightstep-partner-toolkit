@@ -5,7 +5,8 @@
   "license": "ISC",
   "main": "src/index.js",
   "scripts": {
-    "start": "(cd ../; npx lerna bootstrap) && nodemon src/index.js localhost 8181",
+    "start": "nodemon src/index.js localhost 8181",
+    "start-local": "(cd ../; npx lerna bootstrap) && nodemon src/index.js localhost 8181",
     "start-fe": "nodemon src/index.js localhost 8181",
     "lint": "eslint . --ext .js",
     "lint:fix": "eslint . --ext .js --fix"
@@ -20,6 +21,10 @@
     "@opentelemetry/plugins-node-core": "^0.17.0",
     "@opentelemetry/propagator-b3": "^0.17.0",
     "@opentelemetry/tracing": "^0.17.0",
+    "@lightstep/opentelemetry-plugin-launchdarkly-node-server": "https://github.com/lightstep/lightstep-partner-toolkit/releases/download/v0.0.10/lightstep-opentelemetry-plugin-launchdarkly-node-server-0.0.10.tgz",
+    "@lightstep/opentelemetry-plugin-rollbar": "https://github.com/lightstep/lightstep-partner-toolkit/releases/download/v0.0.10/lightstep-opentelemetry-plugin-rollbar-0.0.10.tgz",
+    "@lightstep/opentelemetry-plugin-segment-node": "https://github.com/lightstep/lightstep-partner-toolkit/releases/download/v0.0.10/lightstep-opentelemetry-plugin-segment-node-0.0.10.tgz",
+    "@lightstep/opentelemetry-plugin-splitio": "https://github.com/lightstep/lightstep-partner-toolkit/releases/download/v0.0.10/lightstep-opentelemetry-plugin-splitio-0.0.10.tgz",
     "@splitsoftware/splitio": "10.15.2",
     "analytics-node": "^4.0.0",
     "aws-sdk": "^2.854.0",
