@@ -1,10 +1,14 @@
 {
   "name": "@lightstep/opentelemetry-plugin-segment-node",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "description": "OpenTelemetry Segment.io automatic instrumentation package.",
   "main": "build/src/index.js",
   "types": "build/src/index.d.ts",
-  "repository": "lightstep/lightstep-partner-sdk",
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@github.com:lightstep/lightstep-partner-toolkit.git",
+    "directory": "js/packages/opentelemetry-plugin-segment-node"
+  },
   "scripts": {
     "test": "nyc ts-mocha -p tsconfig.json 'test/**/*.test.ts'",
     "test:debug": "cross-env ts-mocha --inspect-brk --no-timeouts -p tsconfig.json 'test/**/*.test.ts'",
@@ -39,7 +43,8 @@
     "README.md"
   ],
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "registry": "https://npm.pkg.github.com"
   },
   "devDependencies": {
     "@types/analytics-node": "^3.1.4",

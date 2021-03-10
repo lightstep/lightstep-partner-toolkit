@@ -1,10 +1,14 @@
 {
   "name": "@lightstep/opentelemetry-plugin-launchdarkly-node-server",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "description": "OpenTelemetry splitio automatic instrumentation package.",
   "main": "build/src/index.js",
   "types": "build/src/index.d.ts",
-  "repository": "lightstep/lightstep-partner-sdk",
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@github.com:lightstep/lightstep-partner-toolkit.git",
+    "directory": "js/packages/opentelemetry-plugin-launchdarkly-node"
+  },
   "scripts": {
     "clean": "rimraf build/*",
     "lint": "eslint . --ext .ts",
@@ -36,7 +40,8 @@
     "README.md"
   ],
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "registry": "https://npm.pkg.github.com"
   },
   "devDependencies": {
     "@types/node": "14.0.27",

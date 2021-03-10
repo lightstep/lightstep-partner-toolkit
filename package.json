@@ -1,7 +1,7 @@
 {
-  "name": "lightstep-partner-sdk-opentelemetry",
-  "version": "0.0.9",
-  "repository": "lightstep/lightstep-partner-sdk",
+  "name": "lightstep-partner-toolkit-opentelemetry",
+  "version": "0.0.10",
+  "repository": "lightstep/lightstep-partner-toolkit",
   "private": true,
   "scripts": {
     "version:update": "npx lerna run version",
