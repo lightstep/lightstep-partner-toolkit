@@ -1,6 +1,6 @@
 ###  OpenTelemetry + Lightstep Partners Node.js Demo App
 
-WIP. To preview in the cloud, **[Run in Codesandbox](https://githubbox.com/lightstep/lightstep-partner-sdk/tree/main/demo)**.
+Simple Node.js web app that emits OpenTelemetry with Lightstep partner plugins enabled. To preview this in the cloud, **[Run in Codesandbox](https://codesandbox.io/s/github/lightstep/lightstep-partner-toolkit/tree/main/demo)**.
 
 #### Running locally
 
@@ -10,4 +10,5 @@ WIP. To preview in the cloud, **[Run in Codesandbox](https://githubbox.com/light
 
 ##### Partner Environment Variables
 
-* `SPLIT_API_TOKEN`
+* `SPLIT_API_TOKEN` - API token for Split.io
+* `LD_SDK_KEY` - API token for LaunchDarkly
