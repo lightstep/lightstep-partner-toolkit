@@ -1,39 +1,15 @@
-const { propagation, trace, diag, DiagConsoleLogger, DiagLogLevel } = require('@opentelemetry/api');
-const { NodeTracerProvider } = require('@opentelemetry/node');
-const { SimpleSpanProcessor, ConsoleSpanExporter } = require('@opentelemetry/tracing');
-const { CollectorTraceExporter } = require('@opentelemetry/exporter-collector');
-const { B3Propagator } = require('@opentelemetry/propagator-b3');
-const { registerInstrumentations } = require('@opentelemetry/instrumentation');
-const { AwsInstrumentation } = require('opentelemetry-instrumentation-aws-sdk');
-
 const path = require('path');
 
-propagation.setGlobalPropagator(new B3Propagator());
+const {
+  lightstep, opentelemetry,
+} = require('lightstep-opentelemetry-launcher-node');
 
-module.exports = (serviceName) => {
-  const provider = new NodeTracerProvider();
+const { AwsInstrumentation } = require('opentelemetry-instrumentation-aws-sdk');
 
-  // This sends data to Lightstep by default
-  // Lots of other exporters are supported, see
-  // https://opentelemetry.io/registry/
-  const exporter = new CollectorTraceExporter({
+module.exports = async (serviceName) => {
+  const sdk = lightstep.configureOpenTelemetry({
+    accessToken: process.env.LS_ACCESS_TOKEN,
     serviceName,
-    url: 'https://ingest.lightstep.com/traces/otlp/v0.6',
-    headers: {
-      'Lightstep-Access-Token':
-        process.env.LS_ACCESS_TOKEN,
-    },
-  });
-
-  provider.addSpanProcessor(new SimpleSpanProcessor(new ConsoleSpanExporter()));
-  provider.addSpanProcessor(new SimpleSpanProcessor(exporter));
-
-  // Setting the default Global logger to use the Console
-  // And optionally change the logging level (Defaults to INFO)
-  diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.DEBUG);
-
-  registerInstrumentations({
-    tracerProvider: provider,
     instrumentations: [
       new AwsInstrumentation({
         suppressInternalInstrumentation: true,
@@ -87,8 +63,11 @@ module.exports = (serviceName) => {
     ],
   });
 
-  // Initialize the OpenTelemetry APIs
-  provider.register();
+  // Setting the default Global logger to use the Console
+  // And optionally change the logging level (Defaults to INFO)
+  opentelemetry.diag.setLogger(
+    new opentelemetry.DiagConsoleLogger(), opentelemetry.DiagLogLevel.DEBUG,
+  );
 
-  return trace.getTracer(serviceName);
+  return sdk.start();
 };
