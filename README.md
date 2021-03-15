@@ -12,7 +12,7 @@ New to OpenTelemetry, Lightstep, or observability? Check out [technical resource
 
 #### Instrumentation Plugins (Node.js)
 
-Instrumentation has been tested with OpenTelemetry `0.17.0`. Packages are available via GitHub's package registry. 
+Instrumentation has been tested with OpenTelemetry `0.18.0`. Packages are available via GitHub's package registry. 
 
 To install via npm, run:
 

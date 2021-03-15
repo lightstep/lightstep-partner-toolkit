@@ -40,8 +40,7 @@ module.exports = async (serviceName) => {
             path: '@lightstep/opentelemetry-plugin-segment-node',
             enabled: true,
           },
-          /*
-          rollbar: {
+          /*rollbar: {
             path: path.join(__dirname, '../../js/packages/opentelemetry-plugin-rollbar/build/src'),
             enabled: true,
           },
@@ -56,8 +55,7 @@ module.exports = async (serviceName) => {
           'analytics-node': {
             path: path.join(__dirname, '../../js/packages/opentelemetry-plugin-segment-node/build/src'),
             enabled: true,
-          },
-          */
+          },*/
         },
       },
     ],
