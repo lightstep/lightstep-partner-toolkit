@@ -23,9 +23,9 @@ $ npm_config_registry=https://npm.pkg.github.com/lightstep npm install --save <p
 | Instrumentation Package | Instrumented Package |
 | --- | --- |
 | [opentelemetry-plugin-splitio](./js/packages/opentelemetry-plugin-splitio) | [`@splitsoftware/splitio`](https://github.com/splitio/javascript-client) |
-| [opentelemetry-plugin-launchdarkly-node](./js/packages/opentelemetry-plugin-launchdarkly-node) | [`launchdarkly-node-server-sdk`](https://github.com/launchdarkly/node-server-sdk) |
+| [opentelemetry-plugin-launchdarkly-node-server](./js/packages/opentelemetry-plugin-launchdarkly-node-server) | [`launchdarkly-node-server-sdk`](https://github.com/launchdarkly/node-server-sdk) |
 | [opentelemetry-plugin-rollbar](./js/packages/opentelemetry-plugin-launchdarkly-node) | [`rollbar`](https://github.com/rollbar/rollbar.js/) |
-| [opentelemetry-plugin-segment-node](./js/packages/opentelemetry-plugin-launchdarkly-node) | [`analytics-node`](https://github.com/segmentio/analytics-node) |
+| [opentelemetry-plugin-segment-node](./js/packages/opentelemetry-plugin-segment-node) | [`analytics-node`](https://github.com/segmentio/analytics-node) |
 
 #### OpenTelemetry Collector Processors
 
