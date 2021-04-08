@@ -11,9 +11,22 @@ exporters:
       "lightstep-access-token": "${LS_ACCESS_TOKEN}"
 processors:
   batch:
+  # Hack to annotates malformed traces with instrumentation metadata
+  # for Lightstep's backend
+  resource:
+    attributes:
+    - key: host.name
+      value: foo
+      action: upsert
+    - key: service.name
+      value: nginx-foo-proxy
+      action: upsert
+    - key: telemetry.sdk.version
+      value: 0.0.1
+      action: upsert
 service:
   pipelines:
     traces:
       receivers: [otlp]
-      processors: [batch]
+      processors: [batch, resource]
       exporters: [logging, otlp]

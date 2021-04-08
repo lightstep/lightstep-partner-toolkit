@@ -8,6 +8,8 @@ services:
       - ./conf/collector.yml:/etc/otel/config.yaml
   nginx:
     container_name: otel-nginx-test
+    depends_on:
+      - node-backend
     build:
       context: .
       dockerfile: Dockerfile
@@ -23,3 +25,5 @@ services:
       - daemon off;
   node-backend:
     image: alchen99/express-hello:latest
+    ports:
+      - "3000:3000"
