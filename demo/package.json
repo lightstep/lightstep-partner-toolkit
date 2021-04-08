@@ -17,6 +17,8 @@
     "@lightstep/opentelemetry-plugin-segment-node": "https://github.com/lightstep/lightstep-partner-toolkit/releases/download/v0.0.11/lightstep-opentelemetry-plugin-segment-node-0.0.11.tgz",
     "@lightstep/opentelemetry-plugin-splitio": "https://github.com/lightstep/lightstep-partner-toolkit/releases/download/v0.0.11/lightstep-opentelemetry-plugin-splitio-0.0.11.tgz",
     "@opentelemetry/plugin-express": "^0.13.1",
+    "@opentelemetry/plugin-http": "^0.18.2",
+    "@opentelemetry/plugin-https": "^0.18.2",
     "@splitsoftware/splitio": "10.15.2",
     "analytics-node": "^4.0.0",
     "aws-sdk": "^2.854.0",

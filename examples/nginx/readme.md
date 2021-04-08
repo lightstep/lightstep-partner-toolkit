@@ -12,6 +12,5 @@ nginx with the OpenTelemetry module enabled + configured to send data to a colle
   $ docker compose up
 
   # Make some requests to generate traces!
-  $ curl http://localhost:8000/
-  $ curl http://localhost:8000/files/context.txt
+  $ open http://localhost:8000/
 ```

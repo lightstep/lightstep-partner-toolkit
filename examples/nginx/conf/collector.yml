@@ -16,10 +16,10 @@ processors:
   resource:
     attributes:
     - key: host.name
-      value: foo
+      value: nginx-proxy-host
       action: upsert
     - key: service.name
-      value: nginx-foo-proxy
+      value: nginx-proxy
       action: upsert
     - key: telemetry.sdk.version
       value: 0.0.1

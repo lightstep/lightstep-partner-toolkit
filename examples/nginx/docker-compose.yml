@@ -9,7 +9,8 @@ services:
   nginx:
     container_name: otel-nginx-test
     depends_on:
-      - node-backend
+      - demo
+      - collector
     build:
       context: .
       dockerfile: Dockerfile
@@ -23,7 +24,11 @@ services:
       - /usr/sbin/nginx
       - -g
       - daemon off;
-  node-backend:
-    image: alchen99/express-hello:latest
+  demo:
+    container_name: ls-partner-sdk-demo
+    environment:
+      - LS_ACCESS_TOKEN=${LS_ACCESS_TOKEN}
+    build:
+      context: ../../demo/
     ports:
-      - "3000:3000"
+      - "8181:8181"
