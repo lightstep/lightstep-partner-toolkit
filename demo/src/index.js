@@ -2,7 +2,7 @@
 const start = async () => {
   // Important! Require this code before everything else
   // This configures tracing of all following dependencies
-  const serviceName = process.env.LS_SERVICE_NAME || 'lightstep-partner-test-app';
+  const serviceName = process.env.LS_SERVICE_NAME || 'donutshop';
   await require('./tracer')(serviceName);
 
   const express = require('express');

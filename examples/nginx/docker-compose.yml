@@ -28,6 +28,8 @@ services:
     container_name: ls-partner-sdk-demo
     environment:
       - LS_ACCESS_TOKEN=${LS_ACCESS_TOKEN}
+      - SPLIT_API_KEY=${SPLIT_API_KEY}
+      - ROLLBAR_POST_ITEM_KEY=${ROLLBAR_POST_ITEM_KEY}
     build:
       context: ../../demo/
     ports:
