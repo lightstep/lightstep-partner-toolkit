@@ -24,7 +24,7 @@ $ npm_config_registry=https://npm.pkg.github.com/lightstep npm install --save <p
 | --- | --- |
 | [opentelemetry-plugin-splitio](./js/packages/opentelemetry-plugin-splitio) | [`@splitsoftware/splitio`](https://github.com/splitio/javascript-client) |
 | [opentelemetry-plugin-launchdarkly-node-server](./js/packages/opentelemetry-plugin-launchdarkly-node-server) | [`launchdarkly-node-server-sdk`](https://github.com/launchdarkly/node-server-sdk) |
-| [opentelemetry-plugin-rollbar](./js/packages/opentelemetry-plugin-launchdarkly-node) | [`rollbar`](https://github.com/rollbar/rollbar.js/) |
+| [opentelemetry-plugin-rollbar](./js/packages/opentelemetry-plugin-rollbar) | [`rollbar`](https://github.com/rollbar/rollbar.js/) |
 | [opentelemetry-plugin-segment-node](./js/packages/opentelemetry-plugin-segment-node) | [`analytics-node`](https://github.com/segmentio/analytics-node) |
 
 #### OpenTelemetry Collector Processors
@@ -44,6 +44,7 @@ Experimental processors for the [OpenTelemetry Collector](https://github.com/ope
 | [CockroachDB](./examples/cockroachdb) | Instructions for using CockroachDB's native OpenTracing support with Lightstep. |
 | [nginx](./examples/nginx) | Instructions for instrumenting nginx with OpenTelemetry. |
 | [Ambassador k8s Initializer](https://lightstep.com/blog/lightstep-and-ambassador/) | Automatically configure a Kubernetes cluster to emit traces using Ambassador's k8s initializer. |
+| [Jenkins X](https://github.com/jenkinsci/opentelemetry-plugin) | Publish Jenkins performance metrics and traces to an OpenTelemetry endpoint |
 
 ### Demo
 
