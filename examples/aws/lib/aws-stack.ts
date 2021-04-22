@@ -1,31 +1,37 @@
 import * as cdk from '@aws-cdk/core';
 import * as eks from '@aws-cdk/aws-eks';
+import { assert } from 'console';
 
 export class AwsStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
+    
+    assert(process.env.LS_ACCESS_TOKEN, 'environment variable LS_ACCESS_TOKEN must be set');
 
     const cluster = new eks.Cluster(this, 'hello-eks', {
       version: eks.KubernetesVersion.V1_19,
     });
 
-    const appLabel = { app: "hello-kubernetes" };
+    const appLabel = { app: "donut-shop" };
 
     const deployment = {
       apiVersion: "apps/v1",
       kind: "Deployment",
-      metadata: { name: "hello-kubernetes-pod", namespace: "default" },
+      metadata: { name: "donut-shop-pod", namespace: "default" },
       spec: {
         replicas: 1,
         selector: { matchLabels: appLabel },
         template: {
-          metadata: { name: "hello-kubernetes", labels: appLabel },
+          metadata: { name: "donut-shop", labels: appLabel },
           spec: {
             containers: [
               {
-                name: "hello-kubernetes",
-                image: "paulbouwer/hello-kubernetes:1.5",
-                ports: [ { containerPort: 8080 } ]
+                name: "donut-shop",
+                image: "ghcr.io/lightstep/lightstep-partner-toolkit-donut-shop:latest",
+                ports: [ { containerPort: 8181 } ],
+                env: [
+                  { name: 'LS_ACCESS_TOKEN', value: process.env.LS_ACCESS_TOKEN }
+                ]
               }
             ]
           }
@@ -36,10 +42,10 @@ export class AwsStack extends cdk.Stack {
     const service = {
       apiVersion: "v1",
       kind: "Service",
-      metadata: { name: "hello-kubernetes-svc", namespace: "default", labels: appLabel },
+      metadata: { name: "donut-shop-svc", namespace: "default", labels: appLabel },
       spec: {
         type: "ClusterIP",
-        ports: [ { name: "http", port: 80, targetPort: 8080 } ],
+        ports: [ { name: "http", port: 80, targetPort: 8181 } ],
         selector: appLabel
       }
     };
@@ -61,7 +67,7 @@ export class AwsStack extends cdk.Stack {
                 {
                   path: "/",
                   backend: {
-                    serviceName: "hello-kubernetes-svc",
+                    serviceName: "donut-shop-svc",
                     servicePort: 80
                   }
                 }
