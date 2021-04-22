@@ -74,10 +74,63 @@ export class AwsStack extends cdk.Stack {
 
     cluster.addManifest('hello-kub', service, deployment, ingress);
 
-    cluster.addHelmChart('NginxIngress', {
-      chart: 'nginx-ingress',
-      repository: 'https://helm.nginx.com/stable',
-      namespace: 'default'
+    // https://docs.nginx.com/nginx-ingress-controller/overview/
+    // Building custom image: https://docs.nginx.com/nginx-ingress-controller/installation/building-ingress-controller-image/
+    cluster.addHelmChart("NginxIngress", {
+      chart: "nginx-ingress",
+      repository: "https://helm.nginx.com/stable",
+      namespace: "default",
+      values: {
+        controller: {
+          enableLatencyMetrics: true
+        },
+        prometheus: {
+          create: "true",
+          port: 9113
+        }
+      }
+    });
+
+    cluster.addHelmChart('Prometheus', {
+      chart: 'prometheus',
+      repository: 'https://prometheus-community.github.io/helm-charts',
+      namespace: 'prometheus',
+      values: {
+        server: {
+          sidecarContainers: [
+            {
+              name: 'otel-sidecar',
+              image: 'lightstep/opentelemetry-prometheus-sidecar',
+              imagePullPolicy: 'Always',
+              args: [
+                '--prometheus.wal=/data/wal',
+                '--destination.endpoint=https://ingest.lightstep.com:443',
+                `--destination.header=lightstep-access-token=${process.env.LS_ACCESS_TOKEN}`
+              ],
+              volumeMounts: [
+                { 
+                  name: 'storage-volume',
+                  mountPath: '/data'
+                }
+              ],
+              ports: [
+                {
+                  name: 'admin-port',
+                  containerPort: 9091
+                }
+              ],
+              livenessProbe: {
+                httpGet: {
+                  path: '/-/health',
+                  port: 'admin-port'
+                },
+                periodSeconds: 30,
+                failureThreshold: 2
+              }
+            }
+          ]
+        }
+      }
     });
 
   }
