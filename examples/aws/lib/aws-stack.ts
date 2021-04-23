@@ -197,6 +197,7 @@ export class AwsStack extends cdk.Stack {
               args: [
                 '--prometheus.wal=/data/wal',
                 '--destination.endpoint=https://ingest.lightstep.com:443',
+                '--destination.attribute="service.name=nginx-ingress"',
                 `--destination.header=lightstep-access-token=${process.env.LS_ACCESS_TOKEN}`
               ],
               volumeMounts: [
