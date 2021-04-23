@@ -40,6 +40,39 @@ export class AwsStack extends cdk.Stack {
       }
     };
 
+    const cafeDeployment = {
+      apiVersion: "apps/v1",
+      kind: "Deployment",
+      metadata: { name: "coffee", namespace: "default" },
+      spec: {
+        replicas: 1,
+        selector: { matchLabels: { app: "coffee" } },
+        template: {
+          metadata: { labels: { app: "coffee" } },
+          spec: {
+            containers: [
+              {
+                name: "coffee",
+                image: "nginxdemos/nginx-hello:plain-text",
+                ports: [ { containerPort: 8080 } ]
+              }
+            ]
+          }
+        }
+      }
+    };
+
+    const coffeeService = {
+      apiVersion: "v1",
+      kind: "Service",
+      metadata: { name: "coffee-svc", namespace: "default", labels: { app: "coffee" } },
+      spec: {
+        type: "ClusterIP",
+        ports: [ { port: 80, targetPort: 8080 } ],
+        selector: { app: "coffee" } 
+      }
+    };
+
     const collectorLabel = { app: "otel-collector" };
 
     const collectorDeployment = {
@@ -119,6 +152,13 @@ export class AwsStack extends cdk.Stack {
             http: {
               paths: [
                 {
+                  path: "/coffee",
+                  backend: {
+                    serviceName: "coffee-svc",
+                    servicePort: 80
+                  }
+                },
+                {
                   path: "/",
                   backend: {
                     serviceName: "donut-shop-svc",
@@ -144,7 +184,8 @@ export class AwsStack extends cdk.Stack {
       }
     }
 
-    cluster.addManifest('hello-kub', service, deployment, ingress, configMap, collectorDeployment, collectorService);
+    cluster.addManifest('hello-kub', service, deployment, ingress, configMap,
+      collectorDeployment, collectorService, cafeDeployment, coffeeService);
 
     // https://docs.nginx.com/nginx-ingress-controller/overview/
     // Building custom image: https://docs.nginx.com/nginx-ingress-controller/installation/building-ingress-controller-image/
