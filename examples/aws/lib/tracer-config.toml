@@ -2,8 +2,8 @@ exporter = "otlp"
 processor = "simple"
 
 [exporters.otlp]
-host = "collector"
-port = 4317
+host = "otel-collector-svc"
+port = 55680
 
 [processors.batch]
 max_queue_size = 2048
