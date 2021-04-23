@@ -1,6 +1,7 @@
 import * as cdk from '@aws-cdk/core';
 import * as eks from '@aws-cdk/aws-eks';
 import { assert } from 'console';
+import { readFileSync } from 'fs';
 
 export class AwsStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
@@ -78,7 +79,18 @@ export class AwsStack extends cdk.Stack {
       }
     }
 
-    cluster.addManifest('hello-kub', service, deployment, ingress);
+    const configMap = {
+      apiVersion: 'v1',
+      kind: 'ConfigMap',
+      metadata: {
+        name: 'otel-config'
+      },
+      data: {
+        "tracer-config.json": readFileSync(`${__dirname}/tracer-config.toml`, 'utf-8')
+      }
+    }
+
+    cluster.addManifest('hello-kub', service, deployment, ingress, configMap);
 
     // https://docs.nginx.com/nginx-ingress-controller/overview/
     // Building custom image: https://docs.nginx.com/nginx-ingress-controller/installation/building-ingress-controller-image/
@@ -88,7 +100,27 @@ export class AwsStack extends cdk.Stack {
       namespace: "default",
       values: {
         controller: {
-          enableLatencyMetrics: true
+          enableLatencyMetrics: true,
+          image: {
+             repository: 'smithclay/nginx-ingress-otel',
+             tag: '1.11.1',
+             pullPolicy: 'Always'
+          },
+          volumeMounts: [
+            {
+              name: 'config-opentelemetry',
+              mountPath: '/var/lib/nginx/tracer-config.json',
+              subPath: 'tracer-config.json'
+            }
+          ],
+          volumes: [
+            {
+              name: 'config-opentelemetry',
+              configMap: {
+                name: 'otel-config'
+              }
+            }
+          ]
         },
         prometheus: {
           create: "true",
