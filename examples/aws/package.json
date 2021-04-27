@@ -8,7 +8,9 @@
     "build": "tsc",
     "watch": "tsc -w",
     "test": "jest",
-    "cdk": "cdk"
+    "cdk": "cdk",
+    "lint": "eslint . --ext .ts",
+    "lint:fix": "eslint . --ext .ts --fix"
   },
   "devDependencies": {
     "@aws-cdk/assert": "1.99.0",
@@ -16,6 +18,8 @@
     "@types/js-yaml": "^3.12.5",
     "@types/node": "10.17.27",
     "aws-cdk": "1.99.0",
+    "eslint": "7.19.0",
+    "gts": "3.1.0",
     "jest": "^26.4.2",
     "ts-jest": "^26.2.0",
     "ts-node": "^9.0.0",

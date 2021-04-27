@@ -1,227 +1,40 @@
 import * as cdk from '@aws-cdk/core';
 import * as eks from '@aws-cdk/aws-eks';
-import { assert } from 'console';
-import { readFileSync } from 'fs';
 
-export class AwsStack extends cdk.Stack {
+import { DonutShopApp } from './backends/donut-shop';
+import { OtelCollector } from './otel-collector/collector';
+import { MockBackend } from './backends/mock-backend';
+import { OtelNginxIngress } from './ingress/nginx';
+
+export class AwsOtelStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
-    
-    assert(process.env.LS_ACCESS_TOKEN, 'environment variable LS_ACCESS_TOKEN must be set');
 
-    const cluster = new eks.Cluster(this, 'hello-eks', {
+    if (!process.env.LS_ACCESS_TOKEN) {
+      throw 'environment variable LS_ACCESS_TOKEN must be set';
+    }
+
+    const cluster = new eks.Cluster(this, 'hello-otel-eks', {
       version: eks.KubernetesVersion.V1_19,
     });
 
-    const appLabel = { app: "donut-shop" };
+    const donutShop = new DonutShopApp(this, 'donut-shop', {
+      cluster,
+      serviceName: 'donut-shop-svc',
+      servicePort: 80,
+      servicePath: '/',
+    });
+    const coffeeShop = new MockBackend(this, 'coffee', {
+      cluster,
+      serviceName: 'coffee-svc',
+      servicePort: 80,
+      servicePath: '/coffee',
+    });
+    new OtelCollector(this, 'otel-collector', { cluster });
 
-    const deployment = {
-      apiVersion: "apps/v1",
-      kind: "Deployment",
-      metadata: { name: "donut-shop-pod", namespace: "default" },
-      spec: {
-        replicas: 1,
-        selector: { matchLabels: appLabel },
-        template: {
-          metadata: { name: "donut-shop", labels: appLabel },
-          spec: {
-            containers: [
-              {
-                name: "donut-shop",
-                image: "ghcr.io/lightstep/lightstep-partner-toolkit-donut-shop:latest",
-                ports: [ { containerPort: 8181 } ],
-                env: [
-                  { name: 'LS_ACCESS_TOKEN', value: process.env.LS_ACCESS_TOKEN }
-                ]
-              }
-            ]
-          }
-        }
-      }
-    };
-
-    const cafeDeployment = {
-      apiVersion: "apps/v1",
-      kind: "Deployment",
-      metadata: { name: "coffee", namespace: "default" },
-      spec: {
-        replicas: 1,
-        selector: { matchLabels: { app: "coffee" } },
-        template: {
-          metadata: { labels: { app: "coffee" } },
-          spec: {
-            containers: [
-              {
-                name: "coffee",
-                image: "nginxdemos/nginx-hello:plain-text",
-                ports: [ { containerPort: 8080 } ]
-              }
-            ]
-          }
-        }
-      }
-    };
-
-    const coffeeService = {
-      apiVersion: "v1",
-      kind: "Service",
-      metadata: { name: "coffee-svc", namespace: "default", labels: { app: "coffee" } },
-      spec: {
-        type: "ClusterIP",
-        ports: [ { port: 80, targetPort: 8080 } ],
-        selector: { app: "coffee" } 
-      }
-    };
-
-    const collectorLabel = { app: "otel-collector" };
-
-    const collectorDeployment = {
-      apiVersion: "apps/v1",
-      kind: "Deployment",
-      metadata: { name: "otel-collector", namespace: "default" },
-      spec: {
-        replicas: 1,
-        selector: { matchLabels: collectorLabel },
-        template: {
-          metadata: { name: "otel-collector", labels: collectorLabel },
-          spec: {
-            containers: [
-              {
-                name: "otel-collector",
-                image: "otel/opentelemetry-collector-contrib-dev:latest",
-                ports: [ { containerPort: 55680 } ],
-                env: [
-                  { name: 'LS_ACCESS_TOKEN', value: process.env.LS_ACCESS_TOKEN }
-                ],
-                volumeMounts: [
-                  {
-                    name: 'otel-collector-config-vol',
-                    mountPath: '/etc/otel/config.yaml',
-                    subPath: 'config.yaml'
-                  }
-                ]
-              }
-            ],
-            volumes: [
-              {
-                name: 'otel-collector-config-vol',
-                configMap: {
-                  name: 'otel-config'
-                }
-              }
-            ]
-          }
-        }
-      }
-    };
-
-    const collectorService = {
-      apiVersion: "v1",
-      kind: "Service",
-      metadata: { name: "otel-collector-svc", namespace: "default", labels: collectorLabel },
-      spec: {
-        type: "ClusterIP",
-        ports: [ { port: 55680, targetPort: 55680 } ],
-        selector: collectorLabel
-      }
-    };
-
-    const service = {
-      apiVersion: "v1",
-      kind: "Service",
-      metadata: { name: "donut-shop-svc", namespace: "default", labels: appLabel },
-      spec: {
-        type: "ClusterIP",
-        ports: [ { name: "http", port: 80, targetPort: 8181 } ],
-        selector: appLabel
-      }
-    };
-
-    const ingress = {
-      apiVersion: "networking.k8s.io/v1beta1",
-      kind: "Ingress",
-      metadata: { 
-        name: "hello-kubernetes-ingress",
-        namespace: "default"
-      },
-      spec: {
-        ingressClassName: "nginx",
-        rules: [
-          {
-            host: "*.elb.amazonaws.com",
-            http: {
-              paths: [
-                {
-                  path: "/coffee",
-                  backend: {
-                    serviceName: "coffee-svc",
-                    servicePort: 80
-                  }
-                },
-                {
-                  path: "/",
-                  backend: {
-                    serviceName: "donut-shop-svc",
-                    servicePort: 80
-                  }
-                }
-              ]
-            }
-          }
-        ]
-      }
-    }
-
-    const configMap = {
-      apiVersion: 'v1',
-      kind: 'ConfigMap',
-      metadata: {
-        name: 'otel-config'
-      },
-      data: {
-        "tracer-config.json": readFileSync(`${__dirname}/tracer-config.toml`, 'utf-8'),
-        "config.yaml": readFileSync(`${__dirname}/collector-config.yaml`, 'utf-8'),
-      }
-    }
-
-    cluster.addManifest('hello-kub', service, deployment, ingress, configMap,
-      collectorDeployment, collectorService, cafeDeployment, coffeeService);
-
-    // https://docs.nginx.com/nginx-ingress-controller/overview/
-    // Building custom image: https://docs.nginx.com/nginx-ingress-controller/installation/building-ingress-controller-image/
-    cluster.addHelmChart("NginxIngress", {
-      chart: "nginx-ingress",
-      repository: "https://helm.nginx.com/stable",
-      namespace: "default",
-      values: {
-        controller: {
-          enableLatencyMetrics: true,
-          image: {
-             repository: 'smithclay/nginx-ingress-otel',
-             tag: '1.11.1',
-             pullPolicy: 'Always'
-          },
-          volumeMounts: [
-            {
-              name: 'config-opentelemetry',
-              mountPath: '/var/lib/nginx/tracer-config.json',
-              subPath: 'tracer-config.json'
-            }
-          ],
-          volumes: [
-            {
-              name: 'config-opentelemetry',
-              configMap: {
-                name: 'otel-config'
-              }
-            }
-          ]
-        },
-        prometheus: {
-          create: "true",
-          port: 9113
-        }
-      }
+    new OtelNginxIngress(this, 'otel-nginx', {
+      cluster: cluster,
+      backends: [donutShop, coffeeShop],
     });
 
     cluster.addHelmChart('Prometheus', {
@@ -239,33 +52,32 @@ export class AwsStack extends cdk.Stack {
                 '--prometheus.wal=/data/wal',
                 '--destination.endpoint=https://ingest.lightstep.com:443',
                 '--destination.attribute="service.name=nginx-ingress"',
-                `--destination.header=lightstep-access-token=${process.env.LS_ACCESS_TOKEN}`
+                `--destination.header=lightstep-access-token=${process.env.LS_ACCESS_TOKEN}`,
               ],
               volumeMounts: [
-                { 
+                {
                   name: 'storage-volume',
-                  mountPath: '/data'
-                }
+                  mountPath: '/data',
+                },
               ],
               ports: [
                 {
                   name: 'admin-port',
-                  containerPort: 9091
-                }
+                  containerPort: 9091,
+                },
               ],
               livenessProbe: {
                 httpGet: {
                   path: '/-/health',
-                  port: 'admin-port'
+                  port: 'admin-port',
                 },
                 periodSeconds: 30,
-                failureThreshold: 2
-              }
-            }
-          ]
-        }
-      }
+                failureThreshold: 2,
+              },
+            },
+          ],
+        },
+      },
     });
-
   }
 }
