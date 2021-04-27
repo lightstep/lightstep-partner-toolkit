@@ -50,6 +50,9 @@ export class OtelNginxIngress extends cdk.Construct {
       namespace: 'default',
       values: {
         controller: {
+          service: {
+            name: 'nginx-ingress-svc'
+          },
           enableLatencyMetrics: true,
           image: {
             repository: 'smithclay/nginx-ingress-otel',

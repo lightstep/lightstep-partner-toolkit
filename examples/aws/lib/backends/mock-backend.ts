@@ -46,6 +46,6 @@ export class MockBackend extends cdk.Construct implements NginxBackend {
       },
     };
 
-    props.cluster.addManifest('mock-service', deployment, service);
+    props.cluster.addManifest(`mock-service-${this.props.serviceName}`, deployment, service);
   }
 }

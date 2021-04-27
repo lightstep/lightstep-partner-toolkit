@@ -5,6 +5,7 @@ import { DonutShopApp } from './backends/donut-shop';
 import { OtelCollector } from './otel-collector/collector';
 import { MockBackend } from './backends/mock-backend';
 import { OtelNginxIngress } from './ingress/nginx';
+import { Loadtest } from './loadtest/loadtest';
 
 export class AwsOtelStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
@@ -30,11 +31,20 @@ export class AwsOtelStack extends cdk.Stack {
       servicePort: 80,
       servicePath: '/coffee',
     });
+
+    const teaShop = new MockBackend(this, 'tea', {
+      cluster,
+      serviceName: 'tea-svc',
+      servicePort: 80,
+      servicePath: '/tea',
+    });
+
     new OtelCollector(this, 'otel-collector', { cluster });
+    new Loadtest(this, 'loadtest', { cluster, targetUrl: 'http://nginx-ingress-svc' });
 
     new OtelNginxIngress(this, 'otel-nginx', {
       cluster: cluster,
-      backends: [donutShop, coffeeShop],
+      backends: [donutShop, coffeeShop, teaShop],
     });
 
     cluster.addHelmChart('Prometheus', {
