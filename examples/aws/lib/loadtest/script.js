@@ -14,8 +14,8 @@ export let options = {
 };
 
 export default function() {
-    http.get(__ENV.TARGET_URL);
-    http.get(`${__ENV.TARGET_URL}/coffee`);
-    http.get(`${__ENV.TARGET_URL}/tea`);
-    http.get(`${__ENV.TARGET_URL}/api/donuts`);
+    http.get(__ENV.TARGET_URL, { headers: { 'Host': 'foo.us-west-2.elb.amazonaws.com'} });
+    http.get(`${__ENV.TARGET_URL}/coffee`, { headers: { 'Host': 'foo.us-west-2.elb.amazonaws.com'} });
+    http.get(`${__ENV.TARGET_URL}/tea`, { headers: { 'Host': 'foo.us-west-2.elb.amazonaws.com'} });
+    http.get(`${__ENV.TARGET_URL}/api/donuts`, { headers: { 'Host': 'foo.us-west-2.elb.amazonaws.com'} });
 };

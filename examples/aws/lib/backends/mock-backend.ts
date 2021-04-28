@@ -12,16 +12,16 @@ export class MockBackend extends cdk.Construct implements NginxBackend {
     const deployment = {
       apiVersion: 'apps/v1',
       kind: 'Deployment',
-      metadata: { name: 'coffee', namespace: 'default' },
+      metadata: { name: this.props.serviceName, namespace: 'default' },
       spec: {
         replicas: 1,
-        selector: { matchLabels: { app: 'coffee' } },
+        selector: { matchLabels: { app: this.props.serviceName } },
         template: {
-          metadata: { labels: { app: 'coffee' } },
+          metadata: { labels: { app: this.props.serviceName } },
           spec: {
             containers: [
               {
-                name: 'coffee',
+                name: this.props.serviceName,
                 image: 'nginxdemos/nginx-hello:plain-text',
                 ports: [{ containerPort: 8080 }],
               },
@@ -37,12 +37,12 @@ export class MockBackend extends cdk.Construct implements NginxBackend {
       metadata: {
         name: this.props.serviceName,
         namespace: 'default',
-        labels: { app: 'coffee' },
+        labels: { app: this.props.serviceName },
       },
       spec: {
         type: 'ClusterIP',
         ports: [{ port: this.props.servicePort, targetPort: 8080 }],
-        selector: { app: 'coffee' },
+        selector: { app: this.props.serviceName },
       },
     };
 

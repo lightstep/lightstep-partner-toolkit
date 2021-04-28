@@ -36,6 +36,25 @@ export class OtelNginxIngress extends cdk.Construct {
       },
     };
 
+    var imageName = 'smithclay/nginx-ingress-otel';
+
+    if (process.env.DOCKER_CONFIG_BASE64) {
+      const secret = {
+        apiVersion: 'v1',
+        kind: 'Secret',
+        metadata: {
+          name: 'myregistrykey',
+          namespace: 'default'
+        },
+        data: {
+          '.dockerconfigjson': process.env.DOCKER_CONFIG_BASE64
+        },
+        type: 'kubernetes.io/dockerconfigjson'
+      };
+      imageName = 'smithclay/nginx-plus-ingress-otel';
+      props.cluster.addManifest('otel-nginx-plus', secret)
+    }
+
     props.cluster.addManifest(
       'otel-nginx',
       this.createIngressManifest(props.backends),
@@ -50,12 +69,16 @@ export class OtelNginxIngress extends cdk.Construct {
       namespace: 'default',
       values: {
         controller: {
+          nginxplus: process.env.DOCKER_CONFIG_BASE64 ? true : false,
           service: {
             name: 'nginx-ingress-svc'
           },
+          serviceAccount: {
+            imagePullSecretName: 'myregistrykey'
+          },
           enableLatencyMetrics: true,
           image: {
-            repository: 'smithclay/nginx-ingress-otel',
+            repository: imageName,
             tag: '1.11.1',
             pullPolicy: 'Always',
           },
