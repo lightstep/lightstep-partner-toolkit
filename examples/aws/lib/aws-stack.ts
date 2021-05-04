@@ -6,6 +6,7 @@ import { OtelCollector } from './otel-collector/collector';
 import { MockBackend } from './backends/mock-backend';
 import { OtelNginxIngress } from './ingress/nginx';
 import { Loadtest } from './loadtest/loadtest';
+import { LightstepMetricDashboard } from './lightstep/lightstep-metric-dashboard';
 
 export class AwsOtelStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
@@ -25,6 +26,7 @@ export class AwsOtelStack extends cdk.Stack {
       servicePort: 80,
       servicePath: '/',
     });
+
     const coffeeShop = new MockBackend(this, 'coffee', {
       cluster,
       serviceName: 'coffee-svc',
@@ -39,8 +41,20 @@ export class AwsOtelStack extends cdk.Stack {
       servicePath: '/tea',
     });
 
+    if (process.env.LIGHTSTEP_API_KEY) {
+      new LightstepMetricDashboard(this, 'my-dashboard', {
+        name: 'Test Dashboard',
+        lightstepOrg: 'LightStep',
+        lightstepProject: 'Robin-Hipster-Shop',
+        lightstepApiKey: process.env.LIGHTSTEP_API_KEY,
+      });
+    }
+
     new OtelCollector(this, 'otel-collector', { cluster });
-    new Loadtest(this, 'loadtest', { cluster, targetUrl: 'http://nginx-ingress-svc' });
+    new Loadtest(this, 'loadtest', {
+      cluster,
+      targetUrl: 'http://nginx-ingress-svc',
+    });
 
     new OtelNginxIngress(this, 'otel-nginx', {
       cluster: cluster,
