@@ -1,0 +1,29 @@
+spec:
+  template:
+    spec:
+      containers:
+        - name: otel-sidecar
+          image: lightstep/opentelemetry-prometheus-sidecar
+          imagePullPolicy: Always
+          args:
+            - --prometheus.wal=/data/wal
+            - --destination.attribute="service.name=istio"
+            - --destination.endpoint=https://ingest.lightstep.com:443
+            - --destination.header=lightstep-access-token=thjgc+r08zKvfq8YJKJ6zD17WoFEdfiJdMksmEE215A7qxDTdkGMPa+LNYI1YRl1T3VR6JU3dmeXd+BqopVCFiuo2SOqvFRrfBzx0TaS
+          volumeMounts:
+            - name: storage-volume
+              mountPath: /data
+              subPath: ""
+          ports:
+            - name: admin-port
+              containerPort: 9091
+          livenessProbe:
+            httpGet:
+              path: /-/health
+              port: admin-port
+            periodSeconds: 30
+            failureThreshold: 2
+      volumes:
+        - name: storage-volume
+          persistentVolumeClaim:
+            claimName: prom-storage-pvc
