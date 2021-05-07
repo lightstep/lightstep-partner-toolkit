@@ -1,0 +1,22 @@
+apiVersion: install.istio.io/v1alpha1
+kind: IstioOperator
+spec:
+  profile: demo
+  addonComponents:
+    tracing:
+      enabled: true
+  values:
+    global:
+      jwtPolicy: first-party-jwt
+      proxy:
+        tracer: "lightstep"
+      tracer:
+        lightstep:
+          # replace with your local satetille, visit http://ip:8361/ to verify it's running
+          address: "169.254.186.180:8360"
+          accessToken: "<your access token>"
+  meshConfig:
+    enableTracing: true
+    defaultConfig:
+      tracing:
+        sampling: 100

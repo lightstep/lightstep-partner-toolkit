@@ -4,7 +4,7 @@ spec:
   profile: demo
   addonComponents:
     tracing:
-      enabled: true
+      enabed:
   values:
     global:
       jwtPolicy: first-party-jwt
@@ -13,7 +13,7 @@ spec:
       tracer:
         lightstep:
           address: "ingest.lightstep.com:443"
-          accessToken: "hfxG2djgOAqwad/x44PaNIqECETIbC1Da6p5WuQo+XQrO1fuUUKQ+Jn9xhk2r3IMSVqDz+6MeEuZNCHvt4E1BCoBVmEzMBrU7Nla/P2Q"
+          accessToken: "your-token"
   meshConfig:
     enableTracing: true
     defaultConfig:
@@ -24,7 +24,7 @@ spec:
           # Specifying ca certificate here will moute `lightstep.cacert` secret volume
           # at all sidecars by default.
           caCertificates: "/etc/lightstep/cacert.pem"
-  # This seems to be broken
+  # This seems to be broken, need to manually edit the yaml to add
   # components:
   #   ingressGateways:
   #   - name: istio-ingressgateway

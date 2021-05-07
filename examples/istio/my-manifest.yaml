@@ -12044,7 +12044,7 @@ data:
     deployment:
       accessible_namespaces: ['**']
     login_token:
-      signing_key: "SbA1FPawtN"
+      signing_key: "ap2E6vNXQf"
     server:
       port: 20001
       web_root: /kiali
@@ -13226,70 +13226,6 @@ webhooks:
     # endpoint is ready.
     failurePolicy: Ignore
     sideEffects: None
----
-
-
-kind: CustomResourceDefinition
-apiVersion: apiextensions.k8s.io/v1beta1
-metadata:
-  name: adapters.config.istio.io
-  labels:
-    app: mixer
-    package: adapter
-    istio: mixer-adapter
-    chart: istio
-    heritage: Tiller
-    release: istio
-  annotations:
-    "helm.sh/resource-policy": keep
-spec:
-  group: config.istio.io
-  names:
-    kind: adapter
-    plural: adapters
-    singular: adapter
-    categories:
-    - istio-io
-    - policy-istio-io
-  scope: Namespaced
-  subresources:
-    status: {}
-  versions:
-    - name: v1alpha2
-      served: true
-      storage: true
----
-
-
-kind: CustomResourceDefinition
-apiVersion: apiextensions.k8s.io/v1beta1
-metadata:
-  name: templates.config.istio.io
-  labels:
-    app: mixer
-    package: template
-    istio: mixer-template
-    chart: istio
-    heritage: Tiller
-    release: istio
-  annotations:
-    "helm.sh/resource-policy": keep
-spec:
-  group: config.istio.io
-  names:
-    kind: template
-    plural: templates
-    singular: template
-    categories:
-    - istio-io
-    - policy-istio-io
-  scope: Namespaced
-  subresources:
-    status: {}
-  versions:
-    - name: v1alpha2
-      served: true
-      storage: true
 ---
 
 
@@ -18284,6 +18220,70 @@ spec:
     storage: true
 ---
 
+
+kind: CustomResourceDefinition
+apiVersion: apiextensions.k8s.io/v1beta1
+metadata:
+  name: adapters.config.istio.io
+  labels:
+    app: mixer
+    package: adapter
+    istio: mixer-adapter
+    chart: istio
+    heritage: Tiller
+    release: istio
+  annotations:
+    "helm.sh/resource-policy": keep
+spec:
+  group: config.istio.io
+  names:
+    kind: adapter
+    plural: adapters
+    singular: adapter
+    categories:
+    - istio-io
+    - policy-istio-io
+  scope: Namespaced
+  subresources:
+    status: {}
+  versions:
+    - name: v1alpha2
+      served: true
+      storage: true
+---
+
+
+kind: CustomResourceDefinition
+apiVersion: apiextensions.k8s.io/v1beta1
+metadata:
+  name: templates.config.istio.io
+  labels:
+    app: mixer
+    package: template
+    istio: mixer-template
+    chart: istio
+    heritage: Tiller
+    release: istio
+  annotations:
+    "helm.sh/resource-policy": keep
+spec:
+  group: config.istio.io
+  names:
+    kind: template
+    plural: templates
+    singular: template
+    categories:
+    - istio-io
+    - policy-istio-io
+  scope: Namespaced
+  subresources:
+    status: {}
+  versions:
+    - name: v1alpha2
+      served: true
+      storage: true
+---
+
 # Cni component is disabled.
 
 # Resources for EgressGateways component
@@ -18459,9 +18459,6 @@ spec:
         - mountPath: /etc/istio/egressgateway-ca-certs
           name: egressgateway-ca-certs
           readOnly: true
-        - mountPath: /etc/lightstep
-          name: lightstep-certs
-          readOnly: true
       serviceAccountName: istio-egressgateway-service-account
       volumes:
       - configMap:
@@ -18490,10 +18487,6 @@ spec:
         secret:
           optional: true
           secretName: istio-egressgateway-ca-certs
-      - name: lightstep-certs
-        secret:
-          optional: true
-          secretName: lightstep.cacert
 
 ---
 
@@ -18740,9 +18733,6 @@ spec:
         - mountPath: /etc/istio/ingressgateway-ca-certs
           name: ingressgateway-ca-certs
           readOnly: true
-        - mountPath: /etc/lightstep
-          name: lightstep-certs
-          readOnly: true
       serviceAccountName: istio-ingressgateway-service-account
       volumes:
       - configMap:
@@ -18773,10 +18763,7 @@ spec:
         secret:
           optional: true
           secretName: istio-ingressgateway-ca-certs
-      - name: lightstep-certs
-        secret:
-          optional: true
-          secretName: lightstep.cacert
+
 ---
 
 
@@ -18912,12 +18899,9 @@ data:
       serviceCluster: istio-proxy
       tracing:
         lightstep:
-          accessToken: hfxG2djgOAqwad/x44PaNIqECETIbC1Da6p5WuQo+XQrO1fuUUKQ+Jn9xhk2r3IMSVqDz+6MeEuZNCHvt4E1BCoBVmEzMBrU7Nla/P2Q
-          address: ingest.lightstep.com:443
+          accessToken: eyJhbGciOiJIUzI1NiIsImtpZCI6IjIwMTktMDMtMDEiLCJ0eXAiOiJKV1QifQ.eyJzY29wZSI6eyJjb2xsZWN0b3IiOnsicmVhZHdyaXRlIjp0cnVlfSwiZGV2bW9kZSI6eyJyZWFkd3JpdGUiOnRydWV9fSwiYXVkX2lkIjoiMTI5ZjZlYjM0YTdkYmNkNzFlMjY0MzVjNzg5IiwidXNlcl9pZCI6NDYxMDEsImF1ZCI6IkxpZ2h0U3RlcCIsImV4cCI6MTY1MTk0NzEwNywianRpIjoibmJuM3NnbXlsaWYyMmxyZ29ybnVhdmNkYXc2eWhtNGxrdmp2YjVocDVwM3Ryb2VlIiwiaWF0IjoxNjIwNDExMTA3LCJpc3MiOiJsaWdodHN0ZXAuY29tIn0.VNzaA89kCM2739NmVVfESs7naDQhV_TIdS6U-lOceW4
+          address: 169.254.186.180:8360
         sampling: 100
-        tlsSettings:
-          caCertificates: /etc/lightstep/cacert.pem
-          mode: SIMPLE
     disableMixerHttpReports: true
     disablePolicyChecks: false
     enablePrometheusMerge: false
@@ -19194,8 +19178,8 @@ data:
             "address": "$(HOST_IP):8126"
           },
           "lightstep": {
-            "accessToken": "hfxG2djgOAqwad/x44PaNIqECETIbC1Da6p5WuQo+XQrO1fuUUKQ+Jn9xhk2r3IMSVqDz+6MeEuZNCHvt4E1BCoBVmEzMBrU7Nla/P2Q",
-            "address": "ingest.lightstep.com:443"
+            "accessToken": "eyJhbGciOiJIUzI1NiIsImtpZCI6IjIwMTktMDMtMDEiLCJ0eXAiOiJKV1QifQ.eyJzY29wZSI6eyJjb2xsZWN0b3IiOnsicmVhZHdyaXRlIjp0cnVlfSwiZGV2bW9kZSI6eyJyZWFkd3JpdGUiOnRydWV9fSwiYXVkX2lkIjoiMTI5ZjZlYjM0YTdkYmNkNzFlMjY0MzVjNzg5IiwidXNlcl9pZCI6NDYxMDEsImF1ZCI6IkxpZ2h0U3RlcCIsImV4cCI6MTY1MTk0NzEwNywianRpIjoibmJuM3NnbXlsaWYyMmxyZ29ybnVhdmNkYXc2eWhtNGxrdmp2YjVocDVwM3Ryb2VlIiwiaWF0IjoxNjIwNDExMTA3LCJpc3MiOiJsaWdodHN0ZXAuY29tIn0.VNzaA89kCM2739NmVVfESs7naDQhV_TIdS6U-lOceW4",
+            "address": "169.254.186.180:8360"
           },
           "stackdriver": {
             "debug": false,
