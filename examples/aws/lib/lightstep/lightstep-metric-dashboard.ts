@@ -2,11 +2,13 @@ import lambda = require('@aws-cdk/aws-lambda');
 import { Construct, CustomResource, Duration } from '@aws-cdk/core';
 import { RetentionDays } from '@aws-cdk/aws-logs';
 import { Provider } from '@aws-cdk/custom-resources';
+import { LightstepMetricChart } from './charts';
 
 import fs = require('fs');
 
 export interface LightstepDashboardProps {
   name: string;
+  charts: LightstepMetricChart[];
   lightstepProject: string;
   lightstepOrg: string;
   lightstepApiKey: string;
@@ -37,10 +39,12 @@ export class LightstepMetricDashboard extends Construct {
       onEventHandler: onEvent,
       logRetention: RetentionDays.ONE_DAY,
     });
+
     const resource = new CustomResource(this, `LightstepDash-${id}`, {
       serviceToken: myProvider.serviceToken,
       properties: {
         name: props.name,
+        charts: JSON.stringify(props.charts.map((c, ndx) => c.toJSON(ndx))),
         lightstepOrg: props.lightstepOrg,
         lightstepProject: props.lightstepProject,
       },

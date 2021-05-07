@@ -15,7 +15,7 @@ def main(event, context):
 
     raise RuntimeError('Unknown request type')
 
-def create_dashboard(name, org, project, api_key):
+def create_dashboard(name, charts, org, project, api_key):
     response = requests.post('https://api.lightstep.com/public/v0.2/%s/projects/%s/metric_dashboards'%(org, project), 
         headers={
             'Authorization': 'Bearer %s'%api_key
@@ -23,24 +23,29 @@ def create_dashboard(name, org, project, api_key):
         json={
             'data': {
                 'attributes': {
-                    'name': name
+                    'name': name,
+                    'charts': charts
                 }
             }
         })
     return response.json()['data']['id']
 
-def update_dashboard(dashboard_id, name, org, project, api_key):
+def update_dashboard(dashboard_id, name, charts, org, project, api_key):
+    payload = {
+            'data': {
+                'attributes': {
+                    'name': name,
+                    'charts': charts
+                }
+            }
+        }
+    log.debug('update payload:')
+    log.debug(json.dumps(payload))
     response = requests.put('https://api.lightstep.com/public/v0.2/%s/projects/%s/metric_dashboards/%s'%(org, project, dashboard_id), 
         headers={
             'Authorization': 'Bearer %s'%api_key
         },
-        json={
-            'data': {
-                'attributes': {
-                    'name': name
-                }
-            }
-        })
+        json=payload)
     return response.json()
 
 def delete_dashboard(dashboard_id, org, project, api_key):
@@ -55,9 +60,10 @@ def on_create(event, context):
   name = props['name']
   lightstepOrg = props['lightstepOrg']
   lightstepProj = props['lightstepProject']
+  charts = json.loads(props['charts'])
   apiKey = os.getenv('LIGHTSTEP_API_KEY')
   log.debug('Creating dashboard "%s" in %s for %s...'%(name, lightstepOrg, lightstepProj))
-  physical_id = create_dashboard(name, lightstepOrg, lightstepProj, apiKey)
+  physical_id = create_dashboard(name, charts, lightstepOrg, lightstepProj, apiKey)
   attributes = {
     'Response': 'created dashboard "%s"' % physical_id
   }
@@ -70,9 +76,12 @@ def on_update(event, context):
   lightstepProj = props['lightstepProject']
   apiKey = os.getenv('LIGHTSTEP_API_KEY')
   name = props['name']
+  charts = json.loads(props['charts'])
   log.debug('Updating dashboard "%s" in %s for %s...'%(physical_id, lightstepOrg, lightstepProj))
-  update_dashboard(physical_id, name, lightstepOrg, lightstepProj, apiKey)
-  attributes = {}
+  log.debug('charts:')
+  log.debug(charts)
+  response = update_dashboard(physical_id, name, charts, lightstepOrg, lightstepProj, apiKey)
+  attributes = { 'Response': json.dumps(response) }
   return { 'PhysicalResourceId': physical_id, 'Data': attributes }
 
 def on_delete(event, context):

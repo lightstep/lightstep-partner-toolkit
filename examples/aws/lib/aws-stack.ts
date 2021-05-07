@@ -7,6 +7,7 @@ import { MockBackend } from './backends/mock-backend';
 import { OtelNginxIngress } from './ingress/nginx';
 import { Loadtest } from './loadtest/loadtest';
 import { LightstepMetricDashboard } from './lightstep/lightstep-metric-dashboard';
+import { NginxPlusUpstreamResponseTimeChart } from './lightstep/charts';
 
 export class AwsOtelStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
@@ -43,7 +44,12 @@ export class AwsOtelStack extends cdk.Stack {
 
     if (process.env.LIGHTSTEP_API_KEY) {
       new LightstepMetricDashboard(this, 'my-dashboard', {
-        name: 'Test Dashboard',
+        name: 'NGINX Automatic Dashboard',
+        charts: [
+          new NginxPlusUpstreamResponseTimeChart(donutShop),
+          new NginxPlusUpstreamResponseTimeChart(coffeeShop),
+          new NginxPlusUpstreamResponseTimeChart(teaShop),
+        ],
         lightstepOrg: 'LightStep',
         lightstepProject: 'Robin-Hipster-Shop',
         lightstepApiKey: process.env.LIGHTSTEP_API_KEY,
