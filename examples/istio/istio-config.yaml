@@ -2,6 +2,9 @@ apiVersion: install.istio.io/v1alpha1
 kind: IstioOperator
 spec:
   profile: demo
+  addonComponents:
+    tracing:
+      enabled: true
   values:
     global:
       jwtPolicy: first-party-jwt
@@ -12,6 +15,7 @@ spec:
           address: "ingest.lightstep.com:443"
           accessToken: "hfxG2djgOAqwad/x44PaNIqECETIbC1Da6p5WuQo+XQrO1fuUUKQ+Jn9xhk2r3IMSVqDz+6MeEuZNCHvt4E1BCoBVmEzMBrU7Nla/P2Q"
   meshConfig:
+    enableTracing: true
     defaultConfig:
       tracing:
         sampling: 100
