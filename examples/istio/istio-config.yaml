@@ -4,7 +4,7 @@ spec:
   profile: demo
   values:
     global:
-      # jwtPolicy: first-party-jwt
+      jwtPolicy: first-party-jwt
       proxy:
         tracer: "lightstep"
       tracer:
@@ -20,9 +20,9 @@ spec:
           # Specifying ca certificate here will moute `lightstep.cacert` secret volume
           # at all sidecars by default.
           caCertificates: "/etc/lightstep/cacert.pem"
+  # This seems to be broken
   # components:
   #   ingressGateways:
-  #   # `lightstep.cacert` secret volume needs to be mount at gateways via k8s overlay.
   #   - name: istio-ingressgateway
   #     enabled: true
   #     k8s:

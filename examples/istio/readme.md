@@ -15,6 +15,8 @@ $ kubectl create secret generic lightstep.cacert --from-file=cacert.pem
 
 $ kubectl create namespace istio-system
 
+$ kubectl create secret generic lightstep.cacert --from-file=cacert.pem --namespace istio-system
+
 $ istioctl manifest generate -f istio-config.yaml > my-manifest.yaml
 
 $ ... edit manifest to mount volumes
