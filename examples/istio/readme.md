@@ -6,15 +6,20 @@ Work-in-progress.
 
 This assume a Istio environment similar to the one that you create in ["Getting Started: Install Istio"](https://istio.io/latest/docs/setup/getting-started/) with istioctl:
 
-##### Create a demo cluster with telemetry + tracing (optional)
+##### Configure Istio with telemetry + tracing
 ```
 # You can skip this step if you already have an Istio cluster
 $ export LS_ACCESS_TOKEN=<your Lightstep token>
-$ istioctl install --set profile=demo \
-    --set values.pilot.traceSampling=100 \
-    --set values.global.proxy.tracer="lightstep" \
-    --set values.global.tracer.lightstep.address="ingest.lightstep.com:443" \
-    --set values.global.tracer.lightstep.accessToken=$LS_ACCESS_TOKEN
+
+$ kubectl create secret generic lightstep.cacert --from-file=cacert.pem
+
+$ kubectl create namespace istio-system
+
+$ istioctl manifest generate -f istio-config.yaml > my-manifest.yaml
+
+$ ... edit manifest to mount volumes
+
+$ kubectl apply -f my-manifest.yaml
 ```
 
 ##### Update existing cluster to forward Prometheus data to Lightstep

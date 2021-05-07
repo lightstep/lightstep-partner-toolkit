@@ -1,0 +1,43 @@
+apiVersion: install.istio.io/v1alpha1
+kind: IstioOperator
+spec:
+  profile: demo
+  values:
+    global:
+      # jwtPolicy: first-party-jwt
+      proxy:
+        tracer: "lightstep"
+      tracer:
+        lightstep:
+          address: "ingest.lightstep.com:443"
+          accessToken: "hfxG2djgOAqwad/x44PaNIqECETIbC1Da6p5WuQo+XQrO1fuUUKQ+Jn9xhk2r3IMSVqDz+6MeEuZNCHvt4E1BCoBVmEzMBrU7Nla/P2Q"
+  meshConfig:
+    defaultConfig:
+      tracing:
+        sampling: 100
+        tlsSettings:
+          mode: "SIMPLE"
+          # Specifying ca certificate here will moute `lightstep.cacert` secret volume
+          # at all sidecars by default.
+          caCertificates: "/etc/lightstep/cacert.pem"
+  # components:
+  #   ingressGateways:
+  #   # `lightstep.cacert` secret volume needs to be mount at gateways via k8s overlay.
+  #   - name: istio-ingressgateway
+  #     enabled: true
+  #     k8s:
+  #       overlays:
+  #       - kind: Deployment
+  #         name: istio-ingressgateway
+  #         patches:
+  #         - path: spec.template.spec.containers[0].volumeMounts[-1]
+  #           value: |
+  #             name: lightstep-certs
+  #             mountPath: /etc/lightstep
+  #             readOnly: true
+  #         - path: spec.template.spec.volumes[-1]
+  #           value: |
+  #             name: lightstep-certs
+  #             secret:
+  #               secretName: lightstep.cacert
+  #               optional: true
