@@ -18459,6 +18459,9 @@ spec:
         - mountPath: /etc/istio/egressgateway-ca-certs
           name: egressgateway-ca-certs
           readOnly: true
+        - mountPath: /etc/lightstep
+          name: lightstep-certs
+          readOnly: true
       serviceAccountName: istio-egressgateway-service-account
       volumes:
       - configMap:
@@ -18487,6 +18490,10 @@ spec:
         secret:
           optional: true
           secretName: istio-egressgateway-ca-certs
+      - name: lightstep-certs
+        secret:
+          optional: true
+          secretName: lightstep.cacert
 
 ---
 

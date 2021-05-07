@@ -1,8 +1,8 @@
-# volumemount for istio-ingressgateway deployment
+# volumemount for istio-ingressgateway + istioegressgateway deployment
         - mountPath: /etc/lightstep
           name: lightstep-certs
           readOnly: true
-# volume for istio-ingressgateway deployment
+# volume for istio-ingressgateway + istioegressgateway deployment
       - name: lightstep-certs
         secret:
           optional: true
