@@ -11,7 +11,7 @@ Work in progress. This stack is managed using [AWS CDK](https://aws.amazon.com/c
 
 ## Deploying
 
-`sh
+```sh
   # Set LS_ACCESS_TOKEN to send data to Lightstep
   $ export LS_ACCESS_TOKEN=...
   # Set secret for access to private Docker registry with your nginx plus image (optional)
@@ -20,7 +20,7 @@ Work in progress. This stack is managed using [AWS CDK](https://aws.amazon.com/c
   $ cdk bookstrap
   # Deploy this stack
   $ cdk deploy
-`
+```
 
 ## Useful commands
 
