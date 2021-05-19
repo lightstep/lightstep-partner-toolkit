@@ -3,10 +3,10 @@ package backstageprocessor
 import (
 	"context"
 	"fmt"
+	"go.opentelemetry.io/collector/config"
 	"net/url"
 
 	"go.opentelemetry.io/collector/component"
-	"go.opentelemetry.io/collector/config/configmodels"
 	"go.opentelemetry.io/collector/consumer"
 	"go.opentelemetry.io/collector/processor/processorhelper"
 	"go.uber.org/zap"
@@ -19,7 +19,7 @@ const (
 	typeStr = "backstage"
 )
 
-var processorCapabilities = component.ProcessorCapabilities{MutatesConsumedData: true}
+var processorCapabilities = consumer.Capabilities{MutatesData: true}
 
 // TODO: support one attrProc per service
 type resourceProcessor struct {
@@ -58,25 +58,22 @@ func NewFactory() component.ProcessorFactory {
 }
 
 // Note: This isn't a valid configuration because the processor would do no work.
-func createDefaultConfig() configmodels.Processor {
+func createDefaultConfig() config.Processor {
 	return &Config{
-		ProcessorSettings: configmodels.ProcessorSettings{
-			TypeVal: typeStr,
-			NameVal: typeStr,
-		},
+		ProcessorSettings: config.NewProcessorSettings(config.NewID(typeStr)),
 	}
 }
 
 func createTraceProcessor(
 	_ context.Context,
 	params component.ProcessorCreateParams,
-	cfg configmodels.Processor,
-	nextConsumer consumer.TracesConsumer) (component.TracesProcessor, error) {
+	cfg config.Processor,
+	nextConsumer consumer.Traces) (component.TracesProcessor, error) {
 	attrProcs, err := createAttrProcessor(cfg.(*Config), params.Logger)
 	if err != nil {
 		return nil, err
 	}
-	return processorhelper.NewTraceProcessor(
+	return processorhelper.NewTracesProcessor(
 		cfg,
 		nextConsumer,
 		&resourceProcessor{attrProcs: attrProcs},
@@ -88,18 +85,18 @@ func createAttrProcessor(cfg *Config, logger *zap.Logger) (map[string]*processor
 
 	// TODO: validate backstage service catalog api endpoint
 	if len(cfg.BackstageServer.Endpoint) == 0 {
-		return nil, fmt.Errorf("error creating \"%q\" processor due to missing required field \"backstage_endpoint\"", cfg.Name())
+		return nil, fmt.Errorf("error creating \"%q\" processor due to missing required field \"backstage_endpoint\"", cfg.ProcessorSettings.ID())
 	}
 	epURL, err := url.Parse(cfg.BackstageServer.Endpoint)
 	if err != nil {
-		return nil, fmt.Errorf("error creating \"%q\" processor due to bad server url in \"backstage_endpoint\": %v", cfg.Name(), err)
+		return nil, fmt.Errorf("error creating \"%q\" processor due to bad server url in \"backstage_endpoint\": %v", cfg.ProcessorSettings.ID(), err)
 	}
 
 	cp := NewClientProvider(*epURL, logger)
 	backstageClient := cp.BuildClient()
 	entities, err := backstageClient.GetEntities()
 	if err != nil {
-		return nil, fmt.Errorf("error \"%q\" processor due to bad backstage server response: %v", cfg.Name(), err)
+		return nil, fmt.Errorf("error \"%q\" processor due to bad backstage server response: %v", cfg.ProcessorSettings.ID(), err)
 	}
 
 	for _, entity := range *entities {
@@ -121,7 +118,7 @@ func createAttrProcessor(cfg *Config, logger *zap.Logger) (map[string]*processor
 		})
 
 		if err != nil {
-			return nil, fmt.Errorf("error creating \"%q\" processor: %w", cfg.Name(), err)
+			return nil, fmt.Errorf("error creating \"%q\" processor: %w", cfg.ProcessorSettings.ID(), err)
 		}
 		attrProcs[fmt.Sprintf("%v", serviceName)] = attrProc
 	}

@@ -15,13 +15,13 @@
 package webhookprocessor
 
 import (
+	"go.opentelemetry.io/collector/config"
 	"go.opentelemetry.io/collector/config/confighttp"
-	"go.opentelemetry.io/collector/config/configmodels"
 )
 
 // Config defines configuration for http forwarder extension.
 type Config struct {
-	configmodels.ProcessorSettings `mapstructure:",squash"`
+	config.ProcessorSettings `mapstructure:",squash"`
 
 	// TraceIngress holds config settings for HTTP server listening for requests.
 	TracesIngress confighttp.HTTPServerSettings `mapstructure:"traces_ingress"`
