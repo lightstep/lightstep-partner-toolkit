@@ -43,9 +43,11 @@ services:
 
   collector:
     container_name: ls-partner-collector
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: ghcr.io/lightstep/lightstep-partner-toolkit-collector:latest
+    # uncomment to build locally
+    #build:
+    #  context: .
+    #  dockerfile: Dockerfile
     environment:
       - LS_ACCESS_TOKEN=${LS_ACCESS_TOKEN}
     volumes:

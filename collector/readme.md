@@ -4,21 +4,26 @@ Experimental OpenTelemetry collectors that annotate metrics and traces with exte
 
 ### webhook demo instructions
 
-This will run the collector and creates webhooks via [localtunnel](https://theboroer.github.io/localtunnel-www/).
+This will run the collector and creates webhooks to your local machine via [localtunnel](https://theboroer.github.io/localtunnel-www/).
 
 ```
   $ export LS_ACCESS_TOKEN=<your token>
   $ docker-compose up
 ```
 
-From the output of docker compose, find the webhook URL and add to PagerDuty, Gremlin, or GitHub.
+From the output of docker compose, find the metric and trace webhook URLs and add to PagerDuty, Gremlin, or GitHub.
+
+```
+  # example output from docker-compose up
+  localtunnel-trace-webhook_1   | your url is: https://popular-robin-4.loca.lt
+  localtunnel-metric-webhook_1  | your url is: https://short-deer-97.loca.lt
+```
 
 You can also manually add and delete attributes that will appear as tags in metrics or traces. Note that the metric pipeline and trace pipeline have separate URLs.
 
 ```
     $ curl http://<<hostname>>/upsert?key=foo&value=bar # adds foo=bar to all traces or metrics
-    $ curl http://<<hostname>>/delete?key=foo # removed foo to all traces or metrics
-
+    $ curl http://<<hostname>>/delete?key=foo # removes foo to all traces or metrics
 ```
 
 ### building collector (Docker)
