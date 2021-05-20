@@ -10,11 +10,12 @@ This assume a Istio environment similar to the one that you create in ["Getting 
 
 ```
 # Edit istio-config-sat.yaml to point to your Microsatellite: https://docs.lightstep.com/docs/install-and-configure-micro-satellites
+# Quickstart microsat: run `docker-compose up` in this directory after inserting your token.
 
-# Direct install
-$ istioctl install -f istio-config-sat.yam
+# Direct install that points to local microsat
+$ istioctl install -f istio-config-sat.yaml
 
-# From yaml
+# or: generate and install from yaml
 $ istioctl manifest generate -f istio-config-sat.yaml > my-manifest.yaml
 $ kubectl create namespace istio-system
 $ kubectl apply -f my-manifest.yaml

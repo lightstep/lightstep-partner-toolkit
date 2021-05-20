@@ -1,0 +1,16 @@
+version: '3'
+services:
+  satellite:
+    image: lightstep/collector:latest
+    environment:
+      - COLLECTOR_SATELLITE_KEY=sat-key
+      - COLLECTOR_PLAIN_PORT=8383
+      - COLLECTOR_SECURE_PORT=9393
+      - COLLECTOR_DIAGNOSTIC_PORT=8000
+      - COLLECTOR_ADMIN_PLAIN_PORT=8180
+
+    ports:
+      - "8383:8383" #Span inegest, Required for unsecure traffic, or secure traffic that terminates it's secure status before it hits the satellite
+      - "9393:9393" #Span ingest Required for secure traffic
+      - "8000:8000" #Diagnostics
+      - "8180:8180" #COLLECTOR_ADMIN_PLAIN_PORT, Required for health checks

@@ -12,9 +12,9 @@ spec:
         tracer: "lightstep"
       tracer:
         lightstep:
-          # replace with your local satetille, visit http://ip:8361/ to verify it's running
-          address: "169.254.186.180:8360"
-          accessToken: "<your access token>"
+          # Point to a Microsat: https://docs.lightstep.com/docs/docker-install-and-configure-micro-satellites
+          address: "169.254.186.180:8383"
+          accessToken: "your-token-here"
   meshConfig:
     enableTracing: true
     defaultConfig:
