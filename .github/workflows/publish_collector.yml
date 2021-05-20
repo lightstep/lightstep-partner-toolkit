@@ -1,0 +1,24 @@
+name: Build Collector Docker Image
+
+on:
+  workflow_dispatch:
+
+jobs:
+  Deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v1
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and Push Demo Docker Image
+        uses: docker/build-push-action@v2
+        with:
+          push: true # Will only build if this is not here
+          context: ./collector
+          tags: |
+            ghcr.io/${{ github.repository }}-collector:latest
