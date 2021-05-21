@@ -60,7 +60,7 @@ export class AwsOtelStack extends cdk.Stack {
       cluster,
       serviceName: 'otel-collector-svc',
       servicePort: 80,
-      servicePath: '/collector',
+      servicePath: '/webhook',
     });
     new Loadtest(this, 'loadtest', {
       cluster,

@@ -91,7 +91,7 @@ func (h *httpServer) webhookHandler(events ...Event) func(w http.ResponseWriter,
 					h.addAttribute("pagerduty.com.active_incident", fmt.Sprintf("%v", incident))
 				} else if pagerdutyEvent == "incident.resolve" {
 					actionType = PagerDutyActiveIncident
-					h.addAttribute("pagerduty.com.has_incident")
+					h.removeAttribute("pagerduty.com.has_incident")
 					h.removeAttribute("pagerduty.com.active_incident")
 				}
 			}
