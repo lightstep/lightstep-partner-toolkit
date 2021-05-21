@@ -1,0 +1,76 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:55680
+
+processors:
+  batch:
+
+  resource:
+    attributes:
+    - key: host.name
+      value: nginx-proxy-host
+      action: upsert
+    - key: service.name
+      value: nginx-ingress
+      action: upsert
+    - key: telemetry.sdk.version
+      value: 0.0.1
+      action: upsert
+
+  # attributes/upsert:
+  #   actions:
+  #     - key: host.name
+  #       value: nginx-proxy-host
+  #       action: upsert
+  #     - key: service.name
+  #       value: nginx-ingress
+  #       action: upsert
+  #     - key: lightstep.component_name
+  #       value: nginx-ingress
+  #       action: upsert
+  #     - key: component_name
+  #       value: nginx-ingress
+  #       action: upsert
+  #     - key: telemetry.sdk.version
+  #       value: 0.0.1
+  #       action: upsert
+
+  webhook:
+    traces_ingress:
+      endpoint: 0.0.0.0:7070
+    metrics_ingress:
+      endpoint: 0.0.0.0:7071
+
+exporters:
+  logging:
+    logLevel: debug
+  otlp:
+    endpoint: ingest.lightstep.com:443
+    insecure_skip_verify: true
+    headers:
+      "lightstep-access-token": "${LS_ACCESS_TOKEN}"
+
+service:
+  pipelines:
+    metrics:
+      receivers:
+      - otlp
+      processors:
+      - batch
+      - webhook
+      exporters:
+      - otlp
+      - logging
+
+    traces:
+      receivers:
+      - otlp
+      processors: 
+      - batch
+      - resource
+      - webhook
+      exporters:
+      - logging
+      - otlp

@@ -1,16 +1,17 @@
 import * as cdk from '@aws-cdk/core';
 import * as eks from '@aws-cdk/aws-eks';
 import { readFileSync } from 'fs';
+import { NginxBackend, NginxBackendProps } from '../ingress/nginx';
 
 export interface OtelColellectorProps {
   cluster: eks.Cluster;
 }
 
-export class OtelCollector extends cdk.Construct {
+export class OtelCollector extends cdk.Construct implements NginxBackend {
   constructor(
     parent: cdk.Construct,
     name: string,
-    props: OtelColellectorProps
+    public props: NginxBackendProps
   ) {
     super(parent, name);
 
@@ -29,8 +30,15 @@ export class OtelCollector extends cdk.Construct {
             containers: [
               {
                 name: 'otel-collector',
-                image: 'otel/opentelemetry-collector-contrib-dev:latest',
-                ports: [{ containerPort: 55680 }],
+                image:
+                  'ghcr.io/lightstep/lightstep-partner-toolkit-collector:latest',
+                imagePullPolicy: 'Always',
+                //image: 'otel/opentelemetry-collector-contrib-dev:latest',
+                ports: [
+                  { containerPort: 55680 },
+                  { containerPort: 7070 },
+                  { containerPort: 7071 },
+                ],
                 env: [
                   {
                     name: 'LS_ACCESS_TOKEN',
@@ -39,7 +47,7 @@ export class OtelCollector extends cdk.Construct {
                 ],
                 volumeMounts: [
                   {
-                    name: 'otel-collector-config-vol',
+                    name: 'otel-collector-config-vol-v3',
                     mountPath: '/etc/otel/config.yaml',
                     subPath: 'config.yaml',
                   },
@@ -48,9 +56,9 @@ export class OtelCollector extends cdk.Construct {
             ],
             volumes: [
               {
-                name: 'otel-collector-config-vol',
+                name: 'otel-collector-config-vol-v3',
                 configMap: {
-                  name: 'otel-collector-config',
+                  name: 'otel-collector-config-v3',
                 },
               },
             ],
@@ -69,7 +77,15 @@ export class OtelCollector extends cdk.Construct {
       },
       spec: {
         type: 'ClusterIP',
-        ports: [{ port: 55680, targetPort: 55680 }],
+        ports: [
+          { port: 55680, targetPort: 55680, name: 'otel' },
+          {
+            port: this.props.servicePort,
+            targetPort: 7070,
+            name: 'http-trace',
+          },
+          { port: 7071, targetPort: 7071, name: 'http-metric' },
+        ],
         selector: collectorLabel,
       },
     };
@@ -78,11 +94,12 @@ export class OtelCollector extends cdk.Construct {
       apiVersion: 'v1',
       kind: 'ConfigMap',
       metadata: {
-        name: 'otel-collector-config',
+        name: 'otel-collector-config-v3',
       },
       data: {
         'config.yaml': readFileSync(
-          `${__dirname}/collector-config.yaml`,
+          `${__dirname}/partner-collector-config.yaml`,
+          //`${__dirname}/collector-config.yaml`,
           'utf-8'
         ),
       },

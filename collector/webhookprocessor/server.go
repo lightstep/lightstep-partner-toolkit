@@ -135,8 +135,8 @@ func (h *httpServer) Shutdown(_ context.Context) error {
 
 func (h *httpServer) removeAttribute(key string) error {
 	actionKeyValue := processorhelper.ActionKeyValue{
-		Key:           key,
-		Action:        processorhelper.DELETE,
+		Key:    key,
+		Action: processorhelper.DELETE,
 	}
 	h.logger.Debug("removing attribute")
 	return h.addAttrAction(actionKeyValue)
@@ -144,9 +144,9 @@ func (h *httpServer) removeAttribute(key string) error {
 
 func (h *httpServer) addAttribute(key string, value string) error {
 	actionKeyValue := processorhelper.ActionKeyValue{
-		Key:           key,
-		Value:         value,
-		Action:        processorhelper.UPSERT,
+		Key:    key,
+		Value:  value,
+		Action: processorhelper.UPSERT,
 	}
 	h.logger.Debug("adding attribute")
 	return h.addAttrAction(actionKeyValue)

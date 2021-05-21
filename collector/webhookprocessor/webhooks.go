@@ -3,24 +3,24 @@ package webhookprocessor
 import (
 	"errors"
 	"fmt"
-	"github.com/Jeffail/gabs/v2"
 	"io"
 	"io/ioutil"
 	"net/http"
+
+	"github.com/Jeffail/gabs/v2"
 )
 
 type Event string
 
 const (
-	UnknownEvent                    			   Event = "unknown_event"
-	GithubDeploymentStatusEvent                    Event = "deployment_status"
-	PagerDutyActiveIncident                    	   Event = "pagerduty_incident"
-
+	UnknownEvent                Event = "unknown_event"
+	GithubDeploymentStatusEvent Event = "deployment_status"
+	PagerDutyActiveIncident     Event = "pagerduty_incident"
 )
 
 var (
-	ErrInvalidHTTPMethod         = errors.New("invalid HTTP Method")
-	ErrParsingPayload            = errors.New("error parsing payload")
+	ErrInvalidHTTPMethod = errors.New("invalid HTTP Method")
+	ErrParsingPayload    = errors.New("error parsing payload")
 )
 
 func (h *httpServer) parseWebhook(r *http.Request) (*gabs.Container, error) {
@@ -81,16 +81,17 @@ func (h *httpServer) webhookHandler(events ...Event) func(w http.ResponseWriter,
 				h.removeAttribute("gremlin.com.active_attack")
 			}
 		}
-
 		pagerdutyEvent, ok := jsonParsed.Search("messages", "0", "event").Data().(string)
 		if ok {
-			incident, ok := jsonParsed.Search("messages", "0", "incident", "incident_number").Data().(string)
+			incident, ok := jsonParsed.Search("messages", "0", "incident", "incident_number").Data().(float64)
 			if ok {
 				if pagerdutyEvent == "incident.trigger" {
 					actionType = PagerDutyActiveIncident
-					h.addAttribute("pagerduty.com.active_incident", incident)
+					h.addAttribute("pagerduty.com.has_incident", "true")
+					h.addAttribute("pagerduty.com.active_incident", fmt.Sprintf("%v", incident))
 				} else if pagerdutyEvent == "incident.resolve" {
 					actionType = PagerDutyActiveIncident
+					h.addAttribute("pagerduty.com.has_incident")
 					h.removeAttribute("pagerduty.com.active_incident")
 				}
 			}

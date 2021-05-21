@@ -56,7 +56,12 @@ export class AwsOtelStack extends cdk.Stack {
       });
     }
 
-    new OtelCollector(this, 'otel-collector', { cluster });
+    const nginxCollector = new OtelCollector(this, 'otel-collector', {
+      cluster,
+      serviceName: 'otel-collector-svc',
+      servicePort: 80,
+      servicePath: '/collector',
+    });
     new Loadtest(this, 'loadtest', {
       cluster,
       targetUrl: 'http://nginx-ingress-svc',
@@ -64,7 +69,7 @@ export class AwsOtelStack extends cdk.Stack {
 
     new OtelNginxIngress(this, 'otel-nginx', {
       cluster: cluster,
-      backends: [donutShop, coffeeShop, teaShop],
+      backends: [donutShop, coffeeShop, teaShop, nginxCollector],
     });
 
     cluster.addHelmChart('Prometheus', {
