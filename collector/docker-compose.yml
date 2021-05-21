@@ -1,31 +1,43 @@
 version: "3.7"
 
 services:
-  go-opentelemetry-server:
-    container_name: go-opentelemetry-server
-    image: ghcr.io/lightstep/opentelemetry-examples:go-opentelemetry-server
-    depends_on:
-      - collector
+  demo:
+    container_name: ls-partner-sdk-demo
     environment:
-      - LS_SATELLITE_URL=collector:55680
-      - LS_INSECURE=1
-      - LS_SERVICE_NAME=go-opentelemetry-server
-      - LS_SERVICE_VERSION=9.9.1
-    stop_grace_period: 1s
+      - LS_ACCESS_TOKEN=${LS_ACCESS_TOKEN}
+      - LS_PROJECT_NAME=Robin-Hipster-Shop
+      - SPLIT_API_KEY=${SPLIT_API_KEY}
+      - ROLLBAR_POST_ITEM_KEY=${ROLLBAR_POST_ITEM_KEY}
+      - OTEL_EXPORTER_OTLP_SPAN_ENDPOINT=http://collector:55681/v1/traces
+    image: ghcr.io/lightstep/lightstep-partner-toolkit-donut-shop:latest
+    ports:
+      - "8181:8181"
 
-  go-opentelemetry-client:
-    container_name: go-opentelemetry-client
-    image: ghcr.io/lightstep/opentelemetry-examples:go-opentelemetry-client
-    depends_on:
-      - go-opentelemetry-server
-      - collector
-    environment:
-      - LS_SATELLITE_URL=collector:55680
-      - LS_INSECURE=1
-      - LS_SERVICE_NAME=go-opentelemetry-client
-      - LS_SERVICE_VERSION=9.9.2
-      - DESTINATION_URL=http://go-opentelemetry-server:8081/ping
-    stop_grace_period: 1s
+  # go-opentelemetry-server:
+  #   container_name: go-opentelemetry-server
+  #   image: ghcr.io/lightstep/opentelemetry-examples:go-opentelemetry-server
+  #   depends_on:
+  #     - collector
+  #   environment:
+  #     - LS_SATELLITE_URL=collector:55680
+  #     - LS_INSECURE=1
+  #     - LS_SERVICE_NAME=go-opentelemetry-server
+  #     - LS_SERVICE_VERSION=9.9.1
+  #   stop_grace_period: 1s
+
+  # go-opentelemetry-client:
+  #   container_name: go-opentelemetry-client
+  #   image: ghcr.io/lightstep/opentelemetry-examples:go-opentelemetry-client
+  #   depends_on:
+  #     - go-opentelemetry-server
+  #     - collector
+  #   environment:
+  #     - LS_SATELLITE_URL=collector:55680
+  #     - LS_INSECURE=1
+  #     - LS_SERVICE_NAME=go-opentelemetry-client
+  #     - LS_SERVICE_VERSION=9.9.2
+  #     - DESTINATION_URL=http://go-opentelemetry-server:8081/ping
+  #   stop_grace_period: 1s
 
   localtunnel-metric-webhook:
     image: efrecon/localtunnel
@@ -43,17 +55,18 @@ services:
 
   collector:
     container_name: ls-partner-collector
-    image: ghcr.io/lightstep/lightstep-partner-toolkit-collector:latest
+    #image: ghcr.io/lightstep/lightstep-partner-toolkit-collector:latest
     # uncomment to build locally
-    #build:
-    #  context: .
-    #  dockerfile: Dockerfile
+    build:
+      context: .
+      dockerfile: Dockerfile
     environment:
       - LS_ACCESS_TOKEN=${LS_ACCESS_TOKEN}
     volumes:
-      - ./config/collector-config.yml:/otel/collector-config.yml
+      - ./config/collector-config.yml:/etc/otel/config.yaml
     ports:
       - "13133:13133" # health_check
-      - "55680:55680" # otlp
+      - "55681:55681" # otlp http
+      - "55680:55680" # otlp grpc
       - "7070:7070" # traces pipeline webhook
       - "7071:7071" # metrics pipeline webhook
