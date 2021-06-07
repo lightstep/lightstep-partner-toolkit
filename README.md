@@ -1,91 +1,45 @@
 # Lightstep Partner Toolkit
 
-Technical toolkit for Lightstep partners that want to adopt OpenTelemetry. 
+Technical toolkit for Lightstep partners that want to adopt OpenTelemetry or use Lightstep's API to build better workflows.
 
-Looking for Lightstep's REST API? See the documentation [here](https://api-docs.lightstep.com/reference).
+## ⏰ Getting Started
+
+| What | Why |
+| ------- | ------ |
+| [Try the Demo Service](#-demo)  | See working code first, ask questions later. |
+| [Integrate with OpenTelemetry](#-integrate-with-opentelemetry) | Use OpenTelemetry to make your product, service, tool, or SDK more valuable. |
+| [Integrate with Lightstep](#-integrate-with-lightstep) | Connect to Lightstep insights using alerting or our API. |
+| [Contact us](#%EF%B8%8F-contact-us) | 👋 to Lightstep's Partner team. |
 
 ## 💻 Demo
 
-Run [Donut Shop](./demo/readme.md) locally to understand how OpenTelemetry can connect different tools and solutions together. Our example app creates distributed traces that contain data related to relevant feature flags, errors, user analytics, and supporting cloud services.
+Run [Donut Shop](./demo/readme.md) locally to understand how OpenTelemetry can connect different tools and solutions together. Our example app creates distributed traces that contain data related to relevant feature flags, errors, user analytics, and supporting cloud services using code in this toolkit.
 
 > 💡 It's also possible to run Donut Shop on a fully-featured Kuberentes cluster using the AWS CDK. See example [here](./examples/aws).
 
-## 📓 How to integrate OpenTelemetry
+## 📓 Integrate with OpenTelemetry
 
-This toolkit has technical resources and examples you can follow to add OpenTelemetry metrics, logs, or traces to your product or tool. 
+What would you like to accomplish?
 
-> 💡 If you're completely new to OpenTelemetry, check out [technical resources](./resources.md) to learn more.
+| Category | What |
+| ------- | ------ |
+| [General](./docs/otel/instrument.md) | Start here if you're not sure which category fits best. |
+| [Cloud Services and Infrastructure](./docs/otel/cloud-services.md) |  Improve visibility into cloud services or infrastructure. |
+| [Errors](./docs/otel/errors.md) | Enrich error analytics in microservice environments. |
+| [Feature Flags](./docs/otel/feature-flags.md) | Streamline deployment management with feature flags connected to observability workflows. |
+| [Incident Management](./docs/otel/incident-management.md) | Create better workflows for incident response and post-mortems. |
+| [Chaos Engineering](./docs/otel/chaos.md)| Create more resilient systems and measure the impact of chaos experiments. |
+| [User Analytics and Customer Experience](./docs/otel/user-analytics.md) | Correlate user analytics with technical performance.  |
 
-### 🪕 Instrument
+## 🔦 Integrate with Lightstep
 
-To get started, you'll need to determine how you want to use the OpenTelemetry APIs. The pattern you choose depends on what kind of solution or product you have: the integration will look different for a database versus a error tracking library, for example.
+What would you like to accomplish?
 
-> 💡 Not sure if OpenTelemetry is relevant for your product, tool, or solution? Here's a quick test: does it contain any data or context that can help people understand their apps or services? This includes anything from technical or performance data to metadata about teams, deploys or incidents. 
+| Category | What |
+| ------- | ------ |
+| [Alerting](#) | Receive latency and error alerts from Lightstep. |
+| [CI/CD](#) | Improve CI/CD processes with observability data and workflows powered by Lightstep. |
 
-There are three main categories of instrumentation for tools or services:
+## ✉️ Contact Us
 
-1. If your product, tool or solution is a __service__ like a cloud service, database, firewall or application gateway that customers run or you run for customers (i.e. SaaS): see examples under *Code-based Instrumentation*. You'll use the OpenTelemetry to generate metrics, traces or logs from your product by changing its source code.
-
-2. If your product, tool or solution is a __service__ that _already_ has metrics, logs, traces or events that you want to convert to OpenTelemetry, see *Collector-based Integration*. You'll write an external adapter that converts existing telemetry into OpenTelemetry.
-
-3. If your product, tool, or solution includes a __library or SDK client__ written in Node.js, TypeScript, or Python that customers run alongside their service or application code like a feature flag library or cloud SDK see *Code-based Instrumentation with Plugins*. For other languages, see #1.
-
-> 💡 Before you build, double-check the [OpenTelemetry registry](https://opentelemetry.io/registry/) to see if someone already has contributed code related to your project.
-
-#### Code-based Instrumentation
-
-These solutions have directly implemented OpenTelemetry to generate new metrics, logs or traces.
-
-##### Examples
-
-| Integration | Description |
-| --- | --- |
-| [CockroachDB](./examples/cockroachdb) | Instructions for using CockroachDB's native OpenTracing support with Lightstep. |
-| [nginx](./examples/nginx) | Instructions for instrumenting nginx with OpenTelemetry. |
-| [Ambassador k8s Initializer](https://lightstep.com/blog/lightstep-and-ambassador/) | Automatically configure a Kubernetes cluster to emit traces using Ambassador's k8s initializer. |
-| [Jenkins X](https://github.com/jenkinsci/opentelemetry-plugin) | Publish Jenkins performance metrics and traces to an OpenTelemetry endpoint |
-
-#### Code-based Instrumentation with Plugins (TypeScript/Node.js)
-
-These solutions use plugins to generate metrics, logs or traces by automatically-instrumenting libaries or frameworks. No change to the underlying library or framework is needed.
-
-##### Examples
-
-Below are example OpenTelemetry plugins for Node.js. They can be installed in a node.js project with Github's package registry:
-```
-$ npm_config_registry=https://npm.pkg.github.com/lightstep npm install --save <package-name>
-```
-
-| Instrumentation Package | Instrumented Package |
-| --- | --- |
-| [opentelemetry-plugin-splitio](./js/packages/opentelemetry-plugin-splitio) | [`@splitsoftware/splitio`](https://github.com/splitio/javascript-client) |
-| [opentelemetry-plugin-launchdarkly-node-server](./js/packages/opentelemetry-plugin-launchdarkly-node-server) | [`launchdarkly-node-server-sdk`](https://github.com/launchdarkly/node-server-sdk) |
-| [opentelemetry-plugin-rollbar](./js/packages/opentelemetry-plugin-rollbar) | [`rollbar`](https://github.com/rollbar/rollbar.js/) |
-| [opentelemetry-plugin-segment-node](./js/packages/opentelemetry-plugin-segment-node) | [`analytics-node`](https://github.com/segmentio/analytics-node) |
-
-##### Other Plugin Examples
-
-| Instrumentation Package | Description |
-| --- | --- |
-| [AWS SDK Instrumentation (Node.js)](https://github.com/aspecto-io/opentelemetry-ext-js) | Node.js AWS SDK Instrumentation from [Aspecto](https://github.com/aspecto-io). |
-
-#### [Collector](https://github.com/open-telemetry/opentelemetry-collector)-based Integration
-
-##### Processor Examples
-
-| Processor | Description | Partner Integrations |
-| --- | --- | --- |
-| [webhookprocessor](./collector/webhookprocessor) | Annotates spans with metadata provided by webhooks. | PagerDuty, Gremlin, GitHub Deployments |
-| [backstageprocessor](./collector/webhookprocessor) | Annotates spans with service catalog metadata. | [Backstage](https://backstage.io/) |
-
-### 📈 Verify
-
-TBD.
-
-### ↪ Contribute
-
-* Join [CNCF Slack](http://slack.cncf.io/) and say hello on the #opentelemetry channel.
-* Find relevant OpenTelemetry [Special Interest Groups](https://github.com/open-telemetry/community#special-interest-groups) and join the discussion or scheduled meeting.
-* Open a pull request on projects and contribute your code. 
-
-
+Say hi to Lightstep's Partner Team: partnerships@lightstep.com or fill out the form [here](https://go.lightstep.com/contact-us-partners.html). We're here to help and answer any questions about or product or OpenTelemetry.
