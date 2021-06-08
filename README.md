@@ -8,7 +8,7 @@ New to OpenTelemetry, Lightstep, or observability? Check out [technical resource
 
 ### OpenTelemetry Instrumentation
 
-[Demo app](./demo/readme.md) and working plugin examples of how to integrate external products with the OpenTelemetry standard.
+[Demo app](./demo/README.md) and working plugin examples of how to integrate external products with the OpenTelemetry standard.
 
 #### Instrumentation Plugins (Node.js)
 
