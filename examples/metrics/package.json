@@ -1,0 +1,17 @@
+{
+  "name": "ls-partner-otel-metrics-example",
+  "version": "0.0.1",
+  "description": "",
+  "main": "metrics.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@opentelemetry/api": "^0.20.0",
+    "@opentelemetry/exporter-collector": "^0.20.0",
+    "@opentelemetry/host-metrics": "^0.20.0",
+    "@opentelemetry/metrics": "^0.20.0"
+  }
+}
