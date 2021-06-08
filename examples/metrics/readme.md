@@ -5,7 +5,7 @@ Simple script that generates some metrics to send to Lightstep.
 #### running
 
 ```sh
-  $ npm instal
+  $ npm install
   $ export LS_ACCESS_TOKEN=<your access token>
   $ node metrics.js # see output for metrics names + then generate charts in Lightstep
 ```
