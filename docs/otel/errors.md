@@ -14,7 +14,7 @@ Adding OpenTelemetry spans to your SDK or library's errors give the context to c
 ### Instrument
 
 1. **Find the OpenTelemetry SDK for the [language(s) or framework(s)](https://opentelemetry.io/) used by your SDK**
-   * If you're looking to get started quickly with [Java, Python, Go, JavaScript, or C#](https://opentelemetry.lightstep.com/), consider trying the Lightstep Launchers as a shortcut
+   * If you're looking to get started quickly with [Java, Python, Go, JavaScript, or C#](https://docs.lightstep.com/docs/quick-start), consider trying the Lightstep Launchers as a shortcut
 2. **Import the language-specific OpenTelemetry API**
    * [Example from JavaScript](https://github.com/lightstep/lightstep-partner-toolkit/blob/main/js/packages/opentelemetry-plugin-rollbar/src/rollbar.ts#L1)
 3. **Use the OpenTelemetry docs to add spans, metrics, and logs to annotate errors produced by your SDK with more actionable context**
