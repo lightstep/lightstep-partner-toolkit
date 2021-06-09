@@ -1,29 +1,40 @@
 # Errors
 
-This guide has three tracks:
+| What are you looking to do? | 
+| ----- | 
+| [Add OpenTelemetry support for errors emitted by your SDK or library](#add-opentelemetry-support-for-errors-emitted-by-your-sdk-or-library) |
+| [See example integrations](#example-integrations) |
 
-| Track | Difficulty |
-| ----- | ----- |
-| [Add new telemetry to your error tracking SDK or library](#) | 🛠 🛠 🛠 |
+<br/>
 
-## Add New Instrumention to your SDK or library
-
-### Design
-
-* Determine if there are OpenTelemetry SDK(s) available for the language(s) your SDK or library is written in.
+## Add OpenTelemetry support for errors emitted by your SDK or library
 
 ### Instrument
 
-* Start coding! Import the language-specific OpenTelemetry API into your product and use it to generate metrics, logs, and traces.
+1. **Find the OpenTelemetry SDK for the [language(s) or framework(s)](https://opentelemetry.io/) used by your SDK**
+   * If you're looking to get started quickly with [Java, Python, Go, JavaScript, or C#](https://opentelemetry.lightstep.com/), consider trying the Lightstep Launchers as a shortcut
+2. **Import the language-specific OpenTelemetry API**
+   * [Example from JavaScript](https://github.com/lightstep/lightstep-partner-toolkit/blob/main/js/packages/opentelemetry-plugin-rollbar/src/rollbar.ts#L1)
+3. **Use the OpenTelemetry docs to add spans, metrics, and logs to annotate errors produced by your SDK with more actionable context**
+   * As an example, here the Rollbar SDK creates [an attribute to linking back to the specific error](https://github.com/lightstep/lightstep-partner-toolkit/blob/d42c616a227dedbc013e698bdee454f4844d571c/js/packages/opentelemetry-plugin-rollbar/src/rollbar.ts#L48) so the developer can link to the full context of the error
 
-### Run
+### Run and Verify
 
-* Send data from your product to an OpenTelemetry collector that outputs to the console and verify output.
+1. Send data from your product to an OpenTelemetry collector that outputs to the console and verify output.
+2. Optional: verify in an OpenTelemetry production tool of your choice
 
-### Example Integrations
+### Contribute your integration to the OpenTelemetry ecosystem
+
+Make your code usable to as many people as possible!
+
+If you're looking for help here, contact us at partnerships@lightstep.com. We'd love to help support you!
+
+<br/>
+
+## Example Integrations
 
 > These example solutions use plugins to generate metrics, logs or traces by automatically-instrumenting Javascript libaries or frameworks. No change to the underlying library or framework is needed.
 
-| Instrumentation Package | Instrumented Package |
-| --- | --- |
-| [opentelemetry-plugin-rollbar](./js/packages/opentelemetry-plugin-rollbar) | [`rollbar`](https://github.com/rollbar/rollbar.js/) |
+| Instrumentation Package | Instrumented Package | What it does |
+| --- | --- | --- |
+| [opentelemetry-plugin-rollbar](./js/packages/opentelemetry-plugin-rollbar) | [`rollbar`](https://github.com/rollbar/rollbar.js/) | emits OpenTelemetry data from the [Rollbar](https://rollbar.com/) SDK |
