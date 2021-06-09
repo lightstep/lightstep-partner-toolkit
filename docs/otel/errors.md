@@ -1,6 +1,6 @@
 # Errors
 
-Adding OpenTelemetry spans to your SDK or library's errors give the context to connect an error across teams, tools, and products to allow developers to resolve issues faster.  Example such as adding spans with **project IDs**, **URLs**, or **segmentation information** can give developers directly actionable information or direct them to who to pull into the conversation.
+Connecting OpenTelemetry spans to your SDK or library's errors give the context to connect an error across teams, tools, and products to allow developers to resolve issues faster.  Example such as adding spans with **project IDs**, **URLs**, or **segmentation information** can give developers directly actionable information or direct them to who to pull into the conversation.
 
 | What are you looking to do? | 
 | ----- | 
@@ -14,8 +14,7 @@ Adding OpenTelemetry spans to your SDK or library's errors give the context to c
 ### Instrument
 
 1. **Find the OpenTelemetry SDK for the [language(s) or framework(s)](https://opentelemetry.io/) used by your SDK**
-   * If you're looking to get started quickly with [Java, Python, Go, JavaScript, or C#](https://docs.lightstep.com/docs/quick-start), consider trying the Lightstep Launchers as a shortcut
-2. **Import the language-specific OpenTelemetry API**
+2. **Import the language-specific OpenTelemetry API and patch your library method(s)**
    * [Example from JavaScript](https://github.com/lightstep/lightstep-partner-toolkit/blob/main/js/packages/opentelemetry-plugin-rollbar/src/rollbar.ts#L1)
 3. **Use the OpenTelemetry docs to add spans, metrics, and logs to annotate errors produced by your SDK with more actionable context**
    * As an example, here the Rollbar SDK creates [an attribute to linking back to the specific error](https://github.com/lightstep/lightstep-partner-toolkit/blob/d42c616a227dedbc013e698bdee454f4844d571c/js/packages/opentelemetry-plugin-rollbar/src/rollbar.ts#L48) so the developer can link to the full context of the error

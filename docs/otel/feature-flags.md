@@ -1,6 +1,6 @@
 # Feature Flags
 
-Adding OpenTelemetry spans to your feature flags implementation provides a **clear connection between the code, your product and engineering teams, and what your customers are seeing in production**. The full context from OpenTelemetry removes the mystery when managing your deployments and customer experience.
+Connecting OpenTelemetry spans to your feature flags implementation provides a **clear connection between the code, your product and engineering teams, and what your customers are seeing in production**. The full context from OpenTelemetry removes the mystery when managing your deployments and customer experience.
 
 | What are you looking to do? | 
 | ----- | 
@@ -11,12 +11,16 @@ Adding OpenTelemetry spans to your feature flags implementation provides a **cle
 
 ### Instrument
 
-1. Determine if there are OpenTelemetry SDK(s) available for the language(s) your SDK or library is written in.
-2. Start coding! Import the language-specific OpenTelemetry API into your product and use it to generate metrics, logs, and traces.
+1. **Find the OpenTelemetry SDK for the [language(s) or framework(s)](https://opentelemetry.io/) used by your SDK**
+2. **Import the language-specific OpenTelemetry API and patch your library method(s)**
+   * [Example from JavaScript](https://github.com/lightstep/lightstep-partner-toolkit/blob/main/js/packages/opentelemetry-plugin-rollbar/src/rollbar.ts#L1)
+3. **Use the OpenTelemetry docs to add spans, metrics, and logs to annotate calls to retrieve feature flags produced by your SDK with more actionable context**
+   * As an example, here the Rollbar SDK creates [an attribute to linking back to the specific error](https://github.com/lightstep/lightstep-partner-toolkit/blob/d42c616a227dedbc013e698bdee454f4844d571c/js/packages/opentelemetry-plugin-rollbar/src/rollbar.ts#L48) so the developer can link to the full context of the error
 
-### Run
+### Run and Verify
 
-* Send data from your product to an OpenTelemetry collector that outputs to the console and verify output.
+1. Send data from your product to an OpenTelemetry collector that outputs to the console and verify output.
+2. Optional: verify in an OpenTelemetry production tool of your choice
 
 <br/>
 
