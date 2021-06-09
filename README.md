@@ -45,8 +45,8 @@ What would you like to accomplish?
 
 | Category | What |
 | ------- | ------ |
-| [Alerting](#) | Receive latency and error alerts from Lightstep. |
-| [CI/CD](#) | Improve CI/CD processes with observability data and workflows powered by Lightstep. |
+| [Alerting](https://docs.lightstep.com/docs/create-and-manage-destinations) | Receive latency and error alerts from Lightstep. |
+| [CI/CD](https://docs.lightstep.com/paths/git-hub-action-path) | Improve CI/CD processes with observability data and workflows powered by Lightstep. |
 
 <br/>
  
