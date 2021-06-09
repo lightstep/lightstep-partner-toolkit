@@ -1,54 +1,55 @@
 # Lightstep Partner Toolkit
 
-Technical resources for Lightstep Partners.
+Technical toolkit for Lightstep partners that want to adopt OpenTelemetry or use Lightstep's API to build better workflows.
 
-### Getting Started
+<br/>
 
-New to OpenTelemetry, Lightstep, or observability? Check out [technical resources](./resources.md) to learn more.
+## ⏰ Getting Started
 
-### OpenTelemetry Instrumentation
+| What | Why |
+| ------- | ------ |
+| [Try the Demo Service](#-demo)  | See working code first, ask questions later. |
+| [Integrate with OpenTelemetry](#-integrate-with-opentelemetry) | Use OpenTelemetry to make your product, service, tool, or SDK more valuable. |
+| [Integrate with Lightstep](#-integrate-with-lightstep) | Connect to Lightstep insights using alerting or our API. |
+| [Contact us](#%EF%B8%8F-contact-us) | 👋 to Lightstep's Partner team. |
 
-[Demo app](./demo/README.md) and working plugin examples of how to integrate external products with the OpenTelemetry standard.
+<br/>
 
-#### Instrumentation Plugins (Node.js)
+## 💻 Demo
 
-Instrumentation has been tested with OpenTelemetry `0.18.0`. Packages are available via GitHub's package registry. 
+Run [Donut Shop](./demo/readme.md) locally to understand how OpenTelemetry can connect different tools and solutions together. Our example app creates distributed traces that contain data related to relevant feature flags, errors, user analytics, and supporting cloud services using code in this toolkit.
 
-To install via npm, run:
+> 💡 It's also possible to run Donut Shop on a fully-featured Kuberentes cluster using the AWS CDK. See example [here](./examples/aws).
 
-```
-$ npm_config_registry=https://npm.pkg.github.com/lightstep npm install --save <package-name>
-```
+ <br/>
+ 
+## 📓 Integrate with OpenTelemetry
 
-| Instrumentation Package | Instrumented Package |
-| --- | --- |
-| [opentelemetry-plugin-splitio](./js/packages/opentelemetry-plugin-splitio) | [`@splitsoftware/splitio`](https://github.com/splitio/javascript-client) |
-| [opentelemetry-plugin-launchdarkly-node-server](./js/packages/opentelemetry-plugin-launchdarkly-node-server) | [`launchdarkly-node-server-sdk`](https://github.com/launchdarkly/node-server-sdk) |
-| [opentelemetry-plugin-rollbar](./js/packages/opentelemetry-plugin-rollbar) | [`rollbar`](https://github.com/rollbar/rollbar.js/) |
-| [opentelemetry-plugin-segment-node](./js/packages/opentelemetry-plugin-segment-node) | [`analytics-node`](https://github.com/segmentio/analytics-node) |
+What would you like to accomplish?
 
-#### OpenTelemetry Collector Processors
+| Category | What |
+| ------- | ------ |
+| [General](./docs/otel/instrument.md) | Start here if you're not sure which category fits best. |
+| [Cloud Services and Infrastructure](./docs/otel/cloud-services.md) |  Improve visibility into cloud services or infrastructure. |
+| [Errors](./docs/otel/errors.md) | Enrich error analytics in microservice environments. |
+| [Feature Flags](./docs/otel/feature-flags.md) | Streamline deployment management with feature flags connected to observability workflows. |
+| [Incident Management](./docs/otel/incident-management.md) | Create better workflows for incident response and post-mortems. |
+| [Chaos Engineering](./docs/otel/chaos.md)| Create more resilient systems and measure the impact of chaos experiments. |
+| [User Analytics and Customer Experience](./docs/otel/user-analytics.md) | Correlate user analytics with technical performance.  |
 
-Experimental processors for the [OpenTelemetry Collector](https://github.com/open-telemetry/opentelemetry-collector).
+ <br/>
+ 
+## 🔦 Integrate with Lightstep
 
-| Processor | Description | Partner Integrations |
-| --- | --- | --- |
-| [webhookprocessor](./collector/webhookprocessor) | Annotates spans with metadata provided by webhooks. | PagerDuty, Gremlin, GitHub Deployments |
-| [backstageprocessor](./collector/webhookprocessor) | Annotates spans with service catalog metadata. | [Backstage](https://backstage.io/) |
+What would you like to accomplish?
 
-### Other OpenTelemetry Integrations
+| Category | What |
+| ------- | ------ |
+| [Alerting](https://docs.lightstep.com/docs/create-and-manage-destinations) | Receive latency and error alerts from Lightstep. |
+| [CI/CD](https://docs.lightstep.com/paths/git-hub-action-path) | Improve CI/CD processes with observability data and workflows powered by Lightstep. |
 
-| Integration | Description |
-| --- | --- |
-| [AWS SDK Instrumentation (Node.js)](https://github.com/aspecto-io/opentelemetry-ext-js) | Node.js AWS SDK Instrumentation from [Aspecto](https://github.com/aspecto-io). |
-| [CockroachDB](./examples/cockroachdb) | Instructions for using CockroachDB's native OpenTracing support with Lightstep. |
-| [nginx](./examples/nginx) | Instructions for instrumenting nginx with OpenTelemetry. |
-| [Ambassador k8s Initializer](https://lightstep.com/blog/lightstep-and-ambassador/) | Automatically configure a Kubernetes cluster to emit traces using Ambassador's k8s initializer. |
-| [Jenkins X](https://github.com/jenkinsci/opentelemetry-plugin) | Publish Jenkins performance metrics and traces to an OpenTelemetry endpoint |
+<br/>
+ 
+## ✉️ Contact Us
 
-### Demo
-
-Node.js web application that uses Lightstep partner plugins. See instructions in [`./demo`](./demo) to run the app.
-
-
-
+Say hi to Lightstep's Partner Team: partnerships@lightstep.com or fill out the form [here](https://go.lightstep.com/contact-us-partners.html). We're here to help and answer any questions about or product or OpenTelemetry.
