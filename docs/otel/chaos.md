@@ -4,12 +4,14 @@ Connecting OpenTelemetry spans to ongoing chaos experiments creates **clear link
 
 | What are you looking to do? | 
 | ----- |
-| [Use existing telemetry from your service](#) |
+| [Use existing telemetry from your service](#use-existing-events-from-your-product-or-service) |
 | [See example integrations](#example-integrations) |
 
 <br/>
 
 ## Use Existing Events from your Product or Service
+
+_The goal here is to annotate testing data with rich telemetry data so that the developer can quickly isolate issues and improve the system._
 
 ### Configure Collector
 
@@ -28,6 +30,12 @@ Connecting OpenTelemetry spans to ongoing chaos experiments creates **clear link
 
 1. Send webhooks from your product to an OpenTelemetry collector configured for console output. Verify outpiut in the console.
 2. Optional: verify in an OpenTelemetry production tool of your choice
+
+### Contribute your integration to the OpenTelemetry ecosystem
+
+Make your code usable to as many people as possible! If you're looking for help here, contact us at partnerships@lightstep.com. We'd love to help support you!
+
+<br/>
 
 ## Example Integrations
 
