@@ -9,11 +9,15 @@ Connecting OpenTelemetry spans to your feature flags implementation provides a *
 
 ## Add New Instrumention to your SDK or library
 
+_The goal here is to connect feature flag state and customer experience to the full picture of both production system state so that engineers can move faster in building the product._
+
 ### Instrument
 
 1. **Find the OpenTelemetry SDK for the [language(s) or framework(s)](https://opentelemetry.io/) used by your SDK**
+
 2. **Import the language-specific OpenTelemetry API and patch your library method(s)**
    * [Example from JavaScript](https://github.com/lightstep/lightstep-partner-toolkit/blob/main/js/packages/opentelemetry-plugin-rollbar/src/rollbar.ts#L1)
+
 3. **Use the OpenTelemetry docs to add spans, metrics, and logs to annotate calls to retrieve feature flags produced by your SDK with more actionable context**
    * As an example, here the Rollbar SDK creates [an attribute to linking back to the specific error](https://github.com/lightstep/lightstep-partner-toolkit/blob/d42c616a227dedbc013e698bdee454f4844d571c/js/packages/opentelemetry-plugin-rollbar/src/rollbar.ts#L48) so the developer can link to the full context of the error
 
@@ -21,6 +25,10 @@ Connecting OpenTelemetry spans to your feature flags implementation provides a *
 
 1. Send data from your product to an OpenTelemetry collector that outputs to the console and verify output.
 2. Optional: verify in an OpenTelemetry production tool of your choice
+
+### Contribute your integration to the OpenTelemetry ecosystem
+
+Make your code usable to as many people as possible! If you're looking for help here, contact us at partnerships@lightstep.com. We'd love to help support you!
 
 <br/>
 

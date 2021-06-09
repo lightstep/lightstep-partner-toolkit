@@ -3,13 +3,15 @@
 | What are you looking to do? | 
 | ----- |
 | [Use existing telemetry from your service](#) |
-| [Add new telemetry to your service](#) |
-| [Add new telemetry to your SDK or library](#) |
+| [Add new telemetry to your service](#add-new-instrumention-to-your-product-or-service) |
+| [Add new telemetry to your SDK or library](#add-new-instrumention-to-your-sdk-or-library) |
 | [See example integrations](#example-integrations) |
 
 <br/>
 
 ## Use Existing Telemetry from your Product or Service
+
+_The goal here is to give your team a unified data pipeline where your cloud services and infrastructure are "speaking the same language" so that your teams and tools ll see the same data._
 
 ### Configure Collector
 
@@ -28,13 +30,21 @@
 1. Send data from your product to an OpenTelemetry collector that outputs to the console and verify output.
 2. Optional: verify in an OpenTelemetry production tool of your choice
 
+### Contribute your integration to the OpenTelemetry ecosystem
+
+Make your code usable to as many people as possible! If you're looking for help here, contact us at partnerships@lightstep.com. We'd love to help support you!
+
+<br/>
+
 ## Add New Instrumention to your Product or Service
 
 ### Instrument
 
 1. **Find the OpenTelemetry SDK for the [language(s)](https://opentelemetry.io/) used by your solution (i.e. nginx is written in C++)**
+
 2. **Import the language-specific OpenTelemetry API and start creating metrics, logs, or traces**
     * Example: [Jenkins X creating OpenTelemetry metrics related to JVM garbage collection](https://github.com/jenkinsci/opentelemetry-plugin/blob/7a6753976df2ca6f5b4b4e4e87772b9e26d6b3db/src/main/java/io/jenkins/plugins/opentelemetry/opentelemetry/instrumentation/runtimemetrics/MemoryPools.java#L67-L77)
+
 
 ### Run and Verify
 
@@ -46,8 +56,11 @@
 ### Instrument
 
 1. **Find the OpenTelemetry SDK for the [language(s) or framework(s)](https://opentelemetry.io/) used by your SDK**
+
 2. **Import the language-specific OpenTelemetry API and patch your library method(s)**
+
     * Example: [Aspecto AWS SDK Instrumentation](https://github.com/aspecto-io/opentelemetry-ext-js/blob/cf5bead74580c520740560c6bd7ca05fc276168c/packages/instrumentation-aws-sdk/src/aws-sdk.ts#L113)
+
 3. **Use the OpenTelemetry docs to add spans, metrics, and logs to annotate requests to your cloud service from customer code with more actionable context**
     * Example: [Aspecto AWS SDK Instrumentation that adds AWS Regions and other metadata](https://github.com/aspecto-io/opentelemetry-ext-js/blob/cf5bead74580c520740560c6bd7ca05fc276168c/packages/instrumentation-aws-sdk/src/aws-sdk.ts#L175-L186)
 
@@ -55,6 +68,8 @@
 
 1. Send data from your product to an OpenTelemetry collector that outputs to the console and verify output.
 2. Optional: verify in an OpenTelemetry production tool of your choice
+
+<br/>
 
 ## Example Integrations
 
