@@ -1,5 +1,7 @@
 # Errors
 
+Adding OpenTelemetry spans to your SDK or library's errors give the context to connect an error across teams, tools, and products to allow developers to resolve issues faster.  Example such as adding spans with **project IDs**, **URLs**, or **segmentation information** can give developers directly actionable information or direct them to who to pull into the conversation.
+
 | What are you looking to do? | 
 | ----- | 
 | [Add OpenTelemetry support for errors emitted by your SDK or library](#add-opentelemetry-support-for-errors-emitted-by-your-sdk-or-library) |
