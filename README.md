@@ -17,7 +17,7 @@ Technical toolkit for Lightstep partners that want to adopt OpenTelemetry or use
 
 ## 💻 Demo
 
-Run [Donut Shop](./demo/readme.md) locally to understand how OpenTelemetry can connect different tools and solutions together. Our example app creates distributed traces that contain data related to relevant feature flags, errors, user analytics, and supporting cloud services using code in this toolkit.
+Run [Donut Shop](./demo/README.md) locally to understand how OpenTelemetry can connect different tools and solutions together. Our example app creates distributed traces that contain data related to relevant feature flags, errors, user analytics, and supporting cloud services using code in this toolkit.
 
 > 💡 It's also possible to run Donut Shop on a fully-featured Kuberentes cluster using the AWS CDK. See example [here](./examples/aws).
 
