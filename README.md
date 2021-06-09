@@ -23,6 +23,10 @@ Run [Donut Shop](./demo/README.md) locally to understand how OpenTelemetry can c
 
  <br/>
  
+ ![donut-demo](./docs/donut-demo.png)
+ 
+ <br/>
+ 
 ## 📓 Integrate with OpenTelemetry
 
 What would you like to accomplish?
