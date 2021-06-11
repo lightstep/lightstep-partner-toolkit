@@ -49,8 +49,8 @@ What would you like to accomplish?
 
 | Category | What |
 | ------- | ------ |
-| [Alerting](https://docs.lightstep.com/docs/create-and-manage-destinations) | Receive latency and error alerts from Lightstep. |
-| [CI/CD](https://docs.lightstep.com/paths/git-hub-action-path) | Improve CI/CD processes with observability data and workflows powered by Lightstep. |
+| [Alerting](https://docs.lightstep.com/docs/create-and-manage-destinations) | Connect to alerts to the full context of Lightstep's observability platform including deployment tags, service map information, and change intelligence |
+| [CI/CD](https://docs.lightstep.com/paths/git-hub-action-path) | Provide pre-deploy service health checks, active rollout monitoring, and full change intelligence for unexpected deployment behavior |
 
 <br/>
  
