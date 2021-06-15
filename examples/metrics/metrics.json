@@ -1,0 +1,48 @@
+{
+  "resourceMetrics": [
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "unknown_service"
+            }
+          }
+        ],
+        "droppedAttributesCount": 0
+      },
+      "instrumentationLibraryMetrics": [
+        {
+          "metrics": [
+            {
+              "name": "random_count",
+              "description": "",
+              "unit": "1",
+              "doubleSum": {
+                "dataPoints": [
+                  {
+                    "labels": [
+                      {
+                        "key": "hostname",
+                        "value": "test.local"
+                      }
+                    ],
+                    "value": 36,
+                    "startTimeUnixNano": 1623690881701000000,
+                    "timeUnixNano": 1623690893726877700
+                  }
+                ],
+                "isMonotonic": true,
+                "aggregationTemporality": 2
+              }
+            }
+          ],
+          "instrumentationLibrary": {
+            "name": "handmade"
+          }
+        }
+      ]
+    }
+  ]
+}
