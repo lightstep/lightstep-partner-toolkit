@@ -26,6 +26,34 @@ You can also manually add and delete attributes that will appear as tags in metr
     $ curl http://<<hostname>>/delete?key=foo # removes foo to all traces or metrics
 ```
 
+### running collector (locally)
+
+for log-only output without any processors:
+```
+  $ docker run --rm -p 55680:55680 -p 55681:55681 \
+    -v $(pwd)/config/log-only-config.yml:/etc/otel/config.yaml \
+     ghcr.io/lightstep/lightstep-partner-toolkit-collector:latest
+```
+
+to send to Lightstep:
+```
+  $ docker run --rm -p 55680:55680 -p 55681:55681 \
+    -v $(pwd)/config/collector-config.yml:/etc/otel/config.yaml \
+     ghcr.io/lightstep/lightstep-partner-toolkit-collector:latest
+```
+
+send a fake span to the http endpoint:
+
+```
+curl -ivX POST -H "Content-Type: application/json" localhost:55681/v1/traces -d '{"resourceSpans":[{"resource":{},"instrumentationLibrarySpans":[{"instrumentationLibrary":{},"spans":[{"traceId":"5b8efff798038103d269b633813fc60c","spanId":"eee19b7ec3c1b173","parentSpanId":"","name":"testSpan","startTimeUnixNano":"1544712660000000000","endTimeUnixNano":"1544712661000000000","attributes":[{"key":"attr1","value":{"intValue":"55"}}],"status":{}}]}]}]}'
+```
+
+send a fake metric to the http endpoint:
+
+```
+curl -ivX POST "Content-type: application/json" localhost:55681/v1/metrics -d '{"resourceMetrics":[{"resource":{"attributes":[{"key":"service.name","value":{"stringValue":"unknown_service"}}],"droppedAttributesCount":0},"instrumentationLibraryMetrics":[{"metrics":[{"name":"random_count","description":"","unit":"1","doubleSum":{"dataPoints":[{"labels":[{"key":"hostname","value":"test.local"}],"value":36,"startTimeUnixNano":1623690881701000000,"timeUnixNano":1623690893726877700}],"isMonotonic":true,"aggregationTemporality":2}}],"instrumentationLibrary":{"name":"handmade"}}]}]}'
+```
+
 ### building collector (Docker)
 
 This creates a docker image of the collector with the configuration file `config/collector-config.yml`. By default, it sends OpenTelemetry metrics and traces to Lightstep.
