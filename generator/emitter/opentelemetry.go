@@ -12,7 +12,6 @@ import (
 	"go.opentelemetry.io/otel/semconv"
 	oteltrace "go.opentelemetry.io/otel/trace"
 	"google.golang.org/grpc/credentials"
-	"math/rand"
 	"os"
 
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
@@ -42,32 +41,21 @@ func NewOpenTelemetryStdoutEmitter() *OpenTelemetryEmitter {
 }
 
 func (e *OpenTelemetryEmitter) Emit(t *trace.Trace) {
-	convertedSpans := make(map[[8]byte]oteltrace.Span)
-	var traceId oteltrace.TraceID
+	convertedSpans := make(map[oteltrace.SpanID]oteltrace.Span)
+	spanContext := make(map[oteltrace.SpanID]context.Context)
 
 	createOtelSpan := func(s *trace.Span) {
-		oteltracer := e.getTracer(s.Service)
+		t := e.getTracer(s.Service)
 
-		var parentSpanId oteltrace.SpanID
-
-		if len(s.Refs) > 0 {
-			parentSpanId = s.Refs[0].FromSpanId
-			traceId = convertedSpans[s.Refs[0].FromSpanId].SpanContext().TraceID()
+		var parentCtx context.Context
+		if len(s.Refs) == 0 {
+			parentCtx = context.TODO()
 		} else {
-			var tid [16]byte
-			rand.Read(tid[:])
-			traceId = tid
+			parentCtx = oteltrace.ContextWithRemoteSpanContext(spanContext[s.Refs[0].FromSpanId],
+				convertedSpans[s.Refs[0].FromSpanId].SpanContext())
 		}
 
-		parent := oteltrace.NewSpanContext(oteltrace.SpanContextConfig{
-			TraceID: traceId,
-			SpanID: parentSpanId,
-			Remote: true,
-			TraceFlags: 0x1,
-		})
-
-		ctx := oteltrace.ContextWithRemoteSpanContext(context.Background(), parent)
-		_, span := oteltracer.Start(ctx, s.OperationName)
+		ctx, span := t.Start(parentCtx, s.OperationName)
 		span.SetAttributes(semconv.HTTPMethodKey.String("GET"))
 		span.SetAttributes(
 			semconv.HTTPURLKey.String(fmt.Sprintf("http://%s%s", s.Service.ServiceName, s.OperationName)))
@@ -75,8 +63,8 @@ func (e *OpenTelemetryEmitter) Emit(t *trace.Trace) {
 		for _, v := range s.Tags {
 			span.SetAttributes(attribute.String(v.Key, v.Value))
 		}
-
 		convertedSpans[s.ID] = span
+		spanContext[s.ID] = ctx
 	}
 	closeOtelSpan := func(s *trace.Span) {
 		convertedSpans[s.ID].End()
