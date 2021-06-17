@@ -35,6 +35,13 @@ func (g *TraceGenerator) Generate(rootServiceName string, rootRouteName string, 
 	return g.trace
 }
 
+func Max(x, y int64) int64 {
+	if x < y {
+		return y
+	}
+	return x
+}
+
 func (g *TraceGenerator) createSpanForServiceRouteCall(serviceTier *topology.ServiceTier, routeName string, startTimeMicros int64) *trace.Span {
 	serviceTier.Random = g.random
 
@@ -61,8 +68,9 @@ func (g *TraceGenerator) createSpanForServiceRouteCall(serviceTier *topology.Ser
 			}
 		}
 	}
+	maxEndTime := startTimeMicros
 	for s, r := range route.DownstreamCalls {
-		childStartTimeMicros := startTimeMicros + 1
+		childStartTimeMicros := startTimeMicros + (g.random.Int63n(route.MaxLatencyMillis * 1000000))
 		childSvc := g.topology.GetServiceTier(s)
 		childSpan := g.createSpanForServiceRouteCall(childSvc, r, childStartTimeMicros)
 		ref := trace.Reference{
@@ -71,8 +79,10 @@ func (g *TraceGenerator) createSpanForServiceRouteCall(serviceTier *topology.Ser
 			RefType:    trace.CHILD_OF,
 		}
 		childSpan.AddRef(ref)
+		maxEndTime = Max(maxEndTime, childStartTimeMicros)
 	}
-	span.EndTimeMicros = 0
+	ownDuration := g.random.Int63n(route.MaxLatencyMillis * 1000000)
+	span.EndTimeMicros = maxEndTime + ownDuration
 	g.trace.AddSpan(span)
 	g.sequenceNumber = g.sequenceNumber + 1
 	return span

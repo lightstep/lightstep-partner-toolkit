@@ -13,6 +13,7 @@ import (
 	oteltrace "go.opentelemetry.io/otel/trace"
 	"google.golang.org/grpc/credentials"
 	"os"
+	"time"
 
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"log"
@@ -55,7 +56,7 @@ func (e *OpenTelemetryEmitter) Emit(t *trace.Trace) {
 				convertedSpans[s.Refs[0].FromSpanId].SpanContext())
 		}
 
-		ctx, span := t.Start(parentCtx, s.OperationName)
+		ctx, span := t.Start(parentCtx, s.OperationName, oteltrace.WithTimestamp(time.Unix(0, s.StartTimeMicros)))
 		span.SetAttributes(semconv.HTTPMethodKey.String("GET"))
 		span.SetAttributes(
 			semconv.HTTPURLKey.String(fmt.Sprintf("http://%s%s", s.Service.ServiceName, s.OperationName)))
@@ -67,7 +68,7 @@ func (e *OpenTelemetryEmitter) Emit(t *trace.Trace) {
 		spanContext[s.ID] = ctx
 	}
 	closeOtelSpan := func(s *trace.Span) {
-		convertedSpans[s.ID].End()
+		convertedSpans[s.ID].End(oteltrace.WithTimestamp(time.Unix(0, s.EndTimeMicros)))
 	}
 	prePostOrder(t, createOtelSpan, closeOtelSpan)
 }
