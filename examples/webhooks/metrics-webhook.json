@@ -1,0 +1,18 @@
+{
+  "timestamp": "2021-06-03T17:25:28.724661485Z",
+  "status": "Critical Threshold Violated",
+  "name": "*Critical Threshold Violated: Test Alert*",
+  "project": {
+    "text": "demo",
+    "href": "https://app.lightstep.com/demo?utm_source=webhook"
+  },
+  "metric-condition": {
+    "text": "Test Alert",
+    "href": "https://app.lightstep.com/demo/monitoring/condition/Tr0FhDmV?end_micros=1622741128724661&start_micros=1622740228724661&utm_source=webhook"
+  },
+  "details": {
+    "Description": "test test",
+    "Expression": "Critical Threshold Violated: alert 'Test Alert' is above 1000 over the last 2 minutes, computed on average.",
+    "Started At": "Thu, 03 Jun 2021 17:25:28 UTC"
+  }
+}

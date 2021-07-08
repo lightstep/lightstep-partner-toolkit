@@ -1,0 +1,95 @@
+{
+  "grouping-id": "336f_54fd_2021-07-08T17:29:32Z",
+  "timestamp": "2021-07-08T17:29:32.921207101Z",
+  "title": "Alert Triggered",
+  "project": {
+    "text": "demo",
+    "href": "https://app.lightstep.com/demo"
+  },
+  "saved-search": {
+    "text": "service IN (\"android\", \"apache\", \"iOS\")",
+    "href": "https://app.lightstep.com/demo/stream/ctfztmht?anchor=1625765373\u0026range=900"
+  },
+  "live-view": {
+    "text": "Go to Explorer",
+    "href": "https://app.lightstep.com/demo/explorer?query=service+IN+%28%22android%22%2C+%22apache%22%2C+%22iOS%22%29"
+  },
+  "payloads": [
+    {
+      "type": "condition-violated",
+      "subtitle": {
+        "text": "latency2",
+        "href": "https://app.lightstep.com/demo/stream/ctfztmht?anchor=1625765373\u0026range=900\u0026selected_condition_id=VXmXbJsB"
+      },
+      "exemplars": [
+        {
+          "start": "2021-07-08T17:28:08.770045Z",
+          "end": "2021-07-08T17:28:08.88467Z",
+          "is-error": false,
+          "href": "https://app.lightstep.com/demo/trace?at_micros=1625765288884670\u0026selected_span_guid=938797040ea8e787\u0026trace_handle=CIfPo_XA4OXDkwESBzExMTkxNDIoAjIMCKjrnIcGEMjol-8COg5zdHJlYW1zX3RyYWNlcw%3D%3D\u0026utm_source=webhook"
+        },
+        {
+          "start": "2021-07-08T17:26:50.694247Z",
+          "end": "2021-07-08T17:26:50.83419Z",
+          "is-error": false,
+          "href": "https://app.lightstep.com/demo/trace?at_micros=1625765210834190\u0026selected_span_guid=03e3a83249ca873f\u0026trace_handle=CL-Oqs6khurxAxIHMTExOTE0MigCMgwI2uqchwYQ2LyFywI6DnN0cmVhbXNfdHJhY2Vz\u0026utm_source=webhook"
+        },
+        {
+          "start": "2021-07-08T17:28:10.547794Z",
+          "end": "2021-07-08T17:28:10.75597Z",
+          "is-error": false,
+          "href": "https://app.lightstep.com/demo/trace?at_micros=1625765290755970\u0026selected_span_guid=a230186c3ec5a73b\u0026trace_handle=CLvOlvbDjYaYogESBzExMTkxNDIoAjIMCKrrnIcGENDYmoUCOg5zdHJlYW1zX3RyYWNlcw%3D%3D\u0026utm_source=webhook"
+        },
+        {
+          "start": "2021-07-08T17:27:06.62625Z",
+          "end": "2021-07-08T17:27:06.859943Z",
+          "is-error": false,
+          "href": "https://app.lightstep.com/demo/trace?at_micros=1625765226859943\u0026selected_span_guid=03bb918b119c8ced\u0026trace_handle=CO2Z8oyxseTdAxIHMTExOTE0MigCMgwI6uqchwYQkKLPqgI6DnN0cmVhbXNfdHJhY2Vz\u0026utm_source=webhook"
+        },
+        {
+          "start": "2021-07-08T17:27:07.688467Z",
+          "end": "2021-07-08T17:27:08.035603Z",
+          "is-error": false,
+          "href": "https://app.lightstep.com/demo/trace?at_micros=1625765228035603\u0026selected_span_guid=4b637ae9b66c3fb4\u0026trace_handle=CLT_sLOb3d6xSxIHMTExOTE0MigCMgwI6-qchwYQuNikyAI6DnN0cmVhbXNfdHJhY2Vz\u0026utm_source=webhook"
+        },
+        {
+          "start": "2021-07-08T17:27:05.576175Z",
+          "end": "2021-07-08T17:27:06.718736Z",
+          "is-error": false,
+          "href": "https://app.lightstep.com/demo/trace?at_micros=1625765226718736\u0026selected_span_guid=9c78f1bc014b141b\u0026trace_handle=CJuorIrAt7y8nAESBzExMTkxNDIoAjIMCOnqnIcGEJj33pICOg5zdHJlYW1zX3RyYWNlcw%3D%3D\u0026utm_source=webhook"
+        },
+        {
+          "start": "2021-07-08T17:26:48.972024Z",
+          "end": "2021-07-08T17:26:50.576486Z",
+          "is-error": false,
+          "href": "https://app.lightstep.com/demo/trace?at_micros=1625765210576486\u0026selected_span_guid=88b90093f1c2bf5a\u0026trace_handle=CNr-io6_ksDciAESBzExMTkxNDIoAjIMCNjqnIcGEMDRv88DOg5zdHJlYW1zX3RyYWNlcw%3D%3D\u0026utm_source=webhook"
+        },
+        {
+          "start": "2021-07-08T17:28:06.649611Z",
+          "end": "2021-07-08T17:28:08.324684Z",
+          "is-error": false,
+          "href": "https://app.lightstep.com/demo/trace?at_micros=1625765288324684\u0026selected_span_guid=0cfbcaf67b02727c\u0026trace_handle=CPzkidjn3vL9DBIHMTExOTE0MigCMgwIpuuchwYQ-I3htQI6DnN0cmVhbXNfdHJhY2Vz\u0026utm_source=webhook"
+        },
+        {
+          "start": "2021-07-08T17:28:06.218973Z",
+          "end": "2021-07-08T17:28:08.350201Z",
+          "is-error": false,
+          "href": "https://app.lightstep.com/demo/trace?at_micros=1625765288350201\u0026selected_span_guid=f88adc4e001f4034\u0026trace_handle=CLSA_YDgibfF-AESBzExMTkxNDIoAjILCKbrnIcGEMiGtWg6DnN0cmVhbXNfdHJhY2Vz\u0026utm_source=webhook"
+        },
+        {
+          "start": "2021-07-08T17:28:06.223964Z",
+          "end": "2021-07-08T17:28:08.977992Z",
+          "is-error": false,
+          "href": "https://app.lightstep.com/demo/trace?at_micros=1625765288977992\u0026selected_span_guid=a55d982ace8bd91e\u0026trace_handle=CJ6yr_SsheaupQESBzExMTkxNDIoAjILCKbrnIcGEODW5Wo6DnN0cmVhbXNfdHJhY2Vz\u0026utm_source=webhook"
+        }
+      ],
+      "ls-info": {
+        "Actual Value": {
+          "ActualValue": "3.981549s"
+        },
+        "Expression": "p99 is above 100ms over the last 2.0m"
+      },
+      "custom-data": {}
+    }
+  ]
+}
