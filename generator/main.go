@@ -28,7 +28,9 @@ func main() {
 	if collectorUrl == "" {
 		stdoutMode = true
 	}
-
+	if len(os.Getenv("LS_ACCESS_TOKEN")) > 0 {
+		log.Printf("Using LS_ACCESS_TOKEN...")
+	}
 	jsonFile, err := os.Open(paramsFile)
 	if err != nil {
 		log.Fatalf("could not open topology file: %v", err)
@@ -100,5 +102,4 @@ func main() {
 		mg.Shutdown()
 	}
 	os.Exit(0)
-
 }

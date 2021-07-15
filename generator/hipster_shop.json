@@ -231,7 +231,7 @@
     {
       "service" : "frontend",
       "route" : "/cart",
-      "tracesPerHour" : 14400
+      "tracesPerHour" : 1400
     },
     {
       "service" : "frontend",
