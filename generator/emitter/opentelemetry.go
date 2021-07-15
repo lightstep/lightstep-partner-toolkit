@@ -3,45 +3,89 @@ package emitter
 import (
 	"context"
 	"fmt"
+	"github.com/smithclay/synthetic-load-generator-go/topology"
 	"github.com/smithclay/synthetic-load-generator-go/trace"
 	"go.opentelemetry.io/otel/attribute"
-	"go.opentelemetry.io/otel/exporters/otlp"
-	"go.opentelemetry.io/otel/exporters/otlp/otlpgrpc"
-	"go.opentelemetry.io/otel/exporters/stdout"
+	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric"
+	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
+	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
+	"go.opentelemetry.io/otel/metric"
+	controller "go.opentelemetry.io/otel/sdk/metric/controller/basic"
+	processor "go.opentelemetry.io/otel/sdk/metric/processor/basic"
+	"go.opentelemetry.io/otel/sdk/metric/selector/simple"
+	"math/rand"
+
+	"go.opentelemetry.io/otel/exporters/stdout/stdoutmetric"
 	"go.opentelemetry.io/otel/sdk/resource"
-	"go.opentelemetry.io/otel/semconv"
+	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
 	oteltrace "go.opentelemetry.io/otel/trace"
 	"google.golang.org/grpc/credentials"
 	"os"
 	"time"
 
+	metricexport "go.opentelemetry.io/otel/sdk/export/metric"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"log"
 )
 
+const (
+	ValueRecorderType = "ValueRecorder"
+	CounterType = "Counter"
+)
+
 type OpenTelemetryEmitter struct {
-	collectorUrl string
-	flushIntervalMillis int
-	stdout bool
+	collectorUrl                string
+	flushIntervalMillis         int
+	stdout                      bool
 	serviceNameToTracerProvider map[string]*sdktrace.TracerProvider
+	serviceNameToMeterProvider map[string]*metric.MeterProvider
 }
 
 func NewOpenTelemetryGrpcEmitter(collectorUrl string) *OpenTelemetryEmitter {
 	return &OpenTelemetryEmitter{
 		serviceNameToTracerProvider: make(map[string]*sdktrace.TracerProvider),
-		collectorUrl: collectorUrl,
-		stdout: false,
+		serviceNameToMeterProvider: make(map[string]*metric.MeterProvider),
+		collectorUrl:                collectorUrl,
+		stdout:                      false,
 	}
 }
 
 func NewOpenTelemetryStdoutEmitter() *OpenTelemetryEmitter {
 	return &OpenTelemetryEmitter{
 		serviceNameToTracerProvider: make(map[string]*sdktrace.TracerProvider),
-		stdout: true,
+		serviceNameToMeterProvider: make(map[string]*metric.MeterProvider),
+		stdout:                      true,
 	}
 }
 
-func (e *OpenTelemetryEmitter) Emit(t *trace.Trace) {
+func (e *OpenTelemetryEmitter) EmitMetric(metrics []topology.Metric, service string) {
+	meter := e.getMeter(service)
+	for _, m := range metrics {
+		if m.Type == ValueRecorderType {
+			recorder, err := meter.NewFloat64ValueRecorder(m.Name,
+				metric.WithDescription("Synthetic metric via Lightstep Partner Toolkit"))
+			if err != nil {
+				log.Fatalf("error creating recorder: %v", err)
+			}
+			recorder.Record(context.Background(), m.Min + rand.Float64() * (m.Max - m.Min),
+				attribute.String("service.name", service),
+				attribute.Bool("synthetic", true))
+		} else if m.Type == CounterType {
+			counter, err := meter.NewFloat64Counter(m.Name,
+				metric.WithDescription("Synthetic metric via Lightstep Partner Toolkit"))
+			if err != nil {
+				log.Fatalf("error creating counter: %v", err)
+			}
+			counter.Add(context.Background(), m.Min + rand.Float64() * (m.Max - m.Min),
+				attribute.String("service.name", service),
+				attribute.Bool("synthetic", true))
+		}
+	}
+}
+
+func (e *OpenTelemetryEmitter) EmitTrace(t *trace.Trace) {
 	convertedSpans := make(map[oteltrace.SpanID]oteltrace.Span)
 	spanContext := make(map[oteltrace.SpanID]context.Context)
 
@@ -89,6 +133,15 @@ func (e *OpenTelemetryEmitter) getTracer(service trace.Service) oteltrace.Tracer
 	return tp.Tracer(service.ServiceName)
 }
 
+func (e *OpenTelemetryEmitter) getMeter(service string) metric.Meter {
+	if _, ok := e.serviceNameToMeterProvider[service]; !ok {
+		e.serviceNameToMeterProvider[service] = initMeter(service, e.stdout)
+	}
+	mp := e.serviceNameToMeterProvider[service]
+
+	return (*mp).Meter(service)
+}
+
 func getenv(key, fallback string) string {
 	value := os.Getenv(key)
 	if len(value) == 0 {
@@ -97,25 +150,67 @@ func getenv(key, fallback string) string {
 	return value
 }
 
+func initMeter(serviceName string, isStdout bool) *metric.MeterProvider {
+	var exp metricexport.Exporter
+	var err error
+
+	if isStdout {
+		exp, err = stdoutmetric.New(stdoutmetric.WithPrettyPrint())
+		if err != nil {
+			log.Fatalf("creating stdoutmetric exporter: %v", err)
+		}
+	} else {
+		client := otlpmetricgrpc.NewClient(
+			otlpmetricgrpc.WithTLSCredentials(credentials.NewClientTLSFromCert(nil, "")),
+			otlpmetricgrpc.WithEndpoint(getenv("OTEL_EXPORTER_OTLP_METRICS_ENDPOINT", "ingest.lightstep.com:443")),
+			otlpmetricgrpc.WithHeaders(map[string]string{
+				"lightstep-access-token": os.Getenv("LS_ACCESS_TOKEN"),
+			}),
+		)
+		exp, err = otlpmetric.New(context.Background(), client)
+		if err != nil {
+			log.Fatalf("creating otlpmetricgrpc exporter: %v", err)
+		}
+	}
+
+	pusher := controller.New(
+		processor.New(
+			simple.NewWithInexpensiveDistribution(),
+			exp,
+		),
+		controller.WithExporter(exp),
+		controller.WithResource(
+			resource.NewWithAttributes(
+				semconv.SchemaURL,
+				semconv.ServiceNameKey.String(serviceName),
+			),
+		))
+	if err := pusher.Start(context.Background()); err != nil {
+		log.Fatalf("starting push controller: %v", err)
+	}
+	mp := pusher.MeterProvider()
+	return &mp
+}
+
 func initTracer(serviceName string, isStdout bool) *sdktrace.TracerProvider {
 	var err error
 	var exp sdktrace.SpanExporter
 
 	if isStdout {
-		exp, err = stdout.NewExporter(stdout.WithPrettyPrint())
+		exp, err = stdouttrace.New(stdouttrace.WithPrettyPrint())
 		if err != nil {
 			log.Panicf("failed to initialize stdout exporter %v\n", err)
 			return nil
 		}
 	} else {
 		ctx := context.Background()
-		exp, err = otlp.NewExporter(
+		exp, err = otlptrace.New(
 			ctx,
-			otlpgrpc.NewDriver(
-				otlpgrpc.WithTLSCredentials(credentials.NewClientTLSFromCert(nil, "")),
-				otlpgrpc.WithEndpoint(getenv("OTEL_EXPORTER_OTLP_SPAN_ENDPOINT", "ingest.lightstep.com:443")),
-				otlpgrpc.WithHeaders(map[string]string{
-					"lightstep-access-token":    os.Getenv("LS_ACCESS_TOKEN"),
+			otlptracegrpc.NewClient(
+				otlptracegrpc.WithTLSCredentials(credentials.NewClientTLSFromCert(nil, "")),
+				otlptracegrpc.WithEndpoint(getenv("OTEL_EXPORTER_OTLP_SPAN_ENDPOINT", "ingest.lightstep.com:443")),
+				otlptracegrpc.WithHeaders(map[string]string{
+					"lightstep-access-token": os.Getenv("LS_ACCESS_TOKEN"),
 				}),
 			),
 		)
@@ -124,12 +219,17 @@ func initTracer(serviceName string, isStdout bool) *sdktrace.TracerProvider {
 	if err != nil {
 		log.Fatalf("failed to initialize otelgrpc pipeline: %v", err)
 	}
+
 	bsp := sdktrace.NewBatchSpanProcessor(exp)
+
 	tp := sdktrace.NewTracerProvider(
 		sdktrace.WithSampler(sdktrace.AlwaysSample()),
 		sdktrace.WithSpanProcessor(bsp),
 		sdktrace.WithResource(
-			resource.NewWithAttributes(semconv.ServiceNameKey.String(serviceName)),
-	))
+			resource.NewWithAttributes(
+				semconv.SchemaURL,
+				semconv.ServiceNameKey.String(serviceName),
+			),
+		))
 	return tp
 }

@@ -9,6 +9,26 @@
           { "weight": 1, "tags": { "version" : "v125", "region" : "us-east-1" }},
           { "weight": 2, "tags": { "version" : "v125", "region" : "us-west-1" }}
         ],
+        "metrics": [
+          {
+            "name": "request.bytes",
+            "type": "Counter",
+            "max": 1000000,
+            "min": 1024
+          },
+          {
+            "name": "render.latency",
+            "type": "ValueRecorder",
+            "max": 5000,
+            "min": 200
+          },
+          {
+            "name": "dns.lookup",
+            "type": "ValueRecorder",
+            "max": 650,
+            "min": 10
+          }
+        ],
         "routes" : [
           {
             "route" : "/product",

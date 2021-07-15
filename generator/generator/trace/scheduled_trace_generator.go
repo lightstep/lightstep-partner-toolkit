@@ -1,4 +1,4 @@
-package generator
+package trace
 
 import (
 	"github.com/smithclay/synthetic-load-generator-go/emitter"
@@ -46,12 +46,12 @@ func NewScheduledTraceGenerator(topo *topology.Topology, route string, service s
 	)
 
 	stg := &ScheduledTraceGenerator{
-		topology: topo,
-		route: route,
-		service: service,
+		topology:      topo,
+		route:         route,
+		service:       service,
 		tracesPerHour: defaultTracesPerHour,
-		traceGen: NewTraceGenerator(topo, defaultSeed),
-		Emitter: emitter.NewOpenTelemetryStdoutEmitter(),
+		traceGen:      NewTraceGenerator(topo, defaultSeed),
+		Emitter:       emitter.NewOpenTelemetryStdoutEmitter(),
 	}
 
 	for _, opt := range opts {
@@ -63,7 +63,7 @@ func NewScheduledTraceGenerator(topo *topology.Topology, route string, service s
 
 func (stg *ScheduledTraceGenerator) emitOneTrace() {
 	t := stg.traceGen.Generate(stg.service, stg.route, time.Now().UnixNano())
-	stg.Emitter.Emit(t)
+	stg.Emitter.EmitTrace(t)
 	stg.traceCount = stg.traceCount + 1
 }
 
