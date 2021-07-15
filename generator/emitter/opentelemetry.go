@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"github.com/smithclay/synthetic-load-generator-go/trace"
 	"go.opentelemetry.io/otel/attribute"
-	"go.opentelemetry.io/otel/exporters/otlp"
-	"go.opentelemetry.io/otel/exporters/otlp/otlpgrpc"
-	"go.opentelemetry.io/otel/exporters/stdout"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
+	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
 	"go.opentelemetry.io/otel/sdk/resource"
-	"go.opentelemetry.io/otel/semconv"
+	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
 	oteltrace "go.opentelemetry.io/otel/trace"
 	"google.golang.org/grpc/credentials"
 	"os"
@@ -24,6 +24,7 @@ type OpenTelemetryEmitter struct {
 	flushIntervalMillis int
 	stdout bool
 	serviceNameToTracerProvider map[string]*sdktrace.TracerProvider
+
 }
 
 func NewOpenTelemetryGrpcEmitter(collectorUrl string) *OpenTelemetryEmitter {
@@ -41,7 +42,7 @@ func NewOpenTelemetryStdoutEmitter() *OpenTelemetryEmitter {
 	}
 }
 
-func (e *OpenTelemetryEmitter) Emit(t *trace.Trace) {
+func (e *OpenTelemetryEmitter) EmitTrace(t *trace.Trace) {
 	convertedSpans := make(map[oteltrace.SpanID]oteltrace.Span)
 	spanContext := make(map[oteltrace.SpanID]context.Context)
 
@@ -102,19 +103,19 @@ func initTracer(serviceName string, isStdout bool) *sdktrace.TracerProvider {
 	var exp sdktrace.SpanExporter
 
 	if isStdout {
-		exp, err = stdout.NewExporter(stdout.WithPrettyPrint())
+		exp, err = stdouttrace.New(stdouttrace.WithPrettyPrint())
 		if err != nil {
 			log.Panicf("failed to initialize stdout exporter %v\n", err)
 			return nil
 		}
 	} else {
 		ctx := context.Background()
-		exp, err = otlp.NewExporter(
+		exp, err = otlptrace.New(
 			ctx,
-			otlpgrpc.NewDriver(
-				otlpgrpc.WithTLSCredentials(credentials.NewClientTLSFromCert(nil, "")),
-				otlpgrpc.WithEndpoint(getenv("OTEL_EXPORTER_OTLP_SPAN_ENDPOINT", "ingest.lightstep.com:443")),
-				otlpgrpc.WithHeaders(map[string]string{
+			otlptracegrpc.NewClient(
+				otlptracegrpc.WithTLSCredentials(credentials.NewClientTLSFromCert(nil, "")),
+				otlptracegrpc.WithEndpoint(getenv("OTEL_EXPORTER_OTLP_SPAN_ENDPOINT", "ingest.lightstep.com:443")),
+				otlptracegrpc.WithHeaders(map[string]string{
 					"lightstep-access-token":    os.Getenv("LS_ACCESS_TOKEN"),
 				}),
 			),
@@ -124,12 +125,17 @@ func initTracer(serviceName string, isStdout bool) *sdktrace.TracerProvider {
 	if err != nil {
 		log.Fatalf("failed to initialize otelgrpc pipeline: %v", err)
 	}
+
 	bsp := sdktrace.NewBatchSpanProcessor(exp)
+
 	tp := sdktrace.NewTracerProvider(
 		sdktrace.WithSampler(sdktrace.AlwaysSample()),
 		sdktrace.WithSpanProcessor(bsp),
 		sdktrace.WithResource(
-			resource.NewWithAttributes(semconv.ServiceNameKey.String(serviceName)),
+			resource.NewWithAttributes(
+				semconv.SchemaURL,
+				semconv.ServiceNameKey.String(serviceName),
+			),
 	))
 	return tp
 }

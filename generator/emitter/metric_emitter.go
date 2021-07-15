@@ -2,7 +2,7 @@ package emitter
 
 import "github.com/smithclay/synthetic-load-generator-go/trace"
 
-type TraceEmitter interface {
-	Emit(t *trace.Trace)
+type MetricEmitter interface {
+	EmitMetric(t *trace.Trace)
 	Close()
 }

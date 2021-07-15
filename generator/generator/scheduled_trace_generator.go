@@ -63,7 +63,7 @@ func NewScheduledTraceGenerator(topo *topology.Topology, route string, service s
 
 func (stg *ScheduledTraceGenerator) emitOneTrace() {
 	t := stg.traceGen.Generate(stg.service, stg.route, time.Now().UnixNano())
-	stg.Emitter.Emit(t)
+	stg.Emitter.EmitTrace(t)
 	stg.traceCount = stg.traceCount + 1
 }
 
