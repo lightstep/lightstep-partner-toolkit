@@ -3,7 +3,8 @@ package main
 import (
 	"encoding/json"
 	"flag"
-	"github.com/smithclay/synthetic-load-generator-go/generator"
+	scheduledMetric "github.com/smithclay/synthetic-load-generator-go/generator/metric"
+	"github.com/smithclay/synthetic-load-generator-go/generator/trace"
 	"github.com/smithclay/synthetic-load-generator-go/topology"
 	"io/ioutil"
 	"log"
@@ -41,19 +42,40 @@ func main() {
 	if err != nil {
 		log.Fatalf("could not parse topology file: %v", err)
 	}
-	traceGenerators := make([]*generator.ScheduledTraceGenerator, 0)
-	for _, r := range file.RootRoutes {
-		var tg *generator.ScheduledTraceGenerator
+	metricGenerators := make([]*scheduledMetric.ScheduledMetricGenerator, 0)
+	for _, s := range file.Topology.Services {
+		if len(s.Metrics) == 0 {
+			continue
+		}
 
-		tg = generator.NewScheduledTraceGenerator(file.Topology, r.Route, r.Service,
-			generator.WithSeed(randSeed),
-			generator.WithTracesPerHour(r.TracesPerHour),
-			generator.WithGrpc(collectorUrl))
+		var mg *scheduledMetric.ScheduledMetricGenerator
+		mg = scheduledMetric.NewScheduledMetricGenerator(s.Metrics, s.ServiceName,
+			scheduledMetric.WithSeed(randSeed),
+			scheduledMetric.WithMetricsPerHour(3600),
+			scheduledMetric.WithGrpc(collectorUrl),
+		)
 
 		if stdoutMode {
-			tg = generator.NewScheduledTraceGenerator(file.Topology, r.Route, r.Service,
-				generator.WithSeed(randSeed),
-				generator.WithTracesPerHour(r.TracesPerHour))
+			mg = scheduledMetric.NewScheduledMetricGenerator(s.Metrics, s.ServiceName,
+				scheduledMetric.WithSeed(randSeed),
+				scheduledMetric.WithMetricsPerHour(3600),
+			)
+		}
+		metricGenerators = append(metricGenerators, mg)
+	}
+	traceGenerators := make([]*trace.ScheduledTraceGenerator, 0)
+	for _, r := range file.RootRoutes {
+		var tg *trace.ScheduledTraceGenerator
+
+		tg = trace.NewScheduledTraceGenerator(file.Topology, r.Route, r.Service,
+			trace.WithSeed(randSeed),
+			trace.WithTracesPerHour(r.TracesPerHour),
+			trace.WithGrpc(collectorUrl))
+
+		if stdoutMode {
+			tg = trace.NewScheduledTraceGenerator(file.Topology, r.Route, r.Service,
+				trace.WithSeed(randSeed),
+				trace.WithTracesPerHour(r.TracesPerHour))
 		}
 
 		traceGenerators = append(traceGenerators, tg)
@@ -63,12 +85,19 @@ func main() {
 		go tg.Start()
 	}
 
+	for _, mg := range metricGenerators {
+		go mg.Start()
+	}
+
 	c := make(chan os.Signal)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	<-c
 	log.Println("Shutting down...")
 	for _, tg := range traceGenerators {
 		tg.Shutdown()
+	}
+	for _, mg := range metricGenerators {
+		mg.Shutdown()
 	}
 	os.Exit(0)
 

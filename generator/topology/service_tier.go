@@ -7,6 +7,7 @@ type ServiceTier struct {
 	Routes []ServiceRoute `json:"routes"`
 	Instances []string `json:"instances"`
 	TagSets []TagSet `json:"tagSets"`
+	Metrics []Metric `json:"metrics"`
 	Random *rand.Rand
 }
 

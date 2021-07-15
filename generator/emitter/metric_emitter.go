@@ -1,8 +1,8 @@
 package emitter
 
-import "github.com/smithclay/synthetic-load-generator-go/trace"
+import "github.com/smithclay/synthetic-load-generator-go/topology"
 
 type MetricEmitter interface {
-	EmitMetric(t *trace.Trace)
+	EmitMetric(metrics []topology.Metric, service string)
 	Close()
 }
