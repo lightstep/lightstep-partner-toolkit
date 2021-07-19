@@ -1,0 +1,18 @@
+version: "3"
+services:
+  collector:
+    image: otel/opentelemetry-collector-contrib-dev:latest
+    environment:
+      - LS_ACCESS_TOKEN=${LS_ACCESS_TOKEN}
+    volumes:
+      - ./config/collector.yml:/etc/otel/config.yaml
+  generator:
+    container_name: otel-generator
+    depends_on:
+      - collector
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: [ "--collectorUrl", "collector:55680", "--paramsFile", "/topo.json" ]
+    volumes:
+      - ./config/singleton_service.json:/topo.json

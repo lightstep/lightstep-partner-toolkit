@@ -1,0 +1,32 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+exporters:
+  logging:
+    logLevel: debug
+  otlp:
+    endpoint: ingest.lightstep.com:443
+    headers:
+      "lightstep-access-token": "${LS_ACCESS_TOKEN}"
+processors:
+  batch:
+  # Hack to annotates malformed traces with instrumentation metadata
+  # for Lightstep's backend
+  resource:
+    attributes:
+    - key: host.name
+      value: nginx-proxy-host
+      action: upsert
+    - key: service.name
+      value: nginx-proxy
+      action: upsert
+    - key: telemetry.sdk.version
+      value: 0.0.1
+      action: upsert
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch, resource]
+      exporters: [logging, otlp]

@@ -129,7 +129,7 @@ func (e *OpenTelemetryEmitter) Close() {
 
 func (e *OpenTelemetryEmitter) getTracer(service trace.Service) oteltrace.Tracer {
 	if _, ok := e.serviceNameToTracerProvider[service.ServiceName]; !ok {
-		e.serviceNameToTracerProvider[service.ServiceName] = initTracer(service.ServiceName, e.stdout)
+		e.serviceNameToTracerProvider[service.ServiceName] = initTracer(service.ServiceName, e.stdout, e.collectorUrl)
 	}
 	tp := e.serviceNameToTracerProvider[service.ServiceName]
 
@@ -138,7 +138,7 @@ func (e *OpenTelemetryEmitter) getTracer(service trace.Service) oteltrace.Tracer
 
 func (e *OpenTelemetryEmitter) getMeter(service string) metric.Meter {
 	if _, ok := e.serviceNameToMeterProvider[service]; !ok {
-		e.serviceNameToMeterProvider[service] = initMeter(service, e.stdout)
+		e.serviceNameToMeterProvider[service] = initMeter(service, e.stdout, e.collectorUrl)
 	}
 	mp := e.serviceNameToMeterProvider[service]
 
@@ -155,7 +155,7 @@ func getenv(key, fallback string) string {
 
 const LightstepPublicIngest = "ingest.lightstep.com:443"
 
-func initMeter(serviceName string, isStdout bool) *metric.MeterProvider {
+func initMeter(serviceName string, isStdout bool, collectorUrl string) *metric.MeterProvider {
 	var exp metricexport.Exporter
 	var err error
 
@@ -165,15 +165,9 @@ func initMeter(serviceName string, isStdout bool) *metric.MeterProvider {
 			log.Fatalf("creating stdoutmetric exporter: %v", err)
 		}
 	} else {
-		endpoint := getenv("OTEL_EXPORTER_OTLP_METRICS_ENDPOINT", LightstepPublicIngest)
-
-		if endpoint == LightstepPublicIngest && len(os.Getenv("LS_ACCESS_TOKEN")) == 0 {
-			log.Fatalf("error: env var LS_ACCESS_TOKEN must be set")
-		}
-
 		client := otlpmetricgrpc.NewClient(
 			otlpmetricgrpc.WithTLSCredentials(credentials.NewClientTLSFromCert(nil, "")),
-			otlpmetricgrpc.WithEndpoint(endpoint),
+			otlpmetricgrpc.WithEndpoint(collectorUrl),
 			otlpmetricgrpc.WithHeaders(map[string]string{
 				"lightstep-access-token": os.Getenv("LS_ACCESS_TOKEN"),
 			}),
@@ -203,7 +197,7 @@ func initMeter(serviceName string, isStdout bool) *metric.MeterProvider {
 	return &mp
 }
 
-func initTracer(serviceName string, isStdout bool) *sdktrace.TracerProvider {
+func initTracer(serviceName string, isStdout bool, collectorUrl string) *sdktrace.TracerProvider {
 	var err error
 	var exp sdktrace.SpanExporter
 
@@ -214,17 +208,12 @@ func initTracer(serviceName string, isStdout bool) *sdktrace.TracerProvider {
 			return nil
 		}
 	} else {
-		endpoint := getenv("OTEL_EXPORTER_OTLP_SPAN_ENDPOINT", LightstepPublicIngest)
-		if endpoint == LightstepPublicIngest && len(os.Getenv("LS_ACCESS_TOKEN")) == 0 {
-			log.Fatalf("error: env var LS_ACCESS_TOKEN must be set")
-		}
-
 		ctx := context.Background()
 		exp, err = otlptrace.New(
 			ctx,
 			otlptracegrpc.NewClient(
 				otlptracegrpc.WithTLSCredentials(credentials.NewClientTLSFromCert(nil, "")),
-				otlptracegrpc.WithEndpoint(endpoint),
+				otlptracegrpc.WithEndpoint(collectorUrl),
 				otlptracegrpc.WithTimeout(10*time.Second),
 				otlptracegrpc.WithHeaders(map[string]string{
 					"lightstep-access-token": os.Getenv("LS_ACCESS_TOKEN"),

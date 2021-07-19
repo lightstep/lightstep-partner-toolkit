@@ -33,6 +33,9 @@ func main() {
 	if collectorUrl == "" {
 		stdoutMode = true
 	}
+
+	log.Printf("Using collector URL %v", collectorUrl)
+
 	if len(os.Getenv("LS_ACCESS_TOKEN")) > 0 {
 		log.Printf("Using LS_ACCESS_TOKEN...")
 	}
