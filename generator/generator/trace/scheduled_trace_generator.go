@@ -1,22 +1,23 @@
 package trace
 
 import (
-	"github.com/smithclay/synthetic-load-generator-go/emitter"
-	"github.com/smithclay/synthetic-load-generator-go/topology"
 	"log"
 	"time"
+
+	"github.com/smithclay/synthetic-load-generator-go/emitter"
+	"github.com/smithclay/synthetic-load-generator-go/topology"
 )
 
 type ScheduledTraceGenerator struct {
-	topology *topology.Topology
-	route string
-	service string
+	topology      *topology.Topology
+	route         string
+	service       string
 	tracesPerHour int
-	Emitter emitter.TraceEmitter
-	ticker *time.Ticker
-	traceGen *TraceGenerator
-	traceCount int
-	closed chan struct{}
+	Emitter       emitter.TraceEmitter
+	ticker        *time.Ticker
+	traceGen      *TraceGenerator
+	traceCount    int
+	closed        chan struct{}
 }
 
 type ScheduledTraceGeneratorOption func(*ScheduledTraceGenerator)
@@ -27,9 +28,9 @@ func WithSeed(seed int64) ScheduledTraceGeneratorOption {
 	}
 }
 
-func WithGrpc(url string) ScheduledTraceGeneratorOption {
+func WithEmmitter(emitter emitter.TraceEmitter) ScheduledTraceGeneratorOption {
 	return func(h *ScheduledTraceGenerator) {
-		h.Emitter = emitter.NewOpenTelemetryGrpcEmitter(url)
+		h.Emitter = emitter
 	}
 }
 
@@ -42,7 +43,7 @@ func WithTracesPerHour(tracesPerHour int) ScheduledTraceGeneratorOption {
 func NewScheduledTraceGenerator(topo *topology.Topology, route string, service string, opts ...ScheduledTraceGeneratorOption) *ScheduledTraceGenerator {
 	const (
 		defaultTracesPerHour = 720
-		defaultSeed  = 42
+		defaultSeed          = 42
 	)
 
 	stg := &ScheduledTraceGenerator{

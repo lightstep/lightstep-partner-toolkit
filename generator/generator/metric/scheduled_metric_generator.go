@@ -1,21 +1,22 @@
 package metric
 
 import (
-	"github.com/smithclay/synthetic-load-generator-go/emitter"
-	"github.com/smithclay/synthetic-load-generator-go/topology"
 	"log"
 	"time"
+
+	"github.com/smithclay/synthetic-load-generator-go/emitter"
+	"github.com/smithclay/synthetic-load-generator-go/topology"
 )
 
 type ScheduledMetricGenerator struct {
-	metrics []topology.Metric
-	service string
+	metrics        []topology.Metric
+	service        string
 	metricsPerHour int
-	seed int64
-	Emitter emitter.MetricEmitter
-	ticker *time.Ticker
-	metricCount int
-	closed chan struct{}
+	seed           int64
+	Emitter        emitter.MetricEmitter
+	ticker         *time.Ticker
+	metricCount    int
+	closed         chan struct{}
 }
 
 type ScheduledMetricGeneratorOption func(*ScheduledMetricGenerator)
@@ -26,9 +27,9 @@ func WithSeed(seed int64) ScheduledMetricGeneratorOption {
 	}
 }
 
-func WithGrpc(url string) ScheduledMetricGeneratorOption {
+func WithEmitter(e emitter.MetricEmitter) ScheduledMetricGeneratorOption {
 	return func(h *ScheduledMetricGenerator) {
-		h.Emitter = emitter.NewOpenTelemetryGrpcEmitter(url)
+		h.Emitter = e
 	}
 }
 
@@ -41,15 +42,15 @@ func WithMetricsPerHour(metricsPerHour int) ScheduledMetricGeneratorOption {
 func NewScheduledMetricGenerator(metrics []topology.Metric, service string, opts ...ScheduledMetricGeneratorOption) *ScheduledMetricGenerator {
 	const (
 		defaultMetricsPerHour = 720
-		defaultSeed  = 42
+		defaultSeed           = 42
 	)
 
 	stg := &ScheduledMetricGenerator{
-		metrics:      metrics,
-		service:       service,
-		seed: defaultSeed,
+		metrics:        metrics,
+		service:        service,
+		seed:           defaultSeed,
 		metricsPerHour: defaultMetricsPerHour,
-		Emitter:       emitter.NewOpenTelemetryStdoutEmitter(),
+		Emitter:        emitter.NewOpenTelemetryStdoutEmitter(),
 	}
 
 	for _, opt := range opts {
@@ -66,7 +67,7 @@ func (stg *ScheduledMetricGenerator) emitOneMetric() {
 
 func (stg *ScheduledMetricGenerator) Start() {
 	log.Printf("Starting metric generation for service %s %d metrics/hr...",
-		stg.service,  stg.metricsPerHour)
+		stg.service, stg.metricsPerHour)
 	stg.ticker = time.NewTicker(time.Duration(360000/stg.metricsPerHour) * time.Millisecond)
 	done := make(chan bool)
 

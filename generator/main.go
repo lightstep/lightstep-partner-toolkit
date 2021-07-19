@@ -3,16 +3,22 @@ package main
 import (
 	"encoding/json"
 	"flag"
-	scheduledMetric "github.com/smithclay/synthetic-load-generator-go/generator/metric"
-	"github.com/smithclay/synthetic-load-generator-go/generator/trace"
-	"github.com/smithclay/synthetic-load-generator-go/topology"
 	"io/ioutil"
 	"log"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/smithclay/synthetic-load-generator-go/emitter"
+	scheduledMetric "github.com/smithclay/synthetic-load-generator-go/generator/metric"
+	"github.com/smithclay/synthetic-load-generator-go/generator/trace"
+	"github.com/smithclay/synthetic-load-generator-go/topology"
 )
+
+func init() {
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
+}
 
 func main() {
 	var paramsFile string
@@ -23,7 +29,6 @@ func main() {
 	flag.StringVar(&paramsFile, "paramsFile", "REQUIRED", "topology JSON file")
 	flag.StringVar(&collectorUrl, "collectorUrl", "", "URL to gRPC OpenTelemetry collector")
 	flag.Int64Var(&randSeed, "randSeed", time.Now().UTC().UnixNano(), "random seed (int64)")
-
 	flag.Parse()
 	if collectorUrl == "" {
 		stdoutMode = true
@@ -44,6 +49,13 @@ func main() {
 	if err != nil {
 		log.Fatalf("could not parse topology file: %v", err)
 	}
+
+	var e *emitter.OpenTelemetryEmitter
+	e = emitter.NewOpenTelemetryGrpcEmitter(collectorUrl)
+	if stdoutMode {
+		e = emitter.NewOpenTelemetryStdoutEmitter()
+	}
+
 	metricGenerators := make([]*scheduledMetric.ScheduledMetricGenerator, 0)
 	for _, s := range file.Topology.Services {
 		if len(s.Metrics) == 0 {
@@ -54,7 +66,7 @@ func main() {
 		mg = scheduledMetric.NewScheduledMetricGenerator(s.Metrics, s.ServiceName,
 			scheduledMetric.WithSeed(randSeed),
 			scheduledMetric.WithMetricsPerHour(3600),
-			scheduledMetric.WithGrpc(collectorUrl),
+			scheduledMetric.WithEmitter(e),
 		)
 
 		if stdoutMode {
@@ -65,6 +77,7 @@ func main() {
 		}
 		metricGenerators = append(metricGenerators, mg)
 	}
+
 	traceGenerators := make([]*trace.ScheduledTraceGenerator, 0)
 	for _, r := range file.RootRoutes {
 		var tg *trace.ScheduledTraceGenerator
@@ -72,11 +85,12 @@ func main() {
 		tg = trace.NewScheduledTraceGenerator(file.Topology, r.Route, r.Service,
 			trace.WithSeed(randSeed),
 			trace.WithTracesPerHour(r.TracesPerHour),
-			trace.WithGrpc(collectorUrl))
+			trace.WithEmmitter(e))
 
 		if stdoutMode {
 			tg = trace.NewScheduledTraceGenerator(file.Topology, r.Route, r.Service,
 				trace.WithSeed(randSeed),
+				trace.WithEmmitter(e),
 				trace.WithTracesPerHour(r.TracesPerHour))
 		}
 

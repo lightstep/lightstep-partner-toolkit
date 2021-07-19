@@ -3,6 +3,8 @@ package emitter
 import (
 	"context"
 	"fmt"
+	"math/rand"
+
 	"github.com/smithclay/synthetic-load-generator-go/topology"
 	"github.com/smithclay/synthetic-load-generator-go/trace"
 	"go.opentelemetry.io/otel/attribute"
@@ -15,24 +17,25 @@ import (
 	controller "go.opentelemetry.io/otel/sdk/metric/controller/basic"
 	processor "go.opentelemetry.io/otel/sdk/metric/processor/basic"
 	"go.opentelemetry.io/otel/sdk/metric/selector/simple"
-	"math/rand"
+
+	"os"
+	"time"
 
 	"go.opentelemetry.io/otel/exporters/stdout/stdoutmetric"
 	"go.opentelemetry.io/otel/sdk/resource"
 	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
 	oteltrace "go.opentelemetry.io/otel/trace"
 	"google.golang.org/grpc/credentials"
-	"os"
-	"time"
+
+	"log"
 
 	metricexport "go.opentelemetry.io/otel/sdk/export/metric"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
-	"log"
 )
 
 const (
 	ValueRecorderType = "ValueRecorder"
-	CounterType = "Counter"
+	CounterType       = "Counter"
 )
 
 type OpenTelemetryEmitter struct {
@@ -40,13 +43,13 @@ type OpenTelemetryEmitter struct {
 	flushIntervalMillis         int
 	stdout                      bool
 	serviceNameToTracerProvider map[string]*sdktrace.TracerProvider
-	serviceNameToMeterProvider map[string]*metric.MeterProvider
+	serviceNameToMeterProvider  map[string]*metric.MeterProvider
 }
 
 func NewOpenTelemetryGrpcEmitter(collectorUrl string) *OpenTelemetryEmitter {
 	return &OpenTelemetryEmitter{
 		serviceNameToTracerProvider: make(map[string]*sdktrace.TracerProvider),
-		serviceNameToMeterProvider: make(map[string]*metric.MeterProvider),
+		serviceNameToMeterProvider:  make(map[string]*metric.MeterProvider),
 		collectorUrl:                collectorUrl,
 		stdout:                      false,
 	}
@@ -55,7 +58,7 @@ func NewOpenTelemetryGrpcEmitter(collectorUrl string) *OpenTelemetryEmitter {
 func NewOpenTelemetryStdoutEmitter() *OpenTelemetryEmitter {
 	return &OpenTelemetryEmitter{
 		serviceNameToTracerProvider: make(map[string]*sdktrace.TracerProvider),
-		serviceNameToMeterProvider: make(map[string]*metric.MeterProvider),
+		serviceNameToMeterProvider:  make(map[string]*metric.MeterProvider),
 		stdout:                      true,
 	}
 }
@@ -69,7 +72,7 @@ func (e *OpenTelemetryEmitter) EmitMetric(metrics []topology.Metric, service str
 			if err != nil {
 				log.Fatalf("error creating recorder: %v", err)
 			}
-			recorder.Record(context.Background(), m.Min + rand.Float64() * (m.Max - m.Min),
+			recorder.Record(context.Background(), m.Min+rand.Float64()*(m.Max-m.Min),
 				attribute.String("service.name", service),
 				attribute.Bool("synthetic", true))
 		} else if m.Type == CounterType {
@@ -78,7 +81,7 @@ func (e *OpenTelemetryEmitter) EmitMetric(metrics []topology.Metric, service str
 			if err != nil {
 				log.Fatalf("error creating counter: %v", err)
 			}
-			counter.Add(context.Background(), m.Min + rand.Float64() * (m.Max - m.Min),
+			counter.Add(context.Background(), m.Min+rand.Float64()*(m.Max-m.Min),
 				attribute.String("service.name", service),
 				attribute.Bool("synthetic", true))
 		}
@@ -222,22 +225,21 @@ func initTracer(serviceName string, isStdout bool) *sdktrace.TracerProvider {
 			otlptracegrpc.NewClient(
 				otlptracegrpc.WithTLSCredentials(credentials.NewClientTLSFromCert(nil, "")),
 				otlptracegrpc.WithEndpoint(endpoint),
+				otlptracegrpc.WithTimeout(10*time.Second),
 				otlptracegrpc.WithHeaders(map[string]string{
 					"lightstep-access-token": os.Getenv("LS_ACCESS_TOKEN"),
 				}),
 			),
 		)
+		if err != nil {
+			log.Panicf("count not initialize otlptrace exporter: %v", err)
+			return nil
+		}
 	}
-
-	if err != nil {
-		log.Fatalf("failed to initialize otelgrpc pipeline: %v", err)
-	}
-
-	bsp := sdktrace.NewBatchSpanProcessor(exp)
 
 	tp := sdktrace.NewTracerProvider(
 		sdktrace.WithSampler(sdktrace.AlwaysSample()),
-		sdktrace.WithSpanProcessor(bsp),
+		sdktrace.WithBatcher(exp),
 		sdktrace.WithResource(
 			resource.NewWithAttributes(
 				semconv.SchemaURL,

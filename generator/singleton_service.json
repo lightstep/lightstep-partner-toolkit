@@ -48,7 +48,7 @@
     {
       "service" : "frontend",
       "route" : "/product",
-      "tracesPerHour" : 1440
+      "tracesPerHour" : 360
     }
   ]
 }
