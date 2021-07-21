@@ -15,6 +15,9 @@ processors:
   batch:
 
 exporters:
+  service:
+    scraper:
+      endpoint: 0.0.0.0:55688
   logging:
 #    loglevel: debug
 
@@ -35,4 +38,5 @@ service:
       processors: 
       - batch
       exporters:
+      - service
       - logging

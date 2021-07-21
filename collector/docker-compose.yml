@@ -63,7 +63,7 @@ services:
     environment:
       - LS_ACCESS_TOKEN=${LS_ACCESS_TOKEN}
     volumes:
-      - ./config/collector-config.yml:/etc/otel/config.yaml
+      - ./config/log-only-config.yml:/etc/otel/config.yaml
     ports:
       - "13133:13133" # health_check
       - "55681:55681" # otlp http
