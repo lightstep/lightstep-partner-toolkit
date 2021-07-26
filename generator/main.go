@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"flag"
 	"io/ioutil"
@@ -54,7 +55,7 @@ func main() {
 	}
 
 	var e *emitter.OpenTelemetryEmitter
-	e = emitter.NewOpenTelemetryGrpcEmitter(collectorUrl)
+	e = emitter.NewOpenTelemetryGrpcEmitter(context.Background(), collectorUrl)
 	if stdoutMode {
 		e = emitter.NewOpenTelemetryStdoutEmitter()
 	}
