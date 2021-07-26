@@ -2,6 +2,9 @@ extensions:
   health_check:
 
 receivers:
+  generator:
+    path: /Users/claysmith/workspace/lightstep-partner-sdk/generator/config/hipster_shop.json
+    #path: /Users/claysmith/workspace/lightstep-partner-sdk/generator/config/singleton_service.json
   otlp:
     protocols:
       http:
@@ -19,7 +22,7 @@ exporters:
     scraper:
       endpoint: 0.0.0.0:55688
   logging:
-#    loglevel: debug
+    loglevel: debug
 
 service:
   extensions: [health_check]
@@ -35,6 +38,7 @@ service:
     traces:
       receivers:
       - otlp
+      - generator
       processors: 
       - batch
       exporters:
