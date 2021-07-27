@@ -16,10 +16,9 @@ package webhookprocessor
 
 import (
 	"context"
-	"go.opentelemetry.io/collector/config/confighttp"
-
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/config"
+	"go.opentelemetry.io/collector/config/confighttp"
 	"go.opentelemetry.io/collector/consumer"
 	"go.opentelemetry.io/collector/processor/processorhelper"
 )
@@ -59,7 +58,7 @@ func createDefaultConfig() config.Processor {
 }
 
 func createProcessor(
-	params component.ProcessorCreateParams,
+	params component.ProcessorCreateSettings,
 	cfg config.Processor,
 	serverType string,
 	options ...Option,
@@ -71,7 +70,7 @@ func createProcessor(
 
 func createTraceProcessorWithOptions(
 	_ context.Context,
-	params component.ProcessorCreateParams,
+	params component.ProcessorCreateSettings,
 	cfg config.Processor,
 	next consumer.Traces,
 	options ...Option,
@@ -83,19 +82,19 @@ func createTraceProcessorWithOptions(
 	return processorhelper.NewTracesProcessor(
 		cfg,
 		next,
-		kp,
+		kp.ProcessTraces,
 		processorhelper.WithCapabilities(processorCapabilities),
 		processorhelper.WithStart(kp.Start),
 		processorhelper.WithShutdown(kp.Shutdown))
 }
 
-func createTraceProcessor(ctx context.Context, params component.ProcessorCreateParams, cfg config.Processor, next consumer.Traces) (component.TracesProcessor, error) {
+func createTraceProcessor(ctx context.Context, params component.ProcessorCreateSettings, cfg config.Processor, next consumer.Traces) (component.TracesProcessor, error) {
 	return createTraceProcessorWithOptions(ctx, params, cfg, next)
 }
 
 func createMetricsProcessorWithOptions(
 	_ context.Context,
-	params component.ProcessorCreateParams,
+	params component.ProcessorCreateSettings,
 	cfg config.Processor,
 	nextMetricsConsumer consumer.Metrics,
 	options ...Option,
@@ -108,14 +107,14 @@ func createMetricsProcessorWithOptions(
 	return processorhelper.NewMetricsProcessor(
 		cfg,
 		nextMetricsConsumer,
-		kp,
+		kp.ProcessMetrics,
 		processorhelper.WithCapabilities(processorCapabilities),
 		processorhelper.WithStart(kp.Start),
 		processorhelper.WithShutdown(kp.Shutdown))
 }
 func createMetricsProcessor(
 	ctx context.Context,
-	params component.ProcessorCreateParams,
+	params component.ProcessorCreateSettings,
 	cfg config.Processor,
 	nextMetricsConsumer consumer.Metrics,
 ) (component.MetricsProcessor, error) {

@@ -32,7 +32,7 @@ func createDefaultConfig() config.Exporter {
 
 func createTracesExporter(
 	_ context.Context,
-	set component.ExporterCreateParams,
+	set component.ExporterCreateSettings,
 	cfg config.Exporter,
 ) (component.TracesExporter, error) {
 	oCfg := cfg.(*Config)
@@ -44,7 +44,7 @@ func createTracesExporter(
 	}
 	return exporterhelper.NewTracesExporter(
 		cfg,
-		set.Logger,
+		set,
 		se.ConsumeTraces,
 		exporterhelper.WithStart(se.Start),
 		exporterhelper.WithShutdown(se.Shutdown),
