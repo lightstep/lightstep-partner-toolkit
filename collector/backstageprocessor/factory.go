@@ -11,7 +11,7 @@ import (
 	"go.opentelemetry.io/collector/processor/processorhelper"
 	"go.uber.org/zap"
 
-	"go.opentelemetry.io/collector/consumer/pdata"
+	"go.opentelemetry.io/collector/model/pdata"
 )
 
 const (
@@ -66,17 +66,18 @@ func createDefaultConfig() config.Processor {
 
 func createTraceProcessor(
 	_ context.Context,
-	params component.ProcessorCreateParams,
+	params component.ProcessorCreateSettings,
 	cfg config.Processor,
 	nextConsumer consumer.Traces) (component.TracesProcessor, error) {
 	attrProcs, err := createAttrProcessor(cfg.(*Config), params.Logger)
 	if err != nil {
 		return nil, err
 	}
+	rp := &resourceProcessor{attrProcs: attrProcs}
 	return processorhelper.NewTracesProcessor(
 		cfg,
 		nextConsumer,
-		&resourceProcessor{attrProcs: attrProcs},
+		rp.ProcessTraces,
 		processorhelper.WithCapabilities(processorCapabilities))
 }
 
