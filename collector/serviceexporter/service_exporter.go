@@ -6,8 +6,7 @@ import (
 	"fmt"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/consumer"
-	"go.opentelemetry.io/collector/consumer/pdata"
-	"log"
+	"go.opentelemetry.io/collector/model/pdata"
 	"net/http"
 	"sync"
 )
@@ -37,7 +36,6 @@ func (e *serviceExporter) ConsumeTraces(_ context.Context, td pdata.Traces) erro
 		if ok {
 			resourceAttrs := attrsValue(rs.Resource().Attributes())
 			e.serviceResources.Services[serviceName.StringVal()] = resourceAttrs
-			log.Printf("resourceAttrs for service %v: %v", serviceName, resourceAttrs)
 		}
 	}
 	return nil
