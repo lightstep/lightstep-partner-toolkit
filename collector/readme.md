@@ -2,6 +2,16 @@
 
 Experimental OpenTelemetry collectors that annotate metrics and traces with external events like PagerDuty incidents, deployments, or chaos experiments. 
 
+
+### synthetic data instructions
+
+This generates synthetic trace data inside the collector and sends to Lightstep.
+
+```
+$ export LS_ACCESS_TOKEN=your token
+$ docker run -e LS_ACCESS_TOKEN --rm ghcr.io/lightstep/lightstep-partner-toolkit-collector:latest
+```
+
 ### webhook demo instructions
 
 This will run the collector and creates webhooks to your local machine via [localtunnel](https://theboroer.github.io/localtunnel-www/).
