@@ -36,15 +36,7 @@ func createTracesExporter(
 	cfg config.Exporter,
 ) (component.TracesExporter, error) {
 	oCfg := cfg.(*Config)
-	se := &serviceExporter{
-		serviceResources: &ServiceResources{
-			Services: make(map[string]ServiceResourceAttributes),
-		},
-		config:              oCfg,
-		spanIdToServiceName: make(map[string]string),
-		relationshipMap: make(map[string]string),
-		logger:              set.Logger,
-	}
+	se := NewServiceExporter(set.Logger, oCfg)
 
 	return exporterhelper.NewTracesExporter(
 		cfg,

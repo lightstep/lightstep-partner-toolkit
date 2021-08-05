@@ -9,6 +9,7 @@ import (
 	"go.opentelemetry.io/collector/model/pdata"
 	"go.uber.org/zap"
 	"net/http"
+	"strings"
 	"sync"
 )
 
@@ -30,7 +31,19 @@ type serviceExporter struct {
 	config              *Config
 	serviceResources    *ServiceResources
 	spanIdToServiceName map[string]string
-	relationshipMap map[string]string
+	relationshipMap map[string]uint64
+}
+
+func NewServiceExporter(logger *zap.Logger, oCfg *Config) *serviceExporter {
+	return &serviceExporter{
+		serviceResources: &ServiceResources{
+			Services: make(map[string]ServiceResourceAttributes),
+		},
+		config:              oCfg,
+		spanIdToServiceName: make(map[string]string),
+		relationshipMap: make(map[string]uint64),
+		logger:              logger,
+	}
 }
 
 func (e *serviceExporter) Capabilities() consumer.Capabilities {
@@ -59,7 +72,13 @@ func (e *serviceExporter) ConsumeTraces(_ context.Context, td pdata.Traces) erro
 				parentService, parentOk := e.spanIdToServiceName[span.ParentSpanID().HexString()]; if parentOk {
 					if parentService != serviceName.StringVal() {
 						// TODO: handle multiple from relationships
-						e.relationshipMap[parentService] = serviceName.StringVal()
+						keyName := fmt.Sprintf("%s>%s", parentService, serviceName.StringVal())
+						_, exists := e.relationshipMap[keyName]; if exists {
+							e.relationshipMap[keyName] = e.relationshipMap[keyName] + 1
+						} else {
+							e.relationshipMap[keyName] = 0
+						}
+
 					}
 				}
 				e.spanIdToServiceName[span.SpanID().HexString()] = serviceName.StringVal()
@@ -81,8 +100,9 @@ func (e *serviceExporter) Start(_ context.Context, host component.Host) error {
 
 		// rebuild relationship map on each request, probably bad
 		e.serviceResources.Relationships = make([]ServiceRelationship, 0)
-		for k, v := range e.relationshipMap {
-			e.serviceResources.Relationships = append(e.serviceResources.Relationships, ServiceRelationship{From: k, To: v})
+		for serviceRel, _ := range e.relationshipMap {
+			services := strings.Split(serviceRel, ">")
+			e.serviceResources.Relationships = append(e.serviceResources.Relationships, ServiceRelationship{From: services[0], To: services[1]})
 		}
 
 		data, _ := json.Marshal(e.serviceResources)
