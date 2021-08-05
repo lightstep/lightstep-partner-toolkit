@@ -40,8 +40,12 @@ func createTracesExporter(
 		serviceResources: &ServiceResources{
 			Services: make(map[string]ServiceResourceAttributes),
 		},
-		config: oCfg,
+		config:              oCfg,
+		spanIdToServiceName: make(map[string]string),
+		relationshipMap: make(map[string]string),
+		logger:              set.Logger,
 	}
+
 	return exporterhelper.NewTracesExporter(
 		cfg,
 		set,

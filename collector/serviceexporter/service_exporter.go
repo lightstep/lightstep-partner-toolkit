@@ -7,21 +7,30 @@ import (
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/consumer"
 	"go.opentelemetry.io/collector/model/pdata"
+	"go.uber.org/zap"
 	"net/http"
 	"sync"
 )
 
 type ServiceResourceAttributes map[string]interface{}
 
+type ServiceRelationship struct {
+	From string `json:"from"`
+	To string `json:"to"`
+}
 type ServiceResources struct  {
 	Services map[string]ServiceResourceAttributes `json:"services"`
+	Relationships []ServiceRelationship `json:"relationships"`
 }
 
 type serviceExporter struct {
-	mutex sync.Mutex
-	server     *http.Server
-	config     *Config
-	serviceResources *ServiceResources
+	logger              *zap.Logger
+	mutex               sync.Mutex
+	server              *http.Server
+	config              *Config
+	serviceResources    *ServiceResources
+	spanIdToServiceName map[string]string
+	relationshipMap map[string]string
 }
 
 func (e *serviceExporter) Capabilities() consumer.Capabilities {
@@ -32,10 +41,29 @@ func (e *serviceExporter) ConsumeTraces(_ context.Context, td pdata.Traces) erro
 	rss := td.ResourceSpans()
 	for i := 0; i < rss.Len(); i++ {
 		rs := rss.At(i)
-		serviceName, ok := rs.Resource().Attributes().Get("service.name")
-		if ok {
+		serviceName, serviceOk := rs.Resource().Attributes().Get("service.name")
+		if serviceOk {
 			resourceAttrs := attrsValue(rs.Resource().Attributes())
 			e.serviceResources.Services[serviceName.StringVal()] = resourceAttrs
+		}
+		ils := rs.InstrumentationLibrarySpans()
+		for j := 0; j < ils.Len(); j++ {
+			is := ils.At(j)
+			spans := is.Spans()
+			for k := 0; k < spans.Len(); k++ {
+				if !serviceOk {
+					continue
+				}
+				span := spans.At(k)
+
+				parentService, parentOk := e.spanIdToServiceName[span.ParentSpanID().HexString()]; if parentOk {
+					if parentService != serviceName.StringVal() {
+						// TODO: handle multiple from relationships
+						e.relationshipMap[parentService] = serviceName.StringVal()
+					}
+				}
+				e.spanIdToServiceName[span.SpanID().HexString()] = serviceName.StringVal()
+			}
 		}
 	}
 	return nil
@@ -45,8 +73,18 @@ func (e *serviceExporter) Start(_ context.Context, host component.Host) error {
 	handler := http.NewServeMux()
 
 	handler.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		e.mutex.Lock()
+		defer e.mutex.Unlock()
+
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusAccepted)
+
+		// rebuild relationship map on each request, probably bad
+		e.serviceResources.Relationships = make([]ServiceRelationship, 0)
+		for k, v := range e.relationshipMap {
+			e.serviceResources.Relationships = append(e.serviceResources.Relationships, ServiceRelationship{From: k, To: v})
+		}
+
 		data, _ := json.Marshal(e.serviceResources)
 		_, _ = fmt.Fprintf(w, "%s", string(data))
 	})
