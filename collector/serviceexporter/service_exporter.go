@@ -13,14 +13,24 @@ import (
 	"sync"
 )
 
-type ServiceResourceAttributes map[string]interface{}
 
 type ServiceRelationship struct {
 	From string `json:"from"`
 	To string `json:"to"`
 }
+
+//type ServiceResourcesCol struct {
+//	Attributes  `json:"attributes"`
+//}
+
+type ServiceResourceAttributes map[string]pdata.AttributeMap
+
+func attrsHashString(m pdata.AttributeMap) string {
+	return fmt.Sprintf("%v", attrsValue(m))
+}
+
 type ServiceResources struct  {
-	Services map[string]ServiceResourceAttributes `json:"services"`
+	Resources     []map[string]interface{} `json:"resources"`
 	Relationships []ServiceRelationship `json:"relationships"`
 }
 
@@ -32,16 +42,18 @@ type serviceExporter struct {
 	serviceResources    *ServiceResources
 	spanIdToServiceName map[string]string
 	relationshipMap map[string]uint64
+	resourceMap map[string]ServiceResourceAttributes
 }
 
 func NewServiceExporter(logger *zap.Logger, oCfg *Config) *serviceExporter {
 	return &serviceExporter{
 		serviceResources: &ServiceResources{
-			Services: make(map[string]ServiceResourceAttributes),
+			Resources: make([]map[string]interface{}, 0),
 		},
 		config:              oCfg,
 		spanIdToServiceName: make(map[string]string),
 		relationshipMap: make(map[string]uint64),
+		resourceMap: make(map[string]ServiceResourceAttributes),
 		logger:              logger,
 	}
 }
@@ -54,10 +66,18 @@ func (e *serviceExporter) ConsumeTraces(_ context.Context, td pdata.Traces) erro
 	rss := td.ResourceSpans()
 	for i := 0; i < rss.Len(); i++ {
 		rs := rss.At(i)
-		serviceName, serviceOk := rs.Resource().Attributes().Get("service.name")
+		serviceNameAttr, serviceOk := rs.Resource().Attributes().Get("service.name")
+		serviceNameStr := serviceNameAttr.StringVal()
+
 		if serviceOk {
-			resourceAttrs := attrsValue(rs.Resource().Attributes())
-			e.serviceResources.Services[serviceName.StringVal()] = resourceAttrs
+			resourceAttrs := rs.Resource().Attributes()
+			hashKey := attrsHashString(resourceAttrs)
+			_, ok := e.resourceMap[serviceNameStr]; if !ok {
+				e.resourceMap[serviceNameStr] = make(ServiceResourceAttributes)
+			}
+			_, ok = e.resourceMap[serviceNameStr][hashKey]; if !ok {
+				e.resourceMap[serviceNameStr][hashKey] = resourceAttrs
+			}
 		}
 		ils := rs.InstrumentationLibrarySpans()
 		for j := 0; j < ils.Len(); j++ {
@@ -70,18 +90,17 @@ func (e *serviceExporter) ConsumeTraces(_ context.Context, td pdata.Traces) erro
 				span := spans.At(k)
 
 				parentService, parentOk := e.spanIdToServiceName[span.ParentSpanID().HexString()]; if parentOk {
-					if parentService != serviceName.StringVal() {
+					if parentService != serviceNameStr {
 						// TODO: handle multiple from relationships
-						keyName := fmt.Sprintf("%s>%s", parentService, serviceName.StringVal())
+						keyName := fmt.Sprintf("%s>%s", parentService, serviceNameStr)
 						_, exists := e.relationshipMap[keyName]; if exists {
 							e.relationshipMap[keyName] = e.relationshipMap[keyName] + 1
 						} else {
 							e.relationshipMap[keyName] = 0
 						}
-
 					}
 				}
-				e.spanIdToServiceName[span.SpanID().HexString()] = serviceName.StringVal()
+				e.spanIdToServiceName[span.SpanID().HexString()] = serviceNameStr
 			}
 		}
 	}
@@ -103,6 +122,13 @@ func (e *serviceExporter) Start(_ context.Context, host component.Host) error {
 		for serviceRel, _ := range e.relationshipMap {
 			services := strings.Split(serviceRel, ">")
 			e.serviceResources.Relationships = append(e.serviceResources.Relationships, ServiceRelationship{From: services[0], To: services[1]})
+		}
+
+		e.serviceResources.Resources = make([]map[string]interface{}, 0)
+		for _, resourceAttrMap := range e.resourceMap {
+			for _, attrs := range resourceAttrMap {
+				e.serviceResources.Resources = append(e.serviceResources.Resources, attrsValue(attrs))
+			}
 		}
 
 		data, _ := json.Marshal(e.serviceResources)
