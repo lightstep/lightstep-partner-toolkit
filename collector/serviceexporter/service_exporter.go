@@ -29,9 +29,17 @@ func attrsHashString(m pdata.AttributeMap) string {
 	return fmt.Sprintf("%v", attrsValue(m))
 }
 
+type ServiceResourceCollection struct {
+	Attributes map[string]interface{} `json:"attributes"`
+}
+
 type ServiceResources struct  {
-	Resources     []map[string]interface{} `json:"resources"`
+	Resources     []ServiceResourceCollection `json:"resources"`
 	Relationships []ServiceRelationship `json:"relationships"`
+}
+
+type ServiceResourceResponse struct {
+	Data *ServiceResources `json:"data"`
 }
 
 type serviceExporter struct {
@@ -48,7 +56,7 @@ type serviceExporter struct {
 func NewServiceExporter(logger *zap.Logger, oCfg *Config) *serviceExporter {
 	return &serviceExporter{
 		serviceResources: &ServiceResources{
-			Resources: make([]map[string]interface{}, 0),
+			Resources: make([]ServiceResourceCollection, 0),
 		},
 		config:              oCfg,
 		spanIdToServiceName: make(map[string]string),
@@ -124,14 +132,14 @@ func (e *serviceExporter) Start(_ context.Context, host component.Host) error {
 			e.serviceResources.Relationships = append(e.serviceResources.Relationships, ServiceRelationship{From: services[0], To: services[1]})
 		}
 
-		e.serviceResources.Resources = make([]map[string]interface{}, 0)
+		e.serviceResources.Resources = make([]ServiceResourceCollection, 0)
 		for _, resourceAttrMap := range e.resourceMap {
 			for _, attrs := range resourceAttrMap {
-				e.serviceResources.Resources = append(e.serviceResources.Resources, attrsValue(attrs))
+				e.serviceResources.Resources = append(e.serviceResources.Resources, ServiceResourceCollection{attrsValue(attrs)})
 			}
 		}
 
-		data, _ := json.Marshal(e.serviceResources)
+		data, _ := json.Marshal(ServiceResourceResponse{e.serviceResources})
 		_, _ = fmt.Fprintf(w, "%s", string(data))
 	})
 
