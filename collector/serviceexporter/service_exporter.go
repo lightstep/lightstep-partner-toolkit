@@ -11,12 +11,17 @@ import (
 	"net/http"
 	"strings"
 	"sync"
+	"time"
 )
 
 
 type ServiceRelationship struct {
-	From string `json:"from"`
-	To string `json:"to"`
+	From          string `json:"from"`
+	To            string `json:"to"`
+	ToOperation string `json:"to_operation"`
+	FromOperation string `json:"from_operation"`
+	SpanCount     uint64 `json:"span_count"`
+	LastSeen      string `json:"last_seen"`
 }
 
 //type ServiceResourcesCol struct {
@@ -31,6 +36,7 @@ func attrsHashString(m pdata.AttributeMap) string {
 
 type ServiceResourceCollection struct {
 	Attributes map[string]interface{} `json:"attributes"`
+	LastSeen string `json:"last_seen"`
 }
 
 type ServiceResources struct  {
@@ -49,7 +55,9 @@ type serviceExporter struct {
 	config              *Config
 	serviceResources    *ServiceResources
 	spanIdToServiceName map[string]string
-	relationshipMap map[string]uint64
+	spanIdToOperationName map[string]string
+	spanIdToSpanName map[string]string
+	relationshipMap map[string]uint64 // key: svc1>svc2, val: ingress operation svc2
 	resourceMap map[string]ServiceResourceAttributes
 }
 
@@ -60,6 +68,7 @@ func NewServiceExporter(logger *zap.Logger, oCfg *Config) *serviceExporter {
 		},
 		config:              oCfg,
 		spanIdToServiceName: make(map[string]string),
+		spanIdToOperationName: make(map[string]string),
 		relationshipMap: make(map[string]uint64),
 		resourceMap: make(map[string]ServiceResourceAttributes),
 		logger:              logger,
@@ -68,6 +77,15 @@ func NewServiceExporter(logger *zap.Logger, oCfg *Config) *serviceExporter {
 
 func (e *serviceExporter) Capabilities() consumer.Capabilities {
 	return consumer.Capabilities{MutatesData: false}
+}
+
+func (e *serviceExporter) addRelationship(parentService string, parentOp string, childService string, operationName string) {
+	keyName := fmt.Sprintf("%s>%s>%s>%s", parentService, parentOp, childService, operationName)
+	_, exists := e.relationshipMap[keyName]; if !exists {
+		e.relationshipMap[keyName] = 0
+	} else {
+		e.relationshipMap[keyName] = e.relationshipMap[keyName] + 1
+	}
 }
 
 func (e *serviceExporter) ConsumeTraces(_ context.Context, td pdata.Traces) error {
@@ -99,15 +117,14 @@ func (e *serviceExporter) ConsumeTraces(_ context.Context, td pdata.Traces) erro
 
 				parentService, parentOk := e.spanIdToServiceName[span.ParentSpanID().HexString()]; if parentOk {
 					if parentService != serviceNameStr {
-						// TODO: handle multiple from relationships
-						keyName := fmt.Sprintf("%s>%s", parentService, serviceNameStr)
-						_, exists := e.relationshipMap[keyName]; if exists {
-							e.relationshipMap[keyName] = e.relationshipMap[keyName] + 1
-						} else {
-							e.relationshipMap[keyName] = 0
+						parentOperation, parentOpOk := e.spanIdToOperationName[span.ParentSpanID().HexString()]; if parentOpOk {
+							e.addRelationship(parentService, parentOperation, serviceNameStr, span.Name())
 						}
 					}
+				} else if span.ParentSpanID().Bytes() == [8]byte{0x0} {
+					e.addRelationship("__ROOT__", "__ROOT__", serviceNameStr, span.Name())
 				}
+				e.spanIdToOperationName[span.SpanID().HexString()] = span.Name()
 				e.spanIdToServiceName[span.SpanID().HexString()] = serviceNameStr
 			}
 		}
@@ -127,15 +144,17 @@ func (e *serviceExporter) Start(_ context.Context, host component.Host) error {
 
 		// rebuild relationship map on each request, probably bad
 		e.serviceResources.Relationships = make([]ServiceRelationship, 0)
-		for serviceRel, _ := range e.relationshipMap {
+		for serviceRel, count := range e.relationshipMap {
 			services := strings.Split(serviceRel, ">")
-			e.serviceResources.Relationships = append(e.serviceResources.Relationships, ServiceRelationship{From: services[0], To: services[1]})
+			e.serviceResources.Relationships = append(e.serviceResources.Relationships,
+				ServiceRelationship{From: services[0], FromOperation: services[1], To: services[2], SpanCount: count, ToOperation: services[3], LastSeen: time.Now().Format(time.RFC3339)})
 		}
 
 		e.serviceResources.Resources = make([]ServiceResourceCollection, 0)
 		for _, resourceAttrMap := range e.resourceMap {
 			for _, attrs := range resourceAttrMap {
-				e.serviceResources.Resources = append(e.serviceResources.Resources, ServiceResourceCollection{attrsValue(attrs)})
+				e.serviceResources.Resources = append(e.serviceResources.Resources,
+					ServiceResourceCollection{Attributes: attrsValue(attrs), LastSeen: time.Now().Format(time.RFC3339)})
 			}
 		}
 
