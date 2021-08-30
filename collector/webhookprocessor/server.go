@@ -69,7 +69,7 @@ func (h *httpServer) Start(_ context.Context, host component.Host) error {
 		return fmt.Errorf("failed to bind to address %s: %w", h.config.TracesIngress.Endpoint, err)
 	}
 	go func() {
-		if err := h.server.Serve(listener); err != nil {
+		if err := h.server.Serve(listener); err != http.ErrServerClosed {
 			host.ReportFatalError(err)
 		}
 	}()
@@ -129,8 +129,11 @@ func (h *httpServer) ProcessTraces(_ context.Context, td pdata.Traces) (pdata.Tr
 	return td, nil
 }
 
-func (h *httpServer) Shutdown(_ context.Context) error {
-	return h.server.Close()
+func (h *httpServer) Shutdown(ctx context.Context) error {
+	if err := h.server.Shutdown(ctx); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (h *httpServer) removeAttribute(key string) error {
