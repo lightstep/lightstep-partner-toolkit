@@ -134,7 +134,7 @@ func (c *clientImpl) GetTrace(spanId string) (*LightstepTraceResponse, error) {
 
 func (c *clientImpl) GetStreamTraces() (*LightstepStreamResponse, error) {
 	youngestTime := time.Now().Add(time.Duration(-5) * time.Minute)
-	oldestTime := youngestTime.Add(time.Duration(-5) * time.Minute)
+	oldestTime := youngestTime.Add(time.Duration(-3) * time.Minute)
 
 	path := fmt.Sprintf("%s/projects/%s/streams/%s/timeseries?resolution-ms=60000&youngest-time=%s&oldest-time=%s&include-exemplars=1", c.org, c.project, c.streamId, youngestTime.Format(time.RFC3339), oldestTime.Format(time.RFC3339))
 	resp, err := c.get(path)
