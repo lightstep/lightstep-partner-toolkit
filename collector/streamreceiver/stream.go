@@ -2,7 +2,6 @@ package streamreceiver
 
 import (
 	"context"
-	"encoding/hex"
 	"fmt"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/component/componenterror"
@@ -40,16 +39,14 @@ func (s streamReceiver) Start(ctx context.Context, host component.Host) error {
 }
 
 func convertStringToTraceId(traceId string) pdata.TraceID {
-	decodeId, _ := hex.DecodeString(traceId)
 	var newTraceId [16]byte
-	copy(newTraceId[:], decodeId)
+	copy(newTraceId[:], traceId)
 	return pdata.NewTraceID(newTraceId)
 }
 
 func convertStringToSpanId(spanId string) pdata.SpanID {
-	decodeId, _ := hex.DecodeString(spanId)
 	var newSpanId [8]byte
-	copy(newSpanId[:], decodeId)
+	copy(newSpanId[:], spanId)
 	return pdata.NewSpanID(newSpanId)
 }
 
@@ -79,7 +76,6 @@ func (s streamReceiver) convertTrace(trace LightstepTrace) *pdata.Traces {
 		spans := ils.Spans()
 
 		otelSpan := spans.AppendEmpty()
-
 		otelSpan.SetTraceID(convertStringToTraceId(span.TraceID))
 		otelSpan.SetSpanID(convertStringToSpanId(span.SpanID))
 
@@ -92,6 +88,10 @@ func (s streamReceiver) convertTrace(trace LightstepTrace) *pdata.Traces {
 				otelSpan.SetKind(pdata.SpanKindServer)
 			} else if k == "span.kind" && v == "client" {
 				otelSpan.SetKind(pdata.SpanKindClient)
+			}
+
+			if k == "parent_span_guid" {
+				otelSpan.SetParentSpanID(convertStringToSpanId(fmt.Sprintf("%s",v)))
 			}
 			otelSpan.Attributes().InsertString(k, fmt.Sprintf("%s", v))
 		}
