@@ -1,4 +1,4 @@
-package generatorreceiver
+package streamreceiver
 
 import (
 	"context"
@@ -6,12 +6,10 @@ import (
 	"go.opentelemetry.io/collector/config"
 	"go.opentelemetry.io/collector/consumer"
 	"go.opentelemetry.io/collector/receiver/receiverhelper"
-	"time"
 )
 
 const (
-	typeStr         = "generator"
-	DefaultTopoFile = "topo.json"
+	typeStr         = "lightstep-streams"
 )
 
 // NewFactory creates a factory for the receiver.
@@ -19,24 +17,13 @@ func NewFactory() component.ReceiverFactory {
 	return receiverhelper.NewFactory(
 		typeStr,
 		createDefaultConfig,
-		receiverhelper.WithTraces(createTracesReceiver),
-		receiverhelper.WithMetrics(createMetricsReceiver))
+		receiverhelper.WithTraces(createTracesReceiver))
 }
 
 func createDefaultConfig() config.Receiver {
 	return &Config{
 		ReceiverSettings: config.NewReceiverSettings(config.NewID(typeStr)),
-		Path:             DefaultTopoFile,
 	}
-}
-
-func createMetricsReceiver(
-	ctx context.Context,
-	params component.ReceiverCreateSettings,
-	cfg config.Receiver,
-	consumer consumer.Metrics) (component.MetricsReceiver, error) {
-	rcfg := cfg.(*Config)
-	return newMetricReceiver(rcfg, consumer, params.Logger, time.Now().Unix())
 }
 
 func createTracesReceiver(
@@ -45,5 +32,5 @@ func createTracesReceiver(
 	cfg config.Receiver,
 	consumer consumer.Traces) (component.TracesReceiver, error) {
 	rcfg := cfg.(*Config)
-	return newTraceReceiver(rcfg, consumer, params.Logger, time.Now().Unix())
+	return newTraceReceiver(rcfg, consumer, params.Logger)
 }
