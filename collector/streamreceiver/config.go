@@ -12,4 +12,5 @@ type Config struct {
 	Project string `mapstructure:"project"`
 	ApiKey string `mapstructure:"api_key"`
 	StreamId string `mapstructure:"stream_id"`
+	WindowSize string `mapstructure:"window_size"`
 }

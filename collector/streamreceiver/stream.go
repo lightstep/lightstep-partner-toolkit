@@ -153,7 +153,7 @@ func newTraceReceiver(config *Config,
 	}
 	u, _ := url.Parse("https://api.lightstep.com/public/v0.2/")
 	sReceiver.logger = logger
-	c := NewClientProvider(*u, config.Organization, config.Project, config.ApiKey, config.StreamId, logger).BuildClient()
+	c := NewClientProvider(*u, config.Organization, config.Project, config.ApiKey, config.WindowSize, config.StreamId, logger).BuildClient()
 	sReceiver.client = c
 	sReceiver.traceConsumer = consumer
 	return &sReceiver, nil

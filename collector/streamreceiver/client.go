@@ -19,13 +19,14 @@ type Client interface {
 }
 
 // NewClientProvider creates the default rest client provider
-func NewClientProvider(endpoint url.URL, org string, project string, apiKey string, streamId string, logger *zap.Logger) ClientProvider {
+func NewClientProvider(endpoint url.URL, org string, project string, apiKey string, windowSize string, streamId string, logger *zap.Logger) ClientProvider {
 	return &defaultClientProvider{
 		endpoint: endpoint,
 		logger:   logger,
 		org: org,
 		project: project,
 		apiKey: apiKey,
+		windowSize: windowSize,
 		streamId: streamId,
 	}
 }
@@ -41,6 +42,7 @@ type defaultClientProvider struct {
 	project string
 	apiKey string
 	streamId string
+	windowSize string
 	logger   *zap.Logger
 }
 
@@ -51,6 +53,7 @@ func (dcp *defaultClientProvider) BuildClient() Client {
 		dcp.org,
 		dcp.project,
 		dcp.apiKey,
+		dcp.windowSize,
 		dcp.streamId,
 	)
 }
@@ -62,6 +65,7 @@ func defaultClient(
 	org string,
 	project string,
 	apiKey string,
+	windowSize string,
 	streamId string,
 ) *clientImpl {
 	tr := defaultTransport()
@@ -72,6 +76,7 @@ func defaultClient(
 		project: project,
 		apiKey: apiKey,
 		streamId: streamId,
+		windowSize: windowSize,
 		logger:     logger,
 	}
 }
@@ -89,6 +94,7 @@ type clientImpl struct {
 	project string
 	org string
 	streamId string
+	windowSize string
 	logger     *zap.Logger
 }
 
@@ -133,8 +139,13 @@ func (c *clientImpl) GetTrace(spanId string) (*LightstepTraceResponse, error) {
 }
 
 func (c *clientImpl) GetStreamTraces() (*LightstepStreamResponse, error) {
+	var duration time.Duration
+	duration, err := time.ParseDuration(c.windowSize); if err != nil {
+		c.logger.Warn("Error parsing window size, falling to back to default", zap.Error(err))
+		duration = time.Duration(-5) * time.Minute
+	}
 	youngestTime := time.Now().Add(time.Duration(-5) * time.Minute)
-	oldestTime := youngestTime.Add(time.Duration(-3) * time.Minute)
+	oldestTime := youngestTime.Add(-1 * duration)
 
 	path := fmt.Sprintf("%s/projects/%s/streams/%s/timeseries?resolution-ms=60000&youngest-time=%s&oldest-time=%s&include-exemplars=1", c.org, c.project, c.streamId, youngestTime.Format(time.RFC3339), oldestTime.Format(time.RFC3339))
 	resp, err := c.get(path)

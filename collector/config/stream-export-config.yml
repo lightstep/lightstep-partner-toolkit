@@ -1,0 +1,48 @@
+extensions:
+  health_check:
+
+receivers:
+  # Generate traces from the given topology file (env var: TOPO_FILE)
+  lightstep-streams:
+    organization: LightStep
+    project: Robin-Hipster-Shop
+    api_key: "${LIGHTSTEP_API_KEY}"
+    window_size: 30m
+    stream_id: QQRrtJmW
+
+  otlp:
+    protocols:
+      http:
+        endpoint: 0.0.0.0:55681
+        cors_allowed_origins:
+          - '*'
+      grpc:
+        endpoint: 0.0.0.0:55680
+
+processors:
+  batch:
+
+
+exporters:
+  service:
+    scraper:
+      endpoint: 0.0.0.0:55688
+  logging:
+  # Export to Lightstep Public Satellites
+  otlp:
+    endpoint: ingest.lightstep.com:443
+    insecure_skip_verify: true
+    headers:
+      "lightstep-access-token": "${LS_ACCESS_TOKEN}"
+
+service:
+  extensions: [health_check]
+  pipelines:
+    traces:
+      receivers:
+        - lightstep-streams
+      processors:
+        - batch
+      exporters:
+        - logging
+        - service
