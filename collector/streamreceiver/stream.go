@@ -44,7 +44,16 @@ func (s streamReceiver) getTraces() {
 		s.logger.Info(fmt.Sprintf("Could not get traces: %v", err))
 		return
 	}
-	s.logger.Info(fmt.Sprintf("found exemplars: %v", len(resp.Data.Attributes.Exemplars)))
+
+	exemplars := resp.Data.Attributes.Exemplars
+	s.logger.Info(fmt.Sprintf("found exemplars: %v", len(exemplars)))
+	if len(exemplars) > 0 {
+		trace, err := s.client.GetTrace(exemplars[0].SpanGUID)
+		if err != nil {
+			s.logger.Info(fmt.Sprintf("Could not get trace: %v", err))
+		}
+		s.logger.Info(fmt.Sprintf("found trace: %v", trace))
+	}
 }
 
 func (s streamReceiver) Shutdown(ctx context.Context) error {
@@ -52,7 +61,7 @@ func (s streamReceiver) Shutdown(ctx context.Context) error {
 	return nil
 }
 
-var snapReceiver = streamReceiver{}
+var sReceiver = streamReceiver{}
 
 func newTraceReceiver(config *Config,
 	consumer consumer.Traces,
@@ -62,8 +71,8 @@ func newTraceReceiver(config *Config,
 		return nil, componenterror.ErrNilNextConsumer
 	}
 	u, _ := url.Parse("https://api.lightstep.com/public/v0.2/")
-	snapReceiver.logger = logger
-	c := NewClientProvider(*u, config.Organization, config.Project, config.ApiKey, logger).BuildClient()
-	snapReceiver.client = c
-	return &snapReceiver, nil
+	sReceiver.logger = logger
+	c := NewClientProvider(*u, config.Organization, config.Project, config.ApiKey, config.StreamId, logger).BuildClient()
+	sReceiver.client = c
+	return &sReceiver, nil
 }

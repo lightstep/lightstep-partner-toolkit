@@ -34,7 +34,11 @@ type LightstepStreamSlice struct {
 	} `json:"attributes"`
 }
 
-type LightstepTraceResponse []struct {
+type LightstepTraceResponse struct {
+	Data LightstepTrace `json:"data""`
+}
+
+type LightstepTrace []struct {
 	Type       string `json:"type"`
 	ID         string `json:"id"`
 	Attributes struct {
