@@ -15,7 +15,7 @@ import (
 type Client interface {
 	GetStreamTraces() (*LightstepStreamResponse, error)
 	GetTrace(string) (*LightstepTraceResponse, error)
-
+	StreamID() string
 }
 
 // NewClientProvider creates the default rest client provider
@@ -122,6 +122,10 @@ func (c *clientImpl) get(path string) ([]byte, error) {
 		return nil, fmt.Errorf("request GET %s failed - %q", req.URL.String(), resp.Status)
 	}
 	return body, nil
+}
+
+func (c *clientImpl) StreamID() string {
+	return c.streamId
 }
 
 func (c *clientImpl) GetTrace(spanId string) (*LightstepTraceResponse, error) {

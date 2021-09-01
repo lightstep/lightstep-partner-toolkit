@@ -2,13 +2,27 @@ extensions:
   health_check:
 
 receivers:
-  # Generate traces from the given topology file (env var: TOPO_FILE)
-  lightstep-streams:
+  # Pull traces from different Lightstep streams
+  lightstep-streams/web-demo:
     organization: schuler-00fb47fa
     project: schuler-dev-00fb47fa
     api_key: "${LIGHTSTEP_API_KEY}"
-    window_size: 10m
+    window_size: 5m
     stream_id: Pdt5RWjr
+
+  lightstep-streams/service-discovery:
+    organization: schuler-00fb47fa
+    project: schuler-dev-00fb47fa
+    api_key: "${LIGHTSTEP_API_KEY}"
+    window_size: 5m
+    stream_id: D5SxdRBg
+
+  lightstep-streams/app-rabbit:
+    organization: schuler-00fb47fa
+    project: schuler-dev-00fb47fa
+    api_key: "${LIGHTSTEP_API_KEY}"
+    window_size: 5m
+    stream_id: mTyDncv1
 
   otlp:
     protocols:
@@ -40,7 +54,9 @@ service:
   pipelines:
     traces:
       receivers:
-        - lightstep-streams
+        - lightstep-streams/web-demo
+        - lightstep-streams/service-discovery
+        - lightstep-streams/app-rabbit
       processors:
         - batch
       exporters:

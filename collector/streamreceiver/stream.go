@@ -13,22 +13,25 @@ import (
 )
 
 type streamReceiver struct {
-	logger     *zap.Logger
-	traceConsumer   consumer.Traces
-	ticker    *time.Ticker
-	client Client
-	stop chan struct{}
+	logger         *zap.Logger
+	traceConsumer  consumer.Traces
+	ticker         *time.Ticker
+	tickerDuration time.Duration
+	client         Client
+	stop           chan struct{}
 }
 
 func (s streamReceiver) Start(ctx context.Context, host component.Host) error {
-	s.ticker = time.NewTicker(15 * time.Second)
+	go s.consumeStreamData()
+
+	s.ticker = time.NewTicker(s.tickerDuration)
 	s.stop = make(chan struct{})
 	go func() {
 		for {
 			select {
-			case <- s.ticker.C:
+			case <-s.ticker.C:
 				s.consumeStreamData()
-			case <- s.stop:
+			case <-s.stop:
 				s.ticker.Stop()
 				return
 			}
@@ -51,7 +54,7 @@ func convertStringToSpanId(spanId string) pdata.SpanID {
 }
 
 func convertTimeFromString(t int64) time.Time {
-	return time.Unix(0, t * int64(time.Microsecond))
+	return time.Unix(0, t*int64(time.Microsecond))
 }
 
 func (s streamReceiver) convertTrace(trace LightstepTrace) *pdata.Traces {
@@ -91,7 +94,7 @@ func (s streamReceiver) convertTrace(trace LightstepTrace) *pdata.Traces {
 			}
 
 			if k == "parent_span_guid" {
-				otelSpan.SetParentSpanID(convertStringToSpanId(fmt.Sprintf("%s",v)))
+				otelSpan.SetParentSpanID(convertStringToSpanId(fmt.Sprintf("%s", v)))
 			}
 			otelSpan.Attributes().InsertString(k, fmt.Sprintf("%s", v))
 		}
@@ -100,7 +103,8 @@ func (s streamReceiver) convertTrace(trace LightstepTrace) *pdata.Traces {
 }
 
 func (s streamReceiver) consumeStreamData() error {
-	traces, err := s.getTraces(); if err != nil {
+	traces, err := s.getTraces()
+	if err != nil {
 		s.logger.Error("Could not get traces", zap.Error(err))
 	}
 
@@ -114,7 +118,6 @@ func (s streamReceiver) consumeStreamData() error {
 
 func (s streamReceiver) getTraces() ([]LightstepTrace, error) {
 	var traces []LightstepTrace
-	s.logger.Info("Getting traces...")
 	resp, err := s.client.GetStreamTraces()
 	if err != nil {
 		s.logger.Info(fmt.Sprintf("Could not get traces: %v", err))
@@ -122,9 +125,11 @@ func (s streamReceiver) getTraces() ([]LightstepTrace, error) {
 	}
 
 	exemplars := resp.Data.Attributes.Exemplars
-	s.logger.Info(fmt.Sprintf("found exemplars: %v", len(exemplars)))
+	s.logger.Info("Found trace exemplars",
+		zap.String("stream_id", s.client.StreamID()),
+		zap.Int("exemplar_count", len(exemplars)))
+
 	for _, exemplar := range exemplars {
-		s.logger.Info("getting trace", zap.String("span_guid", exemplar.SpanGUID))
 		traceResp, err := s.client.GetTrace(exemplar.SpanGUID)
 		if err != nil {
 			s.logger.Info(fmt.Sprintf("Could not get trace: %v", err))
@@ -142,11 +147,11 @@ func (s streamReceiver) Shutdown(ctx context.Context) error {
 	return nil
 }
 
-var sReceiver = streamReceiver{}
 
 func newTraceReceiver(config *Config,
 	consumer consumer.Traces,
 	logger *zap.Logger) (component.TracesReceiver, error) {
+	var sReceiver = streamReceiver{}
 
 	if consumer == nil {
 		return nil, componenterror.ErrNilNextConsumer
@@ -156,5 +161,13 @@ func newTraceReceiver(config *Config,
 	c := NewClientProvider(*u, config.Organization, config.Project, config.ApiKey, config.WindowSize, config.StreamId, logger).BuildClient()
 	sReceiver.client = c
 	sReceiver.traceConsumer = consumer
+
+	var tickerDuration time.Duration
+	tickerDuration, err := time.ParseDuration(config.WindowSize)
+	if err != nil {
+		tickerDuration = 5 * time.Minute
+	}
+	sReceiver.tickerDuration = tickerDuration
+
 	return &sReceiver, nil
 }

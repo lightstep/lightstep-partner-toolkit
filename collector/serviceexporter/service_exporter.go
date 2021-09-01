@@ -80,7 +80,8 @@ func (e *serviceExporter) Capabilities() consumer.Capabilities {
 }
 
 func (e *serviceExporter) addRelationship(parentService string, parentOp string, childService string, operationName string) {
-	keyName := fmt.Sprintf("%s>%s>%s>%s", parentService, parentOp, childService, operationName)
+	keyName := fmt.Sprintf("%s%s%s%s%s%s%s", parentService, RelationshipSeparator,
+		parentOp, RelationshipSeparator, childService, RelationshipSeparator, operationName)
 	_, exists := e.relationshipMap[keyName]; if !exists {
 		e.relationshipMap[keyName] = 0
 	} else {
@@ -110,10 +111,10 @@ func (e *serviceExporter) ConsumeTraces(_ context.Context, td pdata.Traces) erro
 			is := ils.At(j)
 			spans := is.Spans()
 			for k := 0; k < spans.Len(); k++ {
+				span := spans.At(k)
 				if !serviceOk {
 					continue
 				}
-				span := spans.At(k)
 
 				parentService, parentOk := e.spanIdToServiceName[span.ParentSpanID().HexString()]; if parentOk {
 					if parentService != serviceNameStr {
@@ -132,6 +133,8 @@ func (e *serviceExporter) ConsumeTraces(_ context.Context, td pdata.Traces) erro
 	return nil
 }
 
+const RelationshipSeparator = "\t"
+
 func (e *serviceExporter) Start(_ context.Context, host component.Host) error {
 	handler := http.NewServeMux()
 
@@ -145,7 +148,7 @@ func (e *serviceExporter) Start(_ context.Context, host component.Host) error {
 		// rebuild relationship map on each request, probably bad
 		e.serviceResources.Relationships = make([]ServiceRelationship, 0)
 		for serviceRel, count := range e.relationshipMap {
-			services := strings.Split(serviceRel, ">")
+			services := strings.Split(serviceRel, RelationshipSeparator)
 			e.serviceResources.Relationships = append(e.serviceResources.Relationships,
 				ServiceRelationship{From: services[0], FromOperation: services[1], To: services[2], SpanCount: count, ToOperation: services[3], LastSeen: time.Now().Format(time.RFC3339)})
 		}
