@@ -1,0 +1,37 @@
+extensions:
+  health_check:
+  pprof:
+    endpoint: 0.0.0.0:1777
+
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+
+processors:
+  batch:
+
+exporters:
+  logging:
+    loglevel: debug
+  awsxray:
+    region: 'us-west-2'
+  awsemf:
+    region: 'us-west-2'
+  otlp:
+    endpoint: ingest.lightstep.com:443
+    insecure_skip_verify: true
+    headers:
+      "lightstep-access-token": "${LS_ACCESS_TOKEN}"
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      exporters: [awsxray, otlp]
+    metrics:
+      receivers: [otlp]
+      exporters: [awsemf, otlp]
+
+  extensions: [pprof]
