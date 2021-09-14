@@ -1,7 +1,7 @@
 version: "3"
 services:
   collector:
-    image: otel/opentelemetry-collector-contrib-dev:latest
+    image: otel/opentelemetry-collector-contrib:0.35.0
     environment:
       - LS_ACCESS_TOKEN=${LS_ACCESS_TOKEN}
     volumes:
