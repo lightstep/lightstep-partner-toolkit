@@ -99,7 +99,7 @@ func (h *httpServer) ProcessMetrics(_ context.Context, md pdata.Metrics) (pdata.
 	rl := md.ResourceMetrics()
 	for i := 0; i < rl.Len(); i++ {
 		resource := rl.At(i).Resource()
-		h.attrProc.Process(resource.Attributes())
+		h.attrProc.Process(resource.Attributes(), "")
 	}
 	return md, nil
 }
@@ -108,13 +108,17 @@ func (h *httpServer) ProcessTraces(_ context.Context, td pdata.Traces) (pdata.Tr
 	rss := td.ResourceSpans()
 	for i := 0; i < rss.Len(); i++ {
 		rs := rss.At(i)
+		serviceNameValue, _ := rs.Resource().Attributes().Get("service.name")
+		serviceName := serviceNameValue.StringVal()
+
 		ilss := rs.InstrumentationLibrarySpans()
 		for j := 0; j < ilss.Len(); j++ {
 			ils := ilss.At(j)
 			spans := ils.Spans()
 			for k := 0; k < spans.Len(); k++ {
 				span := spans.At(k)
-				h.attrProc.Process(span.Attributes())
+
+				h.attrProc.Process(span.Attributes(), serviceName)
 			}
 		}
 	}
@@ -128,20 +132,22 @@ func (h *httpServer) Shutdown(ctx context.Context) error {
 	return nil
 }
 
-func (h *httpServer) removeAttribute(key string) error {
+func (h *httpServer) removeAttribute(key string, service string) error {
 	actionKeyValue := ActionKeyValue{
 		Key:    key,
 		Action: DELETE,
+		ServiceName: service,
 	}
 	h.logger.Debug("removing attribute", zap.String("key", key))
 	return h.addAttrAction(actionKeyValue)
 }
 
-func (h *httpServer) addAttribute(key string, value string) error {
+func (h *httpServer) addAttribute(key string, value string, service string) error {
 	actionKeyValue := ActionKeyValue{
 		Key:    key,
 		Value:  value,
 		Action: UPSERT,
+		ServiceName: service,
 	}
 	h.logger.Debug("adding attribute",  zap.String("key", key))
 	return h.addAttrAction(actionKeyValue)
@@ -151,6 +157,7 @@ func (h *httpServer) actionHandler(actionType Action) func(w http.ResponseWriter
 	return func(w http.ResponseWriter, r *http.Request) {
 		k := r.URL.Query().Get("key")
 		v := r.URL.Query().Get("value")
+		service := r.URL.Query().Get("service")
 		//from := r.URL.Query().Get("from_attribute")
 		if len(k) == 0 {
 			w.WriteHeader(http.StatusBadRequest)
@@ -160,9 +167,9 @@ func (h *httpServer) actionHandler(actionType Action) func(w http.ResponseWriter
 
 		var err error
 		if actionType == DELETE {
-			err = h.removeAttribute(k)
+			err = h.removeAttribute(k, service)
 		} else if actionType == UPSERT {
-			err = h.addAttribute(k, v)
+			err = h.addAttribute(k, v, service)
 		}
 
 		if err != nil {
@@ -171,6 +178,7 @@ func (h *httpServer) actionHandler(actionType Action) func(w http.ResponseWriter
 			return
 		}
 		w.WriteHeader(http.StatusAccepted)
+		h.logger.Info("added new processor rule", zap.String("key", k), zap.String("value", v), zap.String("service", service))
 		fmt.Fprintf(w, "ok: %v", actionType)
 	}
 }

@@ -6,9 +6,10 @@ import (
 )
 
 type ActionKeyValue struct {
-	Key string `mapstructure:"key"`
-	Value interface{} `mapstructure:"value"`
-	Action Action `mapstructure:"action"`
+	ServiceName string
+	Key string
+	Value interface{}
+	Action Action
 }
 
 type Action string
@@ -27,8 +28,14 @@ type AttrProc struct {
 	actions []ActionKeyValue
 }
 
-func (ap *AttrProc) Process(attrs pdata.AttributeMap) {
+func (ap *AttrProc) Process(attrs pdata.AttributeMap, serviceName string) {
 	for _, action := range ap.actions {
+
+		// skip if there is a service name set that does not match
+		if action.ServiceName != "" && serviceName != action.ServiceName {
+			continue
+		}
+
 		switch action.Action {
 		case DELETE:
 			attrs.Delete(action.Key)

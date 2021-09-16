@@ -65,9 +65,9 @@ func (h *httpServer) webhookHandler(events ...Event) func(w http.ResponseWriter,
 			if ok && idOk {
 				actionType = GithubDeploymentStatusEvent
 				if deployStatus == "pending" {
-					h.addAttribute("github.com.active_deployment", deployId)
+					h.addAttribute("github.com.active_deployment", deployId, "")
 				} else {
-					h.removeAttribute("github.com.active_deployment")
+					h.removeAttribute("github.com.active_deployment", "")
 				}
 			}
 		}
@@ -76,9 +76,9 @@ func (h *httpServer) webhookHandler(events ...Event) func(w http.ResponseWriter,
 		gremlinAttackStatus, okStatus := jsonParsed.Search("attackStatus").Data().(string)
 		if ok && okStatus {
 			if gremlinAttackStatus == "RUNNING" {
-				h.addAttribute("gremlin.com.active_attack", gremlinAttackId)
+				h.addAttribute("gremlin.com.active_attack", gremlinAttackId, "")
 			} else if gremlinAttackStatus == "FINISHED" {
-				h.removeAttribute("gremlin.com.active_attack")
+				h.removeAttribute("gremlin.com.active_attack", "")
 			}
 		}
 		pagerdutyEvent, ok := jsonParsed.Search("messages", "0", "event").Data().(string)
@@ -87,12 +87,12 @@ func (h *httpServer) webhookHandler(events ...Event) func(w http.ResponseWriter,
 			if ok {
 				if pagerdutyEvent == "incident.trigger" {
 					actionType = PagerDutyActiveIncident
-					h.addAttribute("pagerduty.com.has_incident", "true")
-					h.addAttribute("pagerduty.com.active_incident", fmt.Sprintf("%v", incident))
+					h.addAttribute("pagerduty.com.has_incident", "true", "")
+					h.addAttribute("pagerduty.com.active_incident", fmt.Sprintf("%v", incident), "")
 				} else if pagerdutyEvent == "incident.resolve" {
 					actionType = PagerDutyActiveIncident
-					h.removeAttribute("pagerduty.com.has_incident")
-					h.removeAttribute("pagerduty.com.active_incident")
+					h.removeAttribute("pagerduty.com.has_incident", "")
+					h.removeAttribute("pagerduty.com.active_incident", "")
 				}
 			}
 		}
