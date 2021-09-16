@@ -160,7 +160,6 @@ func (h *httpServer) actionHandler(actionType processorhelper.Action) func(w htt
 		k := r.URL.Query().Get("key")
 		v := r.URL.Query().Get("value")
 		//from := r.URL.Query().Get("from_attribute")
-
 		if len(k) == 0 {
 			w.WriteHeader(http.StatusBadRequest)
 			fmt.Fprintf(w, "bad request: expected key param")

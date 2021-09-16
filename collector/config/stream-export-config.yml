@@ -1,6 +1,3 @@
-extensions:
-  health_check:
-
 receivers:
   # Pull traces from different Lightstep streams
   lightstep-streams/web-demo:
@@ -50,7 +47,6 @@ exporters:
       "lightstep-access-token": "${LS_ACCESS_TOKEN}"
 
 service:
-  extensions: [health_check]
   pipelines:
     traces:
       receivers:

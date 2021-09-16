@@ -82,8 +82,8 @@ func (s streamReceiver) convertTrace(trace LightstepTrace) *pdata.Traces {
 		otelSpan.SetTraceID(convertStringToTraceId(span.TraceID))
 		otelSpan.SetSpanID(convertStringToSpanId(span.SpanID))
 
-		otelSpan.SetStartTimestamp(pdata.TimestampFromTime(convertTimeFromString(span.StartTimeMicros)))
-		otelSpan.SetEndTimestamp(pdata.TimestampFromTime(convertTimeFromString(span.EndTimeMicros)))
+		otelSpan.SetStartTimestamp(pdata.NewTimestampFromTime(convertTimeFromString(span.StartTimeMicros)))
+		otelSpan.SetEndTimestamp(pdata.NewTimestampFromTime(convertTimeFromString(span.EndTimeMicros)))
 		otelSpan.SetKind(pdata.SpanKindUnspecified)
 		otelSpan.SetName(span.SpanName)
 		for k, v := range span.Tags {
