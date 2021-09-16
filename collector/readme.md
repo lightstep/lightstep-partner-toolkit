@@ -1,29 +1,36 @@
 ### OpenTelemetry Collector Experiments
 
-Experimental OpenTelemetry collectors that annotate metrics and traces with external events like PagerDuty incidents, deployments, or chaos experiments. 
+Experimental OpenTelemetry collector processors, exporters, and receivers.
 
+| Collector Component  | Type | Description |
+| ------------- | ------------- | ------------- |
+| generatorreceiver  | receiver  | Synthetic trace and metric generator  | 
+| streamreciever  | receiver  | Converts Lightstep Streams into OpenTelemetry traces  | 
+| webhookprocessor  | processor  | Dynamically annotate traces via webhooks  | 
+| serviceexporter  | exporter  | Exports resource attributes and service relationships as JSON  | 
 
-### synthetic data instructions
+### generator receiver: synthetic data instructions
 
-This generates synthetic trace data inside the collector and sends to Lightstep.
+This generates synthetic trace data inside the collector and sends to Lightstep or another endpoint.
 
 ```
+# 1) to send traces/metrics to public sats (default)
 $ export LS_ACCESS_TOKEN=your token
-
-# to send traces/metrics to public sats (default)
 $ docker run -e LS_ACCESS_TOKEN --rm ghcr.io/lightstep/lightstep-partner-toolkit-collector:latest
 
-# to send traces/metrics elsewhere (another collector, Lightstep sats, etc)
+# 2) to send traces/metrics elsewhere (another collector, Lightstep sats, etc)
 
 # optional: set gRPC transport to insecure (default: `true`, if using dev mode or non-TLS sats)
 $ export OTLP_INSECURE=false
+
+# required: set OTLP gRPC endpoint
 # export OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=another-collector:55680
 
 $ docker run -e LS_ACCESS_TOKEN -e OTEL_INSECURE -e OTEL_EXPORTER_OTLP_TRACES_ENDPOINT --rm ghcr.io/lightstep/lightstep-partner-toolkit-collector:latest
 
 ```
 
-### webhook demo instructions
+### webhook processor: demo instructions
 
 This will run the collector and creates webhooks to your local machine via [localtunnel](https://theboroer.github.io/localtunnel-www/).
 
@@ -47,21 +54,7 @@ You can also manually add and delete attributes that will appear as tags in metr
     $ curl http://<<hostname>>/delete?key=foo # removes foo to all traces or metrics
 ```
 
-### running collector (locally)
-
-for log-only output without any processors:
-```
-  $ docker run --rm -p 55680:55680 -p 55681:55681 \
-    -v $(pwd)/config/log-only-config.yml:/etc/otel/config.yaml \
-     ghcr.io/lightstep/lightstep-partner-toolkit-collector:latest
-```
-
-to send to Lightstep:
-```
-  $ docker run --rm -p 55680:55680 -p 55681:55681 \
-    -v $(pwd)/config/collector-config.yml:/etc/otel/config.yaml \
-     ghcr.io/lightstep/lightstep-partner-toolkit-collector:latest
-```
+### sending data using HTTP (useful for debugging)
 
 send a fake span to the http endpoint:
 
@@ -88,7 +81,7 @@ This creates a docker image of the collector with the configuration file `config
 requires go 1.15+
 
 ```
-  $ go get github.com/open-telemetry/opentelemetry-collector-builder@v0.30.0
+  $ go get github.com/open-telemetry/opentelemetry-collector-builder@v0.35.0
   $ opentelemetry-collector-builder --config $(pwd)/builder-config.yml
   $ /tmp/ls-partner-col-distribution/lightstep-partner-collector --config $(pwd)/config/collector-config.yml
 ```

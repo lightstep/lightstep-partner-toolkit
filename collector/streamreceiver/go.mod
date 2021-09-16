@@ -1,4 +1,4 @@
-module github.com/lightstep/lightstep-partner-sdk/collector/snapshotreciever
+module github.com/lightstep/lightstep-partner-sdk/collector/streamreceiver
 
 go 1.17
 
