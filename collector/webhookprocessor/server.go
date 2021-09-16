@@ -22,7 +22,6 @@ import (
 
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/model/pdata"
-	"go.opentelemetry.io/collector/processor/processorhelper"
 	"go.uber.org/zap"
 )
 
@@ -31,8 +30,8 @@ type httpServer struct {
 	server     *http.Server
 	logger     *zap.Logger
 	config     *Config
-	attrProc   *processorhelper.AttrProc
-	actions    []processorhelper.ActionKeyValue
+	attrProc   *AttrProc
+	actions    []ActionKeyValue
 }
 
 const (
@@ -43,12 +42,9 @@ const (
 func (h *httpServer) Start(_ context.Context, host component.Host) error {
 
 	handler := http.NewServeMux()
-	// include/exclude rules
-	// add-attribute
-	// remove-attribute
 	handler.HandleFunc("/webhook", h.webhookHandler())
-	handler.HandleFunc("/upsert", h.actionHandler(processorhelper.UPSERT))
-	handler.HandleFunc("/delete", h.actionHandler(processorhelper.DELETE))
+	handler.HandleFunc("/upsert", h.actionHandler(UPSERT))
+	handler.HandleFunc("/delete", h.actionHandler(DELETE))
 
 	var listener net.Listener
 	var err error
@@ -81,7 +77,7 @@ func (h *httpServer) Start(_ context.Context, host component.Host) error {
 
 	return nil
 }
-func (h *httpServer) addAttrAction(actionKeyValue processorhelper.ActionKeyValue) error {
+func (h *httpServer) addAttrAction(actionKeyValue ActionKeyValue) error {
 	h.actions = append(h.actions, actionKeyValue)
 	err := h.setAttrProc()
 	if err != nil {
@@ -91,12 +87,10 @@ func (h *httpServer) addAttrAction(actionKeyValue processorhelper.ActionKeyValue
 }
 
 func (h *httpServer) setAttrProc() error {
-	attrProc, err := processorhelper.NewAttrProc(&processorhelper.Settings{
-		Actions: h.actions,
-	})
-	if err != nil {
-		return fmt.Errorf("failed to create attr proccessor: %v", err)
+	attrProc := &AttrProc{
+		actions: h.actions,
 	}
+
 	h.attrProc = attrProc
 	return nil
 }
@@ -114,12 +108,10 @@ func (h *httpServer) ProcessTraces(_ context.Context, td pdata.Traces) (pdata.Tr
 	rss := td.ResourceSpans()
 	for i := 0; i < rss.Len(); i++ {
 		rs := rss.At(i)
-		//resource := rs.Resource()
 		ilss := rs.InstrumentationLibrarySpans()
 		for j := 0; j < ilss.Len(); j++ {
 			ils := ilss.At(j)
 			spans := ils.Spans()
-			//library := ils.InstrumentationLibrary()
 			for k := 0; k < spans.Len(); k++ {
 				span := spans.At(k)
 				h.attrProc.Process(span.Attributes())
@@ -137,30 +129,29 @@ func (h *httpServer) Shutdown(ctx context.Context) error {
 }
 
 func (h *httpServer) removeAttribute(key string) error {
-	actionKeyValue := processorhelper.ActionKeyValue{
+	actionKeyValue := ActionKeyValue{
 		Key:    key,
-		Action: processorhelper.DELETE,
+		Action: DELETE,
 	}
-	h.logger.Debug("removing attribute")
+	h.logger.Debug("removing attribute", zap.String("key", key))
 	return h.addAttrAction(actionKeyValue)
 }
 
 func (h *httpServer) addAttribute(key string, value string) error {
-	actionKeyValue := processorhelper.ActionKeyValue{
+	actionKeyValue := ActionKeyValue{
 		Key:    key,
 		Value:  value,
-		Action: processorhelper.UPSERT,
+		Action: UPSERT,
 	}
-	h.logger.Debug("adding attribute")
+	h.logger.Debug("adding attribute",  zap.String("key", key))
 	return h.addAttrAction(actionKeyValue)
 }
 
-func (h *httpServer) actionHandler(actionType processorhelper.Action) func(w http.ResponseWriter, r *http.Request) {
+func (h *httpServer) actionHandler(actionType Action) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		k := r.URL.Query().Get("key")
 		v := r.URL.Query().Get("value")
 		//from := r.URL.Query().Get("from_attribute")
-
 		if len(k) == 0 {
 			w.WriteHeader(http.StatusBadRequest)
 			fmt.Fprintf(w, "bad request: expected key param")
@@ -168,9 +159,9 @@ func (h *httpServer) actionHandler(actionType processorhelper.Action) func(w htt
 		}
 
 		var err error
-		if actionType == processorhelper.DELETE {
+		if actionType == DELETE {
 			err = h.removeAttribute(k)
-		} else if actionType == processorhelper.UPSERT {
+		} else if actionType == UPSERT {
 			err = h.addAttribute(k, v)
 		}
 
@@ -191,7 +182,7 @@ func newHTTPServer(config *Config, logger *zap.Logger, serverType string) (*http
 		serverType: serverType,
 	}
 
-	h.actions = []processorhelper.ActionKeyValue{}
+	h.actions = []ActionKeyValue{}
 
 	return h, nil
 }

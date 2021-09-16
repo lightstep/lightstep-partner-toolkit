@@ -1,6 +1,3 @@
-extensions:
-  health_check:
-
 receivers:
   # Generate traces from the given file (env var: TOPO_FILE)
   generator:
@@ -25,7 +22,6 @@ exporters:
     loglevel: debug
 
 service:
-  extensions: [health_check]
   pipelines:
     metrics:
       receivers:
