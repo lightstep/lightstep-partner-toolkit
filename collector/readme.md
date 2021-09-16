@@ -9,7 +9,18 @@ This generates synthetic trace data inside the collector and sends to Lightstep.
 
 ```
 $ export LS_ACCESS_TOKEN=your token
+
+# to send traces/metrics to public sats (default)
 $ docker run -e LS_ACCESS_TOKEN --rm ghcr.io/lightstep/lightstep-partner-toolkit-collector:latest
+
+# to send traces/metrics elsewhere (another collector, Lightstep sats, etc)
+
+# optional: set gRPC transport to insecure (default: `true`, if using dev mode or non-TLS sats)
+$ export OTLP_INSECURE=false
+# export OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=another-collector:55680
+
+$ docker run -e LS_ACCESS_TOKEN -e OTEL_INSECURE -e OTEL_EXPORTER_OTLP_TRACES_ENDPOINT --rm ghcr.io/lightstep/lightstep-partner-toolkit-collector:latest
+
 ```
 
 ### webhook demo instructions
@@ -77,7 +88,7 @@ This creates a docker image of the collector with the configuration file `config
 requires go 1.15+
 
 ```
-  $ go get github.com/open-telemetry/opentelemetry-collector-builder
+  $ go get github.com/open-telemetry/opentelemetry-collector-builder@v0.30.0
   $ opentelemetry-collector-builder --config $(pwd)/builder-config.yml
   $ /tmp/ls-partner-col-distribution/lightstep-partner-collector --config $(pwd)/config/collector-config.yml
 ```
