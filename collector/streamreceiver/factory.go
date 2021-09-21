@@ -10,6 +10,7 @@ import (
 
 const (
 	typeStr         = "lightstep-streams"
+	LightstepPublicApiHost = "api.lightstep.com"
 )
 
 // NewFactory creates a factory for the receiver.
@@ -23,6 +24,7 @@ func NewFactory() component.ReceiverFactory {
 func createDefaultConfig() config.Receiver {
 	return &Config{
 		ReceiverSettings: config.NewReceiverSettings(config.NewID(typeStr)),
+		ApiHost: LightstepPublicApiHost,
 	}
 }
 

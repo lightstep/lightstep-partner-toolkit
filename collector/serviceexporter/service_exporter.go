@@ -94,6 +94,9 @@ func (e *serviceExporter) ConsumeTraces(_ context.Context, td pdata.Traces) erro
 	for i := 0; i < rss.Len(); i++ {
 		rs := rss.At(i)
 		serviceNameAttr, serviceOk := rs.Resource().Attributes().Get("service.name")
+		if !serviceOk {
+			serviceNameAttr, serviceOk = rs.Resource().Attributes().Get("lightstep.component_name")
+		}
 		serviceNameStr := serviceNameAttr.StringVal()
 
 		if serviceOk {
@@ -192,6 +195,13 @@ func attrsValue(attrs pdata.AttributeMap) map[string]interface{} {
 		out[k] = attrValue(v)
 		return true
 	})
+
+	// backwards compat for pre-opentelemetry service names
+	componentName, hasLightstepComponentName := out["lightstep.component_name"]
+	_, hasServiceName := out["service.name"]
+	if !hasServiceName && hasLightstepComponentName {
+		out["service.name"] = componentName
+	}
 	return out
 }
 

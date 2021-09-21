@@ -156,14 +156,17 @@ func newTraceReceiver(config *Config,
 	if consumer == nil {
 		return nil, componenterror.ErrNilNextConsumer
 	}
-	u, _ := url.Parse("https://api.lightstep.com/public/v0.2/")
+	u, err := url.Parse(fmt.Sprintf("https://%s/public/v0.2/", config.ApiHost))
+	if err != nil {
+		return nil, fmt.Errorf("could not parse api host: %s", err)
+	}
 	sReceiver.logger = logger
 	c := NewClientProvider(*u, config.Organization, config.Project, config.ApiKey, config.WindowSize, config.StreamId, logger).BuildClient()
 	sReceiver.client = c
 	sReceiver.traceConsumer = consumer
 
 	var tickerDuration time.Duration
-	tickerDuration, err := time.ParseDuration(config.WindowSize)
+	tickerDuration, err = time.ParseDuration(config.WindowSize)
 	if err != nil {
 		tickerDuration = 5 * time.Minute
 	}
