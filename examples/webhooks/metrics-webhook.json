@@ -14,102 +14,129 @@
     "Description": "test test",
     "Expression": "Critical Threshold Violated: alert 'Test Alert' is above 1000 over the last 2 minutes, computed on average.",
     "Started At": "Thu, 03 Jun 2021 17:25:28 UTC",
-    "Queries": [
+    "Queries":[
       {
-        "query": {
-          "metric": "test_metric.success",
-          "filters": [
+        "query":{
+          "metric":"test_metric.success",
+          "filters":[
             {
-              "label_key": "service",
-              "label_value": "test_service",
-              "operand": "eq"
+              "label_key":"service",
+              "label_value":"test_service",
+              "operand":"eq"
+            },
+            {
+              "label_key":"host",
+              "label_value":"bad_host",
+              "operand":"neq"
             }
           ],
-          "timeseries_operator": "delta",
-          "group_by": {
-            "label_keys": null,
-            "aggregation_method": "sum"
-          },
-          "version": 0,
-          "query_aggregation_options": {
-            "time_window_aggregation_method": "",
-            "max_values": 0,
-            "rank_order": ""
-          }
-        },
-        "tql_query": "",
-        "query_name": "a",
-        "query_type": "single",
-        "hidden": false,
-        "display_type": "line",
-        "style": {
-          "line_type": "",
-          "line_width": "",
-          "palette": ""
-        },
-        "version": 0
-      },
-      {
-        "query": {
-          "metric": "test_metric.error",
-          "filters": [
-            {
-              "label_key": "service",
-              "label_value": "test_service",
-              "operand": "eq"
-            }
-          ],
-          "timeseries_operator": "delta",
-          "group_by": {
-            "label_keys":null,
+          "timeseries_operator":"delta",
+          "group_by":{
+            "label_keys":[
+              "host"
+            ],
             "aggregation_method":"sum"
           },
-          "version": 0,
-          "query_aggregation_options": {
-            "time_window_aggregation_method": "",
-            "max_values": 0,
-            "rank_order": ""
+          "distribution_operators":{
+            "percentiles":[
+
+            ]
+          },
+          "version":0,
+          "query_aggregation_options":{
+            "time_window_aggregation_method":"",
+            "max_values":0,
+            "rank_order":""
           }
         },
-        "tql_query": "",
-        "query_name": "b",
-        "query_type": "single",
-        "hidden": false,
-        "display_type": "line",
-        "style": {
-          "line_type": "",
-          "line_width": "",
-          "palette": ""
+        "tql_query":"",
+        "query_name":"a",
+        "query_type":"single",
+        "hidden":false,
+        "display_type":"line",
+        "style":{
+          "line_type":"",
+          "line_width":"",
+          "palette":""
         },
-        "version": 0
+        "version":0
       },
       {
-        "query": {
-          "metric": "",
-          "filters": [],
-          "timeseries_operator": "",
-          "group_by": {
+        "query":{
+          "metric":"test_metric.error",
+          "filters":[
+            {
+              "label_key":"service",
+              "label_value":"test_service",
+              "operand":"eq"
+            },
+            {
+              "label_key":"host",
+              "label_value":"bad_host",
+              "operand":"neq"
+            }
+          ],
+          "timeseries_operator":"delta",
+          "group_by":{
+            "label_keys":[
+              "host"
+            ],
+            "aggregation_method":"sum"
+          },
+          "distribution_operators":{
+            "percentiles":[
+
+            ]
+          },
+          "version":0,
+          "query_aggregation_options":{
+            "time_window_aggregation_method":"",
+            "max_values":0,
+            "rank_order":""
+          }
+        },
+        "tql_query":"",
+        "query_name":"b",
+        "query_type":"single",
+        "hidden":false,
+        "display_type":"line",
+        "style":{
+          "line_type":"",
+          "line_width":"",
+          "palette":""
+        },
+        "version":0
+      },
+      {
+        "query":{
+          "metric":"",
+          "filters":[
+
+          ],
+          "timeseries_operator":"",
+          "group_by":{
             "label_keys":null,
             "aggregation_method":""
           },
-          "version": 0,
-          "query_aggregation_options": {
-            "time_window_aggregation_method": "",
-            "max_values": 0,
-            "rank_order": ""
+          "distribution_operators":null,
+          "version":0,
+          "query_aggregation_options":{
+            "time_window_aggregation_method":"",
+            "max_values":0,
+            "rank_order":""
           }
         },
-        "tql_query": "",
-        "query_name": "b/a",
-        "query_type": "composite",
-        "hidden": false,
-        "display_type": "line",
-        "style": {
-          "line_type": "",
-          "line_width": "",
-          "palette": ""
+        "tql_query":"",
+        "query_name":"b/a",
+        "query_type":"composite",
+        "hidden":false,
+        "display_type":"line",
+        "style":{
+          "line_type":"",
+          "line_width":"",
+          "palette":""
         },
-        "version": 0
+        "version":0
       }
     ]
   }
