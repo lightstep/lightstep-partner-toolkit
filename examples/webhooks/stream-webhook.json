@@ -87,7 +87,8 @@
         "Actual Value": {
           "ActualValue": "3.981549s"
         },
-        "Expression": "p99 is above 100ms over the last 2.0m"
+        "Expression": "p99 is above 100ms over the last 2.0m",
+        "Query": "service IN (\"android\", \"apache\", \"iOS\")"
       },
       "custom-data": {}
     }
