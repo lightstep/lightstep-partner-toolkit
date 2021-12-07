@@ -2,6 +2,7 @@
   "timestamp": "2021-06-03T17:25:28.724661485Z",
   "status": "Critical Threshold Violated",
   "name": "*Critical Threshold Violated: Test Alert*",
+  "incident_id": "409f7e6f-645a-4f6d-93e0-fc5a5d967753",
   "project": {
     "text": "demo",
     "href": "https://app.lightstep.com/demo?utm_source=webhook"
