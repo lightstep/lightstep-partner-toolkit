@@ -83,5 +83,7 @@ requires go 1.15+
 ```
   $ go get github.com/open-telemetry/opentelemetry-collector-builder@v0.35.0
   $ opentelemetry-collector-builder --config $(pwd)/builder-config.yml
+  $ export OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=ingest.lightstep.com:443
+  $ export TOPO_FILE=/path/to/your/topo-file.json
   $ /tmp/ls-partner-col-distribution/lightstep-partner-collector --config $(pwd)/config/collector-config.yml
 ```
