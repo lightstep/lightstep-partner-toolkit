@@ -14,18 +14,19 @@ Experimental OpenTelemetry collector processors, exporters, and receivers.
 This generates synthetic trace data inside the collector and sends to Lightstep or another endpoint.
 
 ```
-# 1) to send traces/metrics to public sats (default)
+# 1) to send traces/metrics to Lightstep public sats (default)
 $ export LS_ACCESS_TOKEN=your token
 $ docker run -e LS_ACCESS_TOKEN --rm ghcr.io/lightstep/lightstep-partner-toolkit-collector:latest
 
-# 2) to send traces/metrics elsewhere (another collector, Lightstep sats, etc)
+# 2) to send traces/metrics elsewhere (another collector, Lightstep microsats, etc)
 
 # optional: set gRPC transport to insecure (default: `true`, if using dev mode or non-TLS sats)
-$ export OTLP_INSECURE=false
+$ export OTEL_INSECURE=false
 
-# required: set OTLP gRPC endpoint
-# export OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=another-collector:55680
+# required: set OTLP gRPC endpoint (must include port!)
+$ export OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=another-collector:55680
 
+# generate traces and metrics, send to OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
 $ docker run -e LS_ACCESS_TOKEN -e OTEL_INSECURE -e OTEL_EXPORTER_OTLP_TRACES_ENDPOINT --rm ghcr.io/lightstep/lightstep-partner-toolkit-collector:latest
 
 ```
