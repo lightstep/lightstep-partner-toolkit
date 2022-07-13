@@ -16,16 +16,16 @@ import (
 
 
 type ServiceRelationship struct {
-	From          string `json:"from"`
-	To            string `json:"to"`
-	ToOperation string `json:"to_operation"`
-	FromOperation string `json:"from_operation"`
-	SpanCount     uint64 `json:"span_count"`
-	LastSeen      string `json:"last_seen"`
+	From          string `json:"from" yaml:"from"`
+	To            string `json:"to" yaml:"to"`
+	ToOperation string `json:"to_operation" yaml:"to_operation"`
+	FromOperation string `json:"from_operation" yaml:"from_operation"`
+	SpanCount     uint64 `json:"span_count" yaml:"span_count"`
+	LastSeen      string `json:"last_seen" yaml:"last_seen"`
 }
 
 //type ServiceResourcesCol struct {
-//	Attributes  `json:"attributes"`
+//	Attributes  `json:"attributes" yaml:"attributes"`
 //}
 
 type ServiceResourceAttributes map[string]pdata.AttributeMap
@@ -35,17 +35,17 @@ func attrsHashString(m pdata.AttributeMap) string {
 }
 
 type ServiceResourceCollection struct {
-	Attributes map[string]interface{} `json:"attributes"`
-	LastSeen string `json:"last_seen"`
+	Attributes map[string]interface{} `json:"attributes" yaml:"attributes"`
+	LastSeen string `json:"last_seen" yaml:"last_seen"`
 }
 
 type ServiceResources struct  {
-	Resources     []ServiceResourceCollection `json:"resources"`
-	Relationships []ServiceRelationship `json:"relationships"`
+	Resources     []ServiceResourceCollection `json:"resources" yaml:"resources"`
+	Relationships []ServiceRelationship `json:"relationships" yaml:"relationships"`
 }
 
 type ServiceResourceResponse struct {
-	Data *ServiceResources `json:"data"`
+	Data *ServiceResources `json:"data" json:"yaml"`
 }
 
 type serviceExporter struct {
