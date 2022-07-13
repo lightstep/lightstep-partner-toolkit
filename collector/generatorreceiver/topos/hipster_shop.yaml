@@ -1,3 +1,22 @@
+aws: &aws
+  east1:
+    cloud.provider: aws
+    cloud.region: us-east-1
+  west1:
+    cloud.provider: aws
+    cloud.region: us-west-1
+  west2:
+    cloud.provider: aws
+    cloud.region: us-west-2
+
+azure: &azure
+  central:
+    cloud.provider: azure
+    cloud.region: Central-US
+  west:
+    cloud.provider: azure
+    cloud.region: West-US
+
 topology:
   services:
     - serviceName: frontend
@@ -14,16 +33,14 @@ topology:
       resourceAttrSets:
         - weight: 1
           resourceAttrs:
-            cloud.provider: aws
-            cloud.region: us-east-1
             k8s.cluster.name: k8s-cluster-1
+            <<: *aws.east1
             host.name: ip-172-31-41-139.us-west-2.compute.internal
             host.id: i-0109aa378a31b4e29
         - weight: 1
           resourceAttrs:
-            cloud.provider: aws
-            cloud.region: us-west-2
             k8s.cluster.name: k8s-cluster-1
+            <<: *aws.west2
             host.name: ip-172-31-41-140.us-west-2.compute.internal
       metrics:
         - name: gauge.1
@@ -91,15 +108,13 @@ topology:
       resourceAttrSets:
         - weight: 1
           resourceAttrs:
-            cloud.provider: azure
-            cloud.region: Central-US
+            <<: *azure.central
             k8s.cluster.name: k8s-cluster-2
             host.type: t3.medium
             host.name: productcatalogservice-d847fdcf5-j6s2f
         - weight: 1
           resourceAttrs:
-            cloud.provider: azure
-            cloud.region: West-US
+            <<: *azure.west
             k8s.cluster.name: k8s-cluster-2
             host.type: t3.medium
             host.name: productcatalogservice-6b654dbf57-zq8dt
@@ -128,14 +143,12 @@ topology:
       resourceAttrSets:
         - weight: 1
           resourceAttrs:
-            cloud.provider: aws
-            cloud.region: us-west-2
+            <<: *aws.west2
             k8s.cluster.name: k8s-cluster-3
             host.name: recommendationservice-6b654dbf57-zq8dt
         - weight: 1
           resourceAttrs:
-            cloud.provider: aws
-            cloud.region: us-west-1
+            <<: *aws.west1
             k8s.cluster.name: k8s-cluster-3
             host.name: recommendationservice-d847fdcf5-j6s2f
       routes:
