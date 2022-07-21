@@ -30,24 +30,18 @@ topology:
             k8s.cluster.name: k8s-cluster-1
             host.name: ip-172-31-41-140.us-west-2.compute.internal
       metrics:
-        - name: gauge.1
+        - name: the_gauge
           type: Gauge
-          max: 1000000
-          min: 1024
-        - name: gauge.2
+          max: 10000
+          min: 1000
+          period: 2m
+          flag_set: fastslow
+        - name: the_gauge
           type: Gauge
-          max: 5000
-          min: 200
-        - name: gauge.3
-          type: Gauge
-          max: 650
-          min: 10
-        - name: sum.1
-          type: Sum
-        - name: sum.2
-          type: Sum
-        - name: sum.3
-          type: Sum
+          max: 20000
+          min: 10000
+          period: 2m
+          flag_unset: fastslow
       routes:
         - route: /product
           downstreamCalls:
@@ -285,6 +279,10 @@ flags:
     # use https://crontab.guru/
     start: "0,10,20,30,40,50 * * * *"
     end: "5,15,25,35,45,55 * * * *"
+  - name: fastslow
+    # https://crontab.guru/#15,30,45_*_*_*_*
+    start: "0-50/10 * * * *"
+    end: "5-55/10 * * * *"
 rootRoutes:
   - service: frontend
     route: /product
