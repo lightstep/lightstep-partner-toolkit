@@ -16,6 +16,7 @@ type Metric struct {
 	Period    *time.Duration `json:"period" yaml:"period"`
 	FlagSet   string         `json:"flag_set" yaml:"flag_set"`
 	FlagUnset string         `json:"flag_unset" yaml:"flag_unset"`
+	Tags      map[string]string
 	// TODO: add "shape"
 }
 

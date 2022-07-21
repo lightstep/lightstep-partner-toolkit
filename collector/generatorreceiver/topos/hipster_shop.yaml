@@ -3,18 +3,14 @@ topology:
     - serviceName: frontend
       tagSets:
         - weight: 1
-          tags:
-            version: v127
-        - weight: 1
-          tags:
-            version: v125
-        - weight: 2
-          tags:
-            version: v125
-        - weight: 1
           flag_set: frontend_errors
           tags:
-            error: "true"
+            version: v127
+            error: true
+        - weight: 1
+          flag_unset: frontend_errors
+          tags:
+            version: v125
       resourceAttrSets:
         - weight: 1
           resourceAttrs:
@@ -35,13 +31,17 @@ topology:
           max: 10000
           min: 1000
           period: 2m
-          flag_set: fastslow
+          flag_set: frontend_errors
+          tags:
+            something: bad
         - name: the_gauge
           type: Gauge
           max: 20000
           min: 10000
           period: 2m
-          flag_unset: fastslow
+          flag_unset: frontend_errors
+          tags:
+            something: good
       routes:
         - route: /product
           downstreamCalls:
@@ -279,10 +279,6 @@ flags:
     # use https://crontab.guru/
     start: "0,10,20,30,40,50 * * * *"
     end: "5,15,25,35,45,55 * * * *"
-  - name: fastslow
-    # https://crontab.guru/#15,30,45_*_*_*_*
-    start: "0-50/10 * * * *"
-    end: "5-55/10 * * * *"
 rootRoutes:
   - service: frontend
     route: /product

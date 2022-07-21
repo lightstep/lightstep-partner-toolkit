@@ -64,7 +64,7 @@ func (g generatorReceiver) Start(ctx context.Context, host component.Host) error
 				metricTicker := time.NewTicker(1 * time.Second)
 				g.tickers = append(g.tickers, metricTicker)
 				metricDone := make(chan bool)
-				go func() {
+				go func(s topology.ServiceTier, m topology.Metric) {
 					g.logger.Info("generating metrics", zap.String("service", s.ServiceName), zap.String("name", m.Name))
 					metricGen := generator.NewMetricGenerator(g.randomSeed, g.fm)
 					for {
@@ -80,7 +80,7 @@ func (g generatorReceiver) Start(ctx context.Context, host component.Host) error
 							}
 						}
 					}
-				}()
+				}(s, m)
 			}
 		}
 

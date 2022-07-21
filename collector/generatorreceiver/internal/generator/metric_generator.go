@@ -42,12 +42,18 @@ func (g *MetricGenerator) Generate(metric topology.Metric, serviceName string) (
 		dp := m.Gauge().DataPoints().AppendEmpty()
 		dp.SetTimestamp(pdata.NewTimestampFromTime(time.Now()))
 		dp.SetDoubleVal(metric.GetValue())
+		for k, v := range metric.Tags {
+			dp.Attributes().UpsertString(k, v)
+		}
 	} else if metric.Type == "Sum" {
 		// TODO: support histograms instead :-D
 		m.SetDataType(pdata.MetricDataTypeSum)
 		dp := m.Sum().DataPoints().AppendEmpty()
 		dp.SetTimestamp(pdata.NewTimestampFromTime(time.Now()))
 		dp.SetDoubleVal(metric.GetValue())
+		for k, v := range metric.Tags {
+			dp.Attributes().UpsertString(k, v)
+		}
 	}
 
 	g.metricCount = g.metricCount + 1
