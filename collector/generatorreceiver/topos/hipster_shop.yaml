@@ -397,35 +397,42 @@ flags:
   # This is a cron-style flag
   - name: frontend_errors
     # use https://crontab.guru/
-    start: "0,10,20,30,40,50 * * * *"
-    end: "5,15,25,35,45,55 * * * *"
+    cron:
+      start: "0,10,20,30,40,50 * * * *"
+      end: "5,15,25,35,45,55 * * * *"
   - name: runs_on_azure
   - name: sev0_total_failure
   - name: database_outage
   # OOM on currency service + slower span latency from frontend -> currencyservice
   - name: currencyservice_oom.default
-    incident: currencyservice_fail
-    start: 0m
-    end: 10m
+    incident:
+      name: currencyservice_fail
+      start: 0m
+      end: 10m
   - name: currencyservice_oom.phase_1
-    incident: currencyservice_fail
-    start: 0m
-    end: 10m
+    incident:
+      name: currencyservice_fail
+      start: 0m
+      end: 10m
   - name: currencyservice_oom.phase_2
-    incident: currencyservice_fail
-    start: 3m
-    end: 10m
+    incident:
+      name: currencyservice_fail
+      start: 3m
+      end: 10m
   # This is an incident-style flag; start and end are relative to incident start
   - name: frontend_doom.default # .default flags are enabled when the incident is not active
-    incident: frontend_doom
-  - incident: frontend_doom
-    name: frontend_doom.phase_1
-    start: 0m
-    end: 10m
-  - incident: frontend_doom
-    name: frontend_doom.phase_2
-    start: 5m
-    # with no end, lasts until the incident finishes
+    incident:
+      name: frontend_doom
+  - name: frontend_doom.phase_1
+    incident:
+      name: frontend_doom
+      start: 0m
+      end: 10m
+  - name: frontend_doom.phase_2
+    incident:
+      name: frontend_doom
+      start: 5m
+      # with no end, lasts until the incident finishes
 
 rootRoutes:
   - service: frontend
@@ -443,3 +450,9 @@ rootRoutes:
   - service: frontend
     route: /checkout
     tracesPerHour: 480
+
+incidents:
+  - name: frontend_doom
+    start: "0,30 * * * *"
+    end: "0,30 * * * *"
+
