@@ -104,6 +104,7 @@ func TestMetric_ShouldGenerate(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			flags.Manager.Clear()
 			theFlags := make([]flags.Flag, 0, len(tt.enabledFlags)+len(tt.disabledFlags))
 			for _, name := range tt.enabledFlags {
 				theFlags = append(theFlags, flags.Flag{Name: name})
@@ -111,14 +112,14 @@ func TestMetric_ShouldGenerate(t *testing.T) {
 			for _, name := range tt.disabledFlags {
 				theFlags = append(theFlags, flags.Flag{Name: name})
 			}
-			fm := flags.NewFlagManager(flags.NewIncidentManager(), theFlags, zap.NewNop())
+			flags.Manager.LoadFlags(theFlags, zap.NewNop())
 			for _, name := range tt.enabledFlags {
-				fm.GetFlag(name).Enable()
+				flags.Manager.GetFlag(name).Enable()
 			}
 			for _, name := range tt.disabledFlags {
-				fm.GetFlag(name).Disable()
+				flags.Manager.GetFlag(name).Disable()
 			}
-			if got := tt.metric.ShouldGenerate(fm); got != tt.want {
+			if got := tt.metric.ShouldGenerate(); got != tt.want {
 				t.Errorf("ShouldGenerate() = %v, want %v", got, tt.want)
 			}
 		})
