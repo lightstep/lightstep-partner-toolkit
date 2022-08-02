@@ -38,7 +38,7 @@ func (fm *FlagManager) LoadFlags(configFlags []FlagConfig, logger *zap.Logger) {
 	defer fm.mu.Unlock()
 
 	for _, cfg := range configFlags {
-		flag := Flag{cfg: cfg}
+		flag := NewFlag(cfg)
 		flag.Setup(logger)
 		fm.flags[flag.Name()] = &flag
 	}

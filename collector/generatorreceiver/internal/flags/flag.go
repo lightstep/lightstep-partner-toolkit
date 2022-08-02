@@ -37,6 +37,10 @@ type Flag struct {
 	mu      sync.Mutex
 }
 
+func NewFlag(cfg FlagConfig) Flag {
+	return Flag{cfg: cfg}
+}
+
 func (f *Flag) Name() string {
 	return f.cfg.Name
 }

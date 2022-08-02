@@ -406,17 +406,17 @@ flags:
   # OOM on currency service + slower span latency from frontend -> currencyservice
   - name: currencyservice_oom.default
     incident:
-      name: currencyservice_fail
+      parentFlag: currencyservice_fail
       start: 0m
       end: 10m
   - name: currencyservice_oom.phase_1
     incident:
-      name: currencyservice_fail
+      parentFlag: currencyservice_fail
       start: 0m
       end: 10m
   - name: currencyservice_oom.phase_2
     incident:
-      name: currencyservice_fail
+      parentFlag: currencyservice_fail
       start: 3m
       end: 10m
   - name: frontend_doom

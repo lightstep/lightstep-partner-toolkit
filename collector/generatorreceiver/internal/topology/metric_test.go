@@ -105,12 +105,12 @@ func TestMetric_ShouldGenerate(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			flags.Manager.Clear()
-			theFlags := make([]flags.Flag, 0, len(tt.enabledFlags)+len(tt.disabledFlags))
+			theFlags := make([]flags.FlagConfig, 0, len(tt.enabledFlags)+len(tt.disabledFlags))
 			for _, name := range tt.enabledFlags {
-				theFlags = append(theFlags, flags.Flag{Name: name})
+				theFlags = append(theFlags, flags.FlagConfig{Name: name})
 			}
 			for _, name := range tt.disabledFlags {
-				theFlags = append(theFlags, flags.Flag{Name: name})
+				theFlags = append(theFlags, flags.FlagConfig{Name: name})
 			}
 			flags.Manager.LoadFlags(theFlags, zap.NewNop())
 			for _, name := range tt.enabledFlags {
