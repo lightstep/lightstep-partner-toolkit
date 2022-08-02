@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/lightstep/lightstep-partner-sdk/collector/generatorreceiver/internal/incidents"
 	"net"
 	"net/http"
 
@@ -21,12 +20,8 @@ type httpServer struct {
 }
 
 type flagHttpResponse struct {
-	Name    string `json:"name"`
-	Enabled bool   `json:"enabled"`
-}
-
-type incidentHttpResponse struct {
 	Name       string `json:"name"`
+	Enabled    bool   `json:"enabled"`
 	DurationMs int64  `json:"duration"`
 }
 
@@ -38,10 +33,11 @@ func (h *httpServer) getFlags(w http.ResponseWriter, r *http.Request) {
 
 	jsonFlags := make([]flagHttpResponse, 0)
 	for flagName, flagVal := range flags.Manager.GetFlags() {
-		if flagVal.Incident != nil {
-			continue
-		}
-		jsonFlags = append(jsonFlags, flagHttpResponse{Name: flagName, Enabled: flagVal.Enabled()})
+		jsonFlags = append(jsonFlags, flagHttpResponse{
+			Name:       flagName,
+			Enabled:    flagVal.Active(),
+			DurationMs: int64(flagVal.CurrentDuration()),
+		})
 	}
 	resp, err := json.MarshalIndent(jsonFlags, "", "  ")
 	if err != nil {
@@ -53,8 +49,6 @@ func (h *httpServer) getFlags(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	_, _ = fmt.Fprintf(w, "%s", string(resp))
 }
-
-// TODO: handle cron-type and incident-type flags differently?
 
 func (h *httpServer) setFlag(w http.ResponseWriter, r *http.Request) {
 	f := r.URL.Query().Get("flag")
@@ -91,59 +85,10 @@ func (h *httpServer) setFlag(w http.ResponseWriter, r *http.Request) {
 	_, _ = fmt.Fprintf(w, "flag %s updated", f)
 }
 
-func (h *httpServer) getIncidents(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		w.WriteHeader(http.StatusBadRequest)
-		_, _ = fmt.Fprintf(w, "bad request")
-		return
-	}
-
-	jsonIncidents := make([]incidentHttpResponse, 0)
-	for _, incident := range incidents.Manager.GetIncidents() {
-		jsonIncidents = append(jsonIncidents, incidentHttpResponse{Name: incident.Name, DurationMs: incident.CurrentDuration().Milliseconds()})
-	}
-	resp, err := json.MarshalIndent(jsonIncidents, "", "  ")
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		_, _ = fmt.Fprintf(w, "internal error: could not set attr proc: %v", err)
-		return
-	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	_, _ = fmt.Fprintf(w, "%s", string(resp))
-}
-
-func (h *httpServer) toggleIncident(w http.ResponseWriter, r *http.Request) {
-	f := r.URL.Query().Get("incident")
-	if f == "" {
-		w.WriteHeader(http.StatusBadRequest)
-		_, _ = fmt.Fprintf(w, "bad request: expected incident param")
-		return
-	}
-
-	reqIncident := incidents.Manager.GetIncident(f)
-
-	if reqIncident == nil {
-		w.WriteHeader(http.StatusNotFound)
-		_, _ = fmt.Fprintf(w, "incident %s not found", f)
-		return
-	}
-
-	if reqIncident.Active() {
-		reqIncident.End()
-	} else {
-		reqIncident.Start()
-	}
-	w.WriteHeader(http.StatusAccepted)
-	_, _ = fmt.Fprintf(w, "incident %s updated", f)
-}
-
 func (h *httpServer) Start(_ context.Context, host component.Host) error {
 	handler := http.NewServeMux()
 	handler.HandleFunc("/api/v1/flags", h.getFlags)
 	handler.HandleFunc("/api/v1/flag", h.setFlag)
-	handler.HandleFunc("/api/v1/incidents", h.getIncidents)
-	handler.HandleFunc("/api/v1/incident", h.toggleIncident)
 
 	var listener net.Listener
 	var err error

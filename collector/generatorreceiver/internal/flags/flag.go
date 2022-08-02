@@ -1,9 +1,7 @@
 package flags
 
 import (
-	"fmt"
 	"github.com/lightstep/lightstep-partner-sdk/collector/generatorreceiver/internal/cron"
-	"github.com/lightstep/lightstep-partner-sdk/collector/generatorreceiver/internal/incidents"
 	"go.uber.org/zap"
 	"time"
 )
@@ -16,14 +14,14 @@ const (
 // TODO: separate config types from code types generally
 
 type IncidentConfig struct {
-	Name  string
-	Start time.Duration
-	End   time.Duration
+	ParentFlag string        `json:"parentFlag" yaml:"parentFlag"`
+	Start      time.Duration `json:"start" yaml:"start"`
+	End        time.Duration `json:"end" yaml:"end"`
 }
 
 type CronConfig struct {
-	Start string
-	End   string
+	Start string `json:"start" yaml:"start"`
+	End   string `json:"end" yaml:"end"`
 }
 
 type Flag struct {
@@ -31,45 +29,68 @@ type Flag struct {
 	Incident *IncidentConfig `json:"incident" yaml:"incident"`
 	Cron     *CronConfig     `json:"cron" yaml:"cron"`
 
-	state float64
+	started time.Time
 }
 
-func (f *Flag) Enabled() bool {
-	return f.GetState() > DisabledState
+func (f *Flag) Active() bool {
+	f.update()
+	return f.active()
 }
 
-func (f *Flag) GetState() float64 {
+func (f *Flag) active() bool {
+	return !f.started.IsZero()
+}
+
+// update checks if the given flag f has a parent flag ("Incident"); if so,
+// updates f's state based on its start and end times relative to the parent.
+func (f *Flag) update() {
 	if f.Incident == nil {
-		return f.state
+		// managed by cron or manual-only
+		return
+	}
+	// Managed by parent
+	parent := Manager.GetFlag(f.Incident.ParentFlag)
+	if parent == nil {
+		// TODO: with validation, this should never happen
+		return
 	}
 
-	incident := incidents.Manager.GetIncident(f.Incident.Name)
-	// TODO: where does this logic belong?
-	if f.Name == fmt.Sprintf("%s.default", incident.Name) {
-		if !incident.Active() {
-			return EnabledState
-		}
-		return DisabledState
+	incidentDuration := parent.CurrentDuration()
+	afterStart := incidentDuration > f.Incident.Start
+	beforeEnd := f.Incident.End == 0 || incidentDuration < f.Incident.End
+	// shouldBeActive will be true if and only if both of the following are true:
+	// - parent has been Active for at least f's incident start time
+	// - either f has no end *or* parent has been active for less than f's incident end time
+	shouldBeActive := afterStart && beforeEnd
+
+	if f.active() != shouldBeActive {
+		f.Toggle()
 	}
-	duration := incident.CurrentDuration()
-	if duration > f.Incident.Start {
-		if f.Incident.End == 0 || duration < f.Incident.End {
-			return EnabledState
-		}
+}
+
+func (f *Flag) CurrentDuration() time.Duration {
+	if !f.Active() {
+		return 0
 	}
-	return DisabledState
+	return time.Now().Sub(f.started)
 }
 
 func (f *Flag) Enable() {
-	f.SetState(EnabledState)
+	if f.started.IsZero() {
+		f.started = time.Now()
+	}
 }
 
 func (f *Flag) Disable() {
-	f.SetState(DisabledState)
+	f.started = time.Time{}
 }
 
-func (f *Flag) SetState(state float64) {
-	f.state = state
+func (f *Flag) Toggle() {
+	if f.active() {
+		f.Disable()
+	} else {
+		f.Enable()
+	}
 }
 
 func (f *Flag) Setup(logger *zap.Logger) {

@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/lightstep/lightstep-partner-sdk/collector/generatorreceiver/internal/cron"
-	"github.com/lightstep/lightstep-partner-sdk/collector/generatorreceiver/internal/incidents"
 	"time"
 
 	"github.com/lightstep/lightstep-partner-sdk/collector/generatorreceiver/internal/flags"
@@ -57,8 +56,6 @@ func (g generatorReceiver) Start(ctx context.Context, host component.Host) error
 	}
 
 	flags.Manager.LoadFlags(topoFile.Flags, g.logger)
-	incidents.Manager.LoadIncidents(topoFile.Incidents, g.logger)
-	//flags.LoadIncidents(topoFile.Incidents, g.logger)
 
 	g.logger.Info("starting flag manager", zap.Int("flag_count", flags.Manager.FlagCount()))
 	cron.Start()

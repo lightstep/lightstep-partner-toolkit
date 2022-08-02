@@ -31,7 +31,7 @@ topology:
           max: 10000
           min: 1000
           period: 2m
-          flag_set: frontend_doom.default
+          flag_unset: frontend_doom
           tags:
             something: good
         - name: another_gauge
@@ -419,18 +419,19 @@ flags:
       name: currencyservice_fail
       start: 3m
       end: 10m
+  - name: frontend_doom
+    cron:
+      start: "57,12,27,42 * * * *"
+      end: "10,25,40,55 * * * *"
   # This is an incident-style flag; start and end are relative to incident start
-  - name: frontend_doom.default # .default flags are enabled when the incident is not active
-    incident:
-      name: frontend_doom
   - name: frontend_doom.phase_1
     incident:
-      name: frontend_doom
+      parentFlag: frontend_doom
       start: 0m
       end: 10m
   - name: frontend_doom.phase_2
     incident:
-      name: frontend_doom
+      parentFlag: frontend_doom
       start: 5m
       # with no end, lasts until the incident finishes
 
@@ -450,9 +451,3 @@ rootRoutes:
   - service: frontend
     route: /checkout
     tracesPerHour: 480
-
-incidents:
-  - name: frontend_doom
-    start: "0,30 * * * *"
-    end: "0,30 * * * *"
-
