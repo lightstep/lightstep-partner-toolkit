@@ -3,6 +3,7 @@ package flags
 import (
 	"github.com/lightstep/lightstep-partner-sdk/collector/generatorreceiver/internal/cron"
 	"go.uber.org/zap"
+	"sync"
 	"time"
 )
 
@@ -24,12 +25,20 @@ type CronConfig struct {
 	End   string `json:"end" yaml:"end"`
 }
 
-type Flag struct {
+type FlagConfig struct {
 	Name     string          `json:"name" yaml:"name"`
 	Incident *IncidentConfig `json:"incident" yaml:"incident"`
 	Cron     *CronConfig     `json:"cron" yaml:"cron"`
+}
 
+type Flag struct {
+	cfg     FlagConfig
 	started time.Time
+	mu      sync.Mutex
+}
+
+func (f *Flag) Name() string {
+	return f.cfg.Name
 }
 
 func (f *Flag) Active() bool {
@@ -44,20 +53,23 @@ func (f *Flag) active() bool {
 // update checks if the given flag f has a parent flag ("Incident"); if so,
 // updates f's state based on its start and end times relative to the parent.
 func (f *Flag) update() {
-	if f.Incident == nil {
+	if f.cfg.Incident == nil {
 		// managed by cron or manual-only
 		return
 	}
-	// Managed by parent
-	parent := Manager.GetFlag(f.Incident.ParentFlag)
+
+	f.mu.Lock()
+	defer f.mu.Unlock()
+
+	parent := Manager.GetFlag(f.cfg.Incident.ParentFlag)
 	if parent == nil {
 		// TODO: with validation, this should never happen
 		return
 	}
 
 	incidentDuration := parent.CurrentDuration()
-	afterStart := incidentDuration > f.Incident.Start
-	beforeEnd := f.Incident.End == 0 || incidentDuration < f.Incident.End
+	afterStart := incidentDuration > f.cfg.Incident.Start
+	beforeEnd := f.cfg.Incident.End == 0 || incidentDuration < f.cfg.Incident.End
 	// shouldBeActive will be true if and only if both of the following are true:
 	// - parent has been Active for at least f's incident start time
 	// - either f has no end *or* parent has been active for less than f's incident end time
@@ -69,14 +81,14 @@ func (f *Flag) update() {
 }
 
 func (f *Flag) CurrentDuration() time.Duration {
-	if !f.Active() {
+	if !f.active() {
 		return 0
 	}
 	return time.Now().Sub(f.started)
 }
 
 func (f *Flag) Enable() {
-	if f.started.IsZero() {
+	if !f.active() {
 		f.started = time.Now()
 	}
 }
@@ -95,22 +107,22 @@ func (f *Flag) Toggle() {
 
 func (f *Flag) Setup(logger *zap.Logger) {
 	// TODO: add validation to disallow having cron and incident both configured?
-	if f.Cron != nil {
+	if f.cfg.Cron != nil {
 		f.SetupCron(logger)
 	}
 }
 
 func (f *Flag) SetupCron(logger *zap.Logger) {
-	_, err := cron.Add(f.Cron.Start, func() {
-		logger.Info("toggling flag on", zap.String("flag", f.Name))
+	_, err := cron.Add(f.cfg.Cron.Start, func() {
+		logger.Info("toggling flag on", zap.String("flag", f.cfg.Name))
 		f.Enable()
 	})
 	if err != nil {
 		logger.Error("error adding flag start schedule", zap.Error(err))
 	}
 
-	_, err = cron.Add(f.Cron.End, func() {
-		logger.Info("toggling flag off", zap.String("flag", f.Name))
+	_, err = cron.Add(f.cfg.Cron.End, func() {
+		logger.Info("toggling flag off", zap.String("flag", f.cfg.Name))
 		f.Disable()
 	})
 	if err != nil {

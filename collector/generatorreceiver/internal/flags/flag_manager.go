@@ -8,7 +8,7 @@ import (
 type FlagManager struct {
 	flags map[string]*Flag
 
-	sync.Mutex
+	mu sync.Mutex
 }
 
 var Manager *FlagManager
@@ -22,36 +22,36 @@ func NewFlagManager() *FlagManager {
 }
 
 func (fm *FlagManager) Clear() {
-	fm.Lock()
+	fm.mu.Lock()
 	fm.flags = make(map[string]*Flag)
-	fm.Unlock()
+	fm.mu.Unlock()
 }
 
 func (fm *FlagManager) GetFlags() map[string]*Flag {
-	fm.Lock()
-	defer fm.Unlock()
+	fm.mu.Lock()
+	defer fm.mu.Unlock()
 	return fm.flags
 }
 
-func (fm *FlagManager) LoadFlags(configFlags []Flag, logger *zap.Logger) {
-	fm.Lock()
-	defer fm.Unlock()
+func (fm *FlagManager) LoadFlags(configFlags []FlagConfig, logger *zap.Logger) {
+	fm.mu.Lock()
+	defer fm.mu.Unlock()
 
-	for _, f := range configFlags {
-		flag := f
+	for _, cfg := range configFlags {
+		flag := Flag{cfg: cfg}
 		flag.Setup(logger)
-		fm.flags[flag.Name] = &flag
+		fm.flags[flag.Name()] = &flag
 	}
 }
 
 func (fm *FlagManager) FlagCount() int {
-	fm.Lock()
-	defer fm.Unlock()
+	fm.mu.Lock()
+	defer fm.mu.Unlock()
 	return len(fm.flags)
 }
 
 func (fm *FlagManager) GetFlag(name string) *Flag {
-	fm.Lock()
-	defer fm.Unlock()
+	fm.mu.Lock()
+	defer fm.mu.Unlock()
 	return fm.flags[name]
 }

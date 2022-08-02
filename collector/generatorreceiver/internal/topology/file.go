@@ -5,8 +5,8 @@ import (
 )
 
 type File struct {
-	Topology   *Topology    `json:"topology" yaml:"topology"`
-	Flags      []flags.Flag `json:"flags" yaml:"flags"`
+	Topology   *Topology          `json:"topology" yaml:"topology"`
+	Flags      []flags.FlagConfig `json:"flags" yaml:"flags"`
 	RootRoutes []struct {
 		Service       string `json:"service" yaml:"service"`
 		Route         string `json:"route" yaml:"route"`
