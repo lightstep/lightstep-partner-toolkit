@@ -22,7 +22,7 @@ type httpServer struct {
 type flagHttpResponse struct {
 	Name       string `json:"name"`
 	Enabled    bool   `json:"enabled"`
-	DurationMs int64  `json:"duration"`
+	DurationNs int64  `json:"duration"`
 }
 
 func (h *httpServer) getFlags(w http.ResponseWriter, r *http.Request) {
@@ -36,7 +36,7 @@ func (h *httpServer) getFlags(w http.ResponseWriter, r *http.Request) {
 		jsonFlags = append(jsonFlags, flagHttpResponse{
 			Name:       flagName,
 			Enabled:    flagVal.Active(),
-			DurationMs: int64(flagVal.CurrentDuration()),
+			DurationNs: int64(flagVal.CurrentDuration()),
 		})
 	}
 	resp, err := json.MarshalIndent(jsonFlags, "", "  ")
