@@ -116,7 +116,7 @@ func (k *Kubernetes) GenerateMetrics(service ServiceTier) []Metric {
 			Name: "kube_node_status_allocatable",
 			Type: "Gauge",
 			Min:  cpuTotal,
-			Max:  cpuTotal, // make the node a little bigger than the limit
+			Max:  cpuTotal,
 			Tags: map[string]string{
 				"resource": "cpu",
 				"pod":      k.PodName, // used to created multiple time series that will be summed up.
@@ -125,8 +125,8 @@ func (k *Kubernetes) GenerateMetrics(service ServiceTier) []Metric {
 		{
 			Name: "kube_node_status_allocatable",
 			Type: "Gauge",
-			Min:  memTotal, // make the node a little bigger than the limit
-			Max:  memTotal, // make the node a little bigger than the limit
+			Min:  memTotal,
+			Max:  memTotal,
 			Tags: map[string]string{
 				"resource": "memory",
 				"pod":      k.PodName, // used to created multiple time series that will be summed up.
