@@ -1,0 +1,481 @@
+topology:
+  services:
+    frontend:
+      tagSets:
+        - weight: 1
+          tags:
+            version: v125
+      resourceAttrSets:
+        - weight: 1
+          kubernetes:
+            cluster_name: k8s-cluster-1
+            request:
+              cpu: 0.5
+              memory: 2048
+            limit:
+              cpu: 0.75
+              memory: 3072
+            usage:
+              cpu:
+                target: 0.5
+                jitter: 0.5
+              memory:
+                target: 0.6
+                jitter: 0.4
+          resourceAttrs:
+            cloud.provider: aws
+            cloud.region: us-east-1
+        - weight: 1
+          kubernetes:
+            cluster_name: k8s-cluster-1
+            request:
+              cpu: 0.5
+              memory: 2048
+            limit:
+              cpu: 0.75
+              memory: 3072
+            usage:
+              cpu:
+                target: 0.5
+                jitter: 0.5
+              memory:
+                target: 0.6
+                jitter: 0.4
+          resourceAttrs:
+            cloud.provider: aws
+            cloud.region: us-west-2
+      routes:
+        /product:
+          downstreamCalls:
+            productcatalogservice: /GetProducts
+            recommendationservice: /GetRecommendations
+            adservice: /AdRequest
+          latencyConfigs:
+            - p0: 25ms
+              p50: 75ms
+              p95: 100ms
+              p99: 120ms
+              p99.9: 150ms
+              p100: 200ms
+          tagSets:
+            - weight: 1
+              tags:
+                starter: charmander
+              tagGenerators:
+                - numTags: 50
+                  numVals: 3000
+                  valLength: 16
+            - weight: 1
+              tags:
+                starter: squirtle
+            - weight: 1
+              tags:
+                starter: bulbasaur
+        /cart:
+          downstreamCalls:
+            cartservice: /GetCart
+            recommendationservice: /GetRecommendations
+          latencyConfigs:
+            - p0: 25ms
+              p50: 75ms
+              p95: 100ms
+              p99: 120ms
+              p99.9: 150ms
+              p100: 200ms
+        /checkout:
+          downstreamCalls:
+            checkoutservice: /PlaceOrder
+          maxLatencyMillis: 800
+        /shipping:
+          downstreamCalls:
+            shippingservice: /GetQuote
+          maxLatencyMillis: 50
+        /currency:
+          downstreamCalls:
+            currencyservice: /GetConversion
+          maxLatencyMillis: 1500
+    productcatalogservice:
+      tagSets:
+        - weight: 1
+          tags:
+            service.version: v52
+            gRPC: v1.44.0
+          flag_unset: productcatalogservice_leak
+        - weight: 1
+          tags:
+            service.version: v53
+            gRPC: v1.45.0
+          flag_set: productcatalogservice_leak
+      resourceAttrSets:
+        - weight: 1
+          kubernetes:
+            cluster_name: k8s-cluster-2
+            request:
+              cpu: 0.5
+              memory: 512
+            limit:
+              cpu: 1
+              memory: 1024
+            usage:
+              cpu:
+                target: 0.5
+                jitter: 0.5
+              memory:
+                target: 0.6
+                jitter: 0.4
+          resourceAttrs:
+            cloud.provider: azure
+            cloud.region: Central-US
+            host.type: t3.medium
+          flag_unset: productcatalogservice_leak
+        - weight: 1
+          kubernetes:
+            cluster_name: k8s-cluster-2
+            request:
+              cpu: 0.5
+              memory: 512
+            limit:
+              cpu: 1
+              memory: 1024
+            restart:
+              every: 15m
+          resourceAttrs:
+            cloud.provider: azure
+            cloud.region: Central-US
+            host.type: t3.medium
+          flag_set: productcatalogservice_leak
+      routes:
+        /GetProducts:
+          downstreamCalls: {}
+          latencyConfigs:
+            - flag_set: productcatalogservice_leak.phase_1a
+              p0: 25ms
+              p50: 75ms
+              p95: 100ms
+              p99: 130ms
+              p99.9: 200ms
+              p100: 300ms
+            - flag_set: productcatalogservice_leak.phase_1b
+              p0: 25ms
+              p50: 80ms
+              p95: 120ms
+              p99: 200ms
+              p99.9: 300ms
+              p100: 500ms
+            - flag_set: productcatalogservice_leak.phase_1c
+              p0: 30ms
+              p50: 90ms
+              p95: 200ms
+              p99: 350ms
+              p99.9: 500ms
+              p100: 700ms
+            - flag_set: productcatalogservice_leak.phase_2a
+              p0: 25ms
+              p50: 75ms
+              p95: 100ms
+              p99: 130ms
+              p99.9: 200ms
+              p100: 300ms
+            - flag_set: productcatalogservice_leak.phase_2b
+              p0: 25ms
+              p50: 80ms
+              p95: 120ms
+              p99: 200ms
+              p99.9: 300ms
+              p100: 500ms
+            - flag_set: productcatalogservice_leak.phase_2c
+              p0: 30ms
+              p50: 90ms
+              p95: 200ms
+              p99: 350ms
+              p99.9: 500ms
+              p100: 700ms
+            - p0: 25ms
+              p50: 75ms
+              p95: 100ms
+              p99: 120ms
+              p99.9: 150ms
+              p100: 200ms
+    recommendationservice:
+      tagSets:
+        - weight: 1
+          tags:
+            version: v234
+            region: us-east-1
+      resourceAttrSets:
+        - weight: 1
+          kubernetes:
+            cluster_name: k8s-cluster-3
+            request:
+              cpu: 0.5
+              memory: 512
+            limit:
+              cpu: 1
+              memory: 1024
+          resourceAttrs:
+            cloud.provider: aws
+            cloud.region: us-west-2
+        - weight: 1
+          kubernetes:
+            cluster_name: k8s-cluster-3
+            request:
+              cpu: 0.5
+              memory: 512
+            limit:
+              cpu: 1
+              memory: 1024
+          resourceAttrs:
+            cloud.provider: aws
+            cloud.region: us-west-1
+      routes:
+        /GetRecommendations:
+          downstreamCalls:
+            productcatalogservice: /GetProducts
+          maxLatencyMillis: 200
+    cartservice:
+      tagSets:
+        - weight: 1
+          tags:
+            version: v5
+            region: us-east-1
+      resourceAttrSets:
+        - weight: 1
+          kubernetes:
+            cluster_name: k8s-cluster-4
+            request:
+              cpu: 1
+              memory: 512
+            limit:
+              cpu: 2
+              memory: 1024
+          resourceAttrs:
+            host.name: cartservice-hostname
+      routes:
+        /GetCart:
+          downstreamCalls: {}
+          maxLatencyMillis: 200
+    checkoutservice:
+      tagSets:
+        - weight: 1
+          tags:
+            version: v37
+            region: us-east-1
+      resourceAttrSets:
+        - weight: 1
+          kubernetes:
+            cluster_name: k8s-cluster-1
+            request:
+              cpu: 0.5
+              memory: 512
+            limit:
+              cpu: 1
+              memory: 1024
+      routes:
+        /PlaceOrder:
+          downstreamCalls:
+            paymentservice: /CreditCardInfo
+            shippingservice: /Address
+            currencyservice: /GetConversion
+            cartservice: /GetCart
+            emailservice: /SendOrderConfirmation
+          tagSets:
+            - weight: 25
+              tags:
+                error: true
+                http.status_code: 503
+            - weight: 85
+              tags: {}
+          maxLatencyMillis: 500
+    paymentservice:
+      tagSets:
+        - weight: 1
+          tags:
+            version: v177
+            region: us-east-1
+      resourceAttrSets:
+        - weight: 1
+          kubernetes:
+            cluster_name: k8s-cluster-6
+            request:
+              cpu: 0.5
+              memory: 512
+            limit:
+              cpu: 1
+              memory: 1024
+          resourceAttrs:
+            host.name: paymentservice-hostname
+      routes:
+        /ChargeRequest:
+          downstreamCalls:
+            paymentservice: /CreditCardInfo
+          maxLatencyMillis: 700
+        /CreditCardInfo:
+          downstreamCalls: {}
+          maxLatencyMillis: 50
+    shippingservice:
+      tagSets:
+        - weight: 1
+          tags:
+            version: v127
+            region: us-east-1
+      resourceAttrSets:
+        - weight: 1
+          kubernetes:
+            cluster_name: k8s-cluster-7
+            request:
+              cpu: 0.5
+              memory: 512
+            limit:
+              cpu: 1
+              memory: 1024
+          resourceAttrs:
+            host.name: shippingservice-hostname
+      routes:
+        /GetQuote:
+          downstreamCalls:
+            shippingservice: /Address
+          maxLatencyMillis: 250
+        /ShipOrder:
+          downstreamCalls:
+            shippingservice: /Address
+          maxLatencyMillis: 500
+        /Address:
+          downstreamCalls: {}
+          maxLatencyMillis: 100
+    emailservice:
+      tagSets:
+        - weight: 1
+          tags:
+            version: v27
+            region: us-east-1
+      resourceAttrSets:
+        - weight: 1
+          kubernetes:
+            cluster_name: k8s-cluster-8
+            request:
+              cpu: 0.5
+              memory: 512
+            limit:
+              cpu: 1
+              memory: 1024
+          resourceAttrs:
+            host.name: emailservice-hostname
+      routes:
+        /SendOrderConfirmation:
+          downstreamCalls:
+            emailservice: /OrderResult
+          tagSets:
+            - weight: 15
+              tags:
+                error: true
+                service.version: v122
+                http.status_code: 503
+            - weight: 85
+              tags: {}
+          maxLatencyMillis: 500
+        /OrderResult:
+          downstreamCalls: {}
+          maxLatencyMillis: 100
+    currencyservice:
+      tagSets:
+        - weight: 1
+          tags:
+            version: v27
+            region: us-east-1
+      resourceAttrSets:
+        - weight: 1
+          kubernetes:
+            cluster_name: k8s-cluster-9
+            request:
+              cpu: 0.5
+              memory: 512
+            limit:
+              cpu: 1
+              memory: 1024
+          resourceAttrs:
+            host.name: currencyservice-hostname
+      routes:
+        /GetConversion:
+          downstreamCalls:
+            currencyservice: /Money
+          maxLatencyMillis: 100
+        /Money:
+          downstreamCalls: {}
+          maxLatencyMillis: 100
+    adservice:
+      tagSets:
+        - weight: 1
+          version: v37
+          region: us-east-1
+      resourceAttrSets:
+        - weight: 1
+          kubernetes:
+            cluster_name: k8s-cluster-10
+            request:
+              cpu: 0.5
+              memory: 512
+            limit:
+              cpu: 1
+              memory: 1024
+          resourceAttrs:
+            host.name: adservice-hostname
+      routes:
+        /AdRequest:
+          downstreamCalls: {}
+          maxLatencyMillis: 500
+        /Ad:
+          downstreamCalls: {}
+          maxLatencyMillis: 500
+
+flags:
+  - name: productcatalogservice_leak
+    cron:
+      start: "50 * * * *"
+      end: "20 * * * *"
+  - name: productcatalogservice_leak.phase_1a
+    incident:
+      parentFlag: productcatalogservice_leak
+      start: 0m
+      end: 5m
+  - name: productcatalogservice_leak.phase_1b
+    incident:
+      parentFlag: productcatalogservice_leak
+      start: 5m
+      end: 10m
+  - name: productcatalogservice_leak.phase_1c
+    incident:
+      parentFlag: productcatalogservice_leak
+      start: 10m
+      end: 15m
+  - name: productcatalogservice_leak.phase_2a
+    incident:
+      parentFlag: productcatalogservice_leak
+      start: 15m
+      end: 20m
+  - name: productcatalogservice_leak.phase_2b
+    incident:
+      parentFlag: productcatalogservice_leak
+      start: 20m
+      end: 25m
+  - name: productcatalogservice_leak.phase_2c
+    incident:
+      parentFlag: productcatalogservice_leak
+      start: 25m
+      end: 30m
+
+rootRoutes:
+  - service: frontend
+    route: /product
+    tracesPerHour: 2880
+  - service: frontend
+    route: /cart
+    tracesPerHour: 1400
+  - service: frontend
+    route: /shipping
+    tracesPerHour: 480
+  - service: frontend
+    route: /currency
+    tracesPerHour: 200
+  - service: frontend
+    route: /checkout
+    tracesPerHour: 480
