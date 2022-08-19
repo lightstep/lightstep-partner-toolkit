@@ -1,0 +1,626 @@
+topology:
+  services:
+    frontend:
+      tagSets:
+        - weight: 1
+          flag_set: frontend_errors
+          tags:
+            version: v127
+            error: true
+        - weight: 1
+          flag_unset: frontend_errors
+          tags:
+            version: v125
+      resourceAttrSets:
+        - weight: 1
+          kubernetes:
+            cluster_name: k8s-cluster-1
+            request:
+              cpu: 0.5
+              memory: 2048
+            limit:
+              cpu: 0.75
+              memory: 3072
+            usage:
+              cpu:
+                target: 0.5
+                jitter: 0.5
+              memory:
+                target: 0.6
+                jitter: 0.4
+          resourceAttrs:
+            cloud.provider: aws
+            cloud.region: us-east-1
+
+        - weight: 1
+          kubernetes:
+            cluster_name: k8s-cluster-1
+            request:
+              cpu: 0.5
+            limit:
+              cpu: 0.75
+          resourceAttrs:
+            cloud.provider: aws
+            cloud.region: us-west-2
+      routes:
+        /product:
+          downstreamCalls:
+            productcatalogservice: /GetProducts
+            recommendationservice: /GetRecommendations
+            adservice: /AdRequest
+          latencyPercentiles:
+            p0: 25ms
+            p50: 75ms
+            p95: 100ms
+            p99: 120ms
+            p99.9: 150ms
+            p100: 200ms
+          tagSets:
+            - weight: 1
+              tags:
+                starter: charmander
+              tagGenerators:
+                - numTags: 50
+                  numVals: 3000
+                  valLength: 16
+            - weight: 1
+              tags:
+                starter: squirtle
+            - weight: 1
+              tags:
+                starter: bulbasaur
+        /cart:
+          downstreamCalls:
+            cartservice: /GetCart
+            recommendationservice: /GetRecommendations
+          latencyPercentiles:
+            p0: 25ms
+            p50: 75ms
+            p95: 100ms
+            p99: 120ms
+            p99.9: 150ms
+            p100: 200ms
+        /checkout:
+          downstreamCalls:
+            checkoutservice: /PlaceOrder
+          maxLatencyMillis: 800
+        /shipping:
+          downstreamCalls:
+            shippingservice: /GetQuote
+          maxLatencyMillis: 50
+        /currency:
+          downstreamCalls:
+            currencyservice: /GetConversion
+          maxLatencyMillis: 1500
+        /currency_slow:
+          downstreamCalls:
+            currencyservice: /DoSomethingSlow
+          flag_set: currencyservice_oom.phase_1
+          maxLatencyMillis: 3500
+    productcatalogservice:
+      tagSets:
+        - tags:
+            version: v52
+          inherit:
+            - region
+      resourceAttrSets:
+        - weight: 1
+          flag_set: product_spike
+          kubernetes:
+            cluster_name: k8s-cluster-2
+            request:
+              cpu: 0.5
+              memory: 512
+            limit:
+              cpu: 1
+              memory: 1024
+          resourceAttrs:
+            cloud.provider: azure
+            cloud.region: Central-US
+            host.type: t3.medium
+        - weight: 1
+          flag_unset: product_spike
+          kubernetes:
+            cluster_name: k8s-cluster-2
+            request:
+              cpu: 0.5
+              memory: 256 #changed
+            limit:
+              cpu: 1
+              memory: 1024
+          resourceAttrs:
+            cloud.provider: azure
+            cloud.region: Central-US
+            host.type: t3.medium
+        - weight: 1
+          resourceAttrs:
+            cloud.provider: azure
+            cloud.region: West-US
+            host.type: t3.medium
+      routes:
+        /GetProducts:
+          downstreamCalls: {}
+          maxLatencyMillis: 100
+          tagSets:
+            - inherit:
+                - starter
+        /SearchProducts:
+          downstreamCalls: {}
+          tagSets:
+            - weight: 15
+              tags:
+                error: true
+                http.status_code: 503
+            - weight: 85
+              tags: {}
+          maxLatencyMillis: 400
+    recommendationservice:
+      tagSets:
+        - tags:
+            version: v234
+            region: us-east-1
+      resourceAttrSets:
+        - weight: 1
+          flag_set: product_spike
+          kubernetes:
+            cluster_name: k8s-cluster-3
+            request:
+              cpu: 0.5
+              memory: 512
+            limit:
+              cpu: 1
+              memory: 1024
+        - weight: 1
+          flag_set: product_spike
+          kubernetes:
+            cluster_name: k8s-cluster-3
+            request:
+              cpu: 0.5
+              memory: 512
+            limit:
+              cpu: 1
+              memory: 1024
+          resourceAttrs:
+            cloud.provider: aws
+            cloud.region: us-west-2
+        - weight: 1
+          flag_unset: product_spike
+          kubernetes:
+            cluster_name: k8s-cluster-3
+            request:
+              cpu: 0.5
+              memory: 256 #changed
+            limit:
+              cpu: 1
+              memory: 1024
+          resourceAttrs:
+            cloud.provider: aws
+            cloud.region: us-west-2
+        - weight: 1
+          kubernetes:
+            cluster_name: k8s-cluster-3
+            request:
+              cpu: 0.5
+              memory: 512
+            limit:
+              cpu: 1
+              memory: 1024
+          resourceAttrs:
+            cloud.provider: aws
+            cloud.region: us-west-1
+      routes:
+        /GetRecommendations:
+          downstreamCalls:
+            productcatalogservice: /GetProducts
+          maxLatencyMillis: 200
+    cartservice:
+      tagSets:
+        - tags:
+            version: v5
+            region: us-east-1
+          flag_unset: runs_on_azure
+        - tags:
+            region: North_Central_US
+          flag_set: runs_on_azure
+      resourceAttrSets:
+        - weight: 1
+          flag_set: cart_spike
+          kubernetes:
+            cluster_name: k8s-cluster-4
+            request:
+              cpu: 1
+              memory: 512
+            limit:
+              cpu: 2
+              memory: 1024
+          resourceAttrs:
+            host.name: cartservice-hostname
+        - weight: 1
+          flag_unset: cart_spike
+          kubernetes:
+            cluster_name: k8s-cluster-4
+            request:
+              cpu: 1
+              memory: 256 #changed
+            limit:
+              cpu: 2
+              memory: 1024
+          resourceAttrs:
+            host.name: cartservice-hostname
+      routes:
+        /GetCart:
+          downstreamCalls: {}
+          maxLatencyMillis: 200
+    checkoutservice:
+      tagSets:
+        - tags:
+            version: v37
+            region: us-east-1
+      resourceAttrSets:
+        - weight: 1
+          flag_set: checkout_spike
+          kubernetes:
+            cluster_name: k8s-cluster-1
+            request:
+              cpu: 0.5
+              memory: 512
+            limit:
+              cpu: 1
+              memory: 1024
+        - weight: 1
+          flag_unset: checkout_spike
+          kubernetes:
+            cluster_name: k8s-cluster-1
+            request:
+              cpu: 0.5
+              memory: 256 #changed
+            limit:
+              cpu: 1
+              memory: 1024
+      routes:
+        /PlaceOrder:
+          downstreamCalls:
+            paymentservice: /CreditCardInfo
+            shippingservice: /Address
+            currencyservice: /GetConversion
+            cartservice: /GetCart
+            emailservice: /SendOrderConfirmation
+          tagSets:
+            - weight: 25
+              tags:
+                error: true
+                http.status_code: 503
+            - weight: 85
+              tags: {}
+          maxLatencyMillis: 500
+    paymentservice:
+      tagSets:
+        - tags:
+            version: v177
+            region: us-east-1
+      resourceAttrSets:
+        - weight: 1
+          kubernetes:
+            cluster_name: k8s-cluster-6
+            request:
+              cpu: 0.5
+              memory: 512
+            limit:
+              cpu: 1
+              memory: 1024
+          resourceAttrs:
+            host.name: paymentservice-hostname
+      routes:
+        /ChargeRequest:
+          downstreamCalls:
+            paymentservice: /CreditCardInfo
+          maxLatencyMillis: 700
+        /CreditCardInfo:
+          downstreamCalls: {}
+          maxLatencyMillis: 50
+    shippingservice:
+      tagSets:
+        - tags:
+            version: v127
+            region: us-east-1
+      resourceAttrSets:
+        - weight: 1
+          flag_set: shipping_spike
+          kubernetes:
+            cluster_name: k8s-cluster-7
+            request:
+              cpu: 0.5
+              memory: 512
+            limit:
+              cpu: 1
+              memory: 1024
+          resourceAttrs:
+            host.name: shippingservice-hostname
+        - weight: 1
+          flag_unset: shipping_spike
+          kubernetes:
+            cluster_name: k8s-cluster-7
+            request:
+              cpu: 0.5
+              memory: 256 #changed
+            limit:
+              cpu: 1
+              memory: 1024
+          resourceAttrs:
+            host.name: shippingservice-hostname
+      routes:
+        /GetQuote:
+          downstreamCalls:
+            shippingservice: /Address
+          maxLatencyMillis: 250
+        /ShipOrder:
+          downstreamCalls:
+            shippingservice: /Address
+          maxLatencyMillis: 500
+        /Address:
+          downstreamCalls: {}
+          maxLatencyMillis: 100
+    emailservice:
+      tagSets:
+        - tags:
+            version: v27
+            region: us-east-1
+      resourceAttrSets:
+        - weight: 1
+          kubernetes:
+            cluster_name: k8s-cluster-8
+            request:
+              cpu: 0.5
+              memory: 512
+            limit:
+              cpu: 1
+              memory: 1024
+          resourceAttrs:
+            host.name: emailservice-hostname
+      routes:
+        /SendOrderConfirmation:
+          downstreamCalls:
+            emailservice: /OrderResult
+          tagSets:
+            - weight: 15
+              tags:
+                error: true
+                service.version: v122
+                http.status_code: 503
+            - weight: 85
+              tags: {}
+          maxLatencyMillis: 500
+        /OrderResult:
+          downstreamCalls: {}
+          maxLatencyMillis: 100
+    currencyservice:
+      tagSets:
+        - tags:
+            version: v27
+            region: us-east-1
+      resourceAttrSets:
+        - weight: 1
+          flag_set: currency_spike
+          kubernetes:
+            cluster_name: k8s-cluster-9
+            request:
+              cpu: 0.5
+              memory: 512
+            limit:
+              cpu: 1
+              memory: 1024
+          resourceAttrs:
+            host.name: currencyservice-hostname
+        - weight: 1
+          flag_unset: currency_spike
+          kubernetes:
+            cluster_name: k8s-cluster-9
+            request:
+              cpu: 0.5
+              memory: 256 #changed
+            limit:
+              cpu: 1
+              memory: 1024
+          resourceAttrs:
+            host.name: currencyservice-hostname
+      routes:
+        /GetConversion:
+          downstreamCalls:
+            currencyservice: /Money
+          maxLatencyMillis: 100
+        /Money:
+          downstreamCalls: {}
+          maxLatencyMillis: 100
+        /DoSomethingSlow:
+          downstreamCalls: {}
+          maxLatencyMillis: 4000
+          flag_set: currencyservice_oom.phase_1
+    adservice:
+      tagSets:
+        - version: v37
+          region: us-east-1
+      resourceAttrSets:
+        - weight: 1
+          flag_set: product_spike
+          kubernetes:
+            cluster_name: k8s-cluster-10
+            request:
+              cpu: 0.5
+              memory: 512
+            limit:
+              cpu: 1
+              memory: 1024
+          resourceAttrs:
+            host.name: adservice-hostname
+        - weight: 1
+          flag_unset: product_spike
+          kubernetes:
+            cluster_name: k8s-cluster-10
+            request:
+              cpu: 0.5
+              memory: 256 #changed
+            limit:
+              cpu: 1
+              memory: 1024
+          resourceAttrs:
+            host.name: adservice-hostname
+      routes:
+        /AdRequest:
+          downstreamCalls: {}
+          maxLatencyMillis: 500
+        /Ad:
+          downstreamCalls: {}
+          maxLatencyMillis: 500
+
+flags:
+  # This is a cron-style flag
+  - name: frontend_errors
+    # use https://crontab.guru/
+    cron:
+      start: "0,10,20,30,40,50 * * * *"
+      end: "5,15,25,35,45,55 * * * *"
+  - name: runs_on_azure
+  - name: sev0_total_failure
+  - name: database_outage
+  # OOM on currency service + slower span latency from frontend -> currencyservice
+  - name: currencyservice_oom.default
+    incident:
+      parentFlag: currencyservice_fail
+      start: 0m
+      end: 10m
+  - name: currencyservice_oom.phase_1
+    incident:
+      parentFlag: currencyservice_fail
+      start: 0m
+      end: 10m
+  - name: currencyservice_oom.phase_2
+    incident:
+      parentFlag: currencyservice_fail
+      start: 3m
+      end: 10m
+  - name: frontend_doom
+    cron:
+      start: "57,12,27,42 * * * *"
+      end: "10,25,40,55 * * * *"
+  # This is an incident-style flag; start and end are relative to incident start
+  - name: frontend_doom.phase_1
+    incident:
+      parentFlag: frontend_doom
+      start: 0m
+      end: 10m
+  - name: frontend_doom.phase_2
+    incident:
+      parentFlag: frontend_doom
+      start: 5m
+      # with no end, lasts until the incident finishes
+  - name: currencyservice_fail
+    cron:
+      start: "57,12,27,42 * * * *"
+      end: "10,25,40,55 * * * *"
+  - name: checkout_spike
+    cron:
+      start: "0,10,20,30,40,50 * * * *"
+      end: "5,15,25,35,45,55 * * * *"
+  - name: checkout_spike.phase_1
+    incident:
+      parentFlag: checkout_spike
+      start: 0m
+      end: 10m
+  - name: checkout_spike.phase_2
+    incident:
+      parentFlag: checkout_spike
+      start: 5m
+  - name: currency_spike
+    cron:
+      start: "0,10,20,30,40,50 * * * *"
+      end: "5,15,25,35,45,55 * * * *"
+  - name: currency_spike.phase_1
+    incident:
+      parentFlag: currency_spike
+      start: 0m
+      end: 10m
+  - name: currency_spike.phase_2
+    incident:
+      parentFlag: currency_spike
+      start: 5m
+  - name: shipping_spike
+    cron:
+      start: "0,10,20,30,40,50 * * * *"
+      end: "5,15,25,35,45,55 * * * *"
+  - name: shipping_spike.phase_1
+    incident:
+      parentFlag: shipping_spike
+      start: 0m
+      end: 10m
+  - name: shipping_spike.phase_2
+    incident:
+      parentFlag: shipping_spike
+      start: 5m
+  - name: product_spike
+    cron:
+      start: "5,15,25,35,45,55 * * * *"
+      end: "7,14,21,28,35,42,49,56 * * * *" #for testing purposes
+  - name: product_spike.phase_1
+    incident:
+      parentFlag: product_spike
+      start: 0m
+      end: 10m
+  - name: product_spike.phase_2
+    incident:
+      parentFlag: product_spike
+      start: 5m
+  - name: cart_spike
+    cron:
+      start: "5,15,25,35,45,55 * * * *"
+      end: "7,14,21,28,35,42,49,56 * * * *" #for testing purposes
+  - name: cart_spike.phase_1
+    incident:
+      parentFlag: cart_spike
+      start: 0m
+      end: 10m
+  - name: cart_spike.phase_2
+    incident:
+      parentFlag: cart_spike
+      start: 5m
+
+rootRoutes:
+  - service: frontend
+    route: /product
+    tracesPerHour: 2880
+    flag_unset: product_spike
+  - service: frontend
+    route: /product
+    tracesPerHour: 10000
+    flag_set: product_spike
+  - service: frontend
+    route: /cart
+    tracesPerHour: 1400
+    flag_unset: cart_spike
+  - service: frontend
+    route: /cart
+    tracesPerHour: 7000
+    flag_set: cart_spike
+  - service: frontend
+    route: /shipping
+    tracesPerHour: 480
+    flag_unset: shipping_spike
+  - service: frontend
+    route: /shipping
+    tracesPerHour: 2400
+    flag_set: shipping_spike
+  - service: frontend
+    route: /currency
+    tracesPerHour: 200
+    flag_unset: currency_spike
+  - service: frontend
+    route: /currency
+    tracesPerHour: 1000
+    flag_set: currency_spike
+  - service: frontend
+    route: /checkout
+    tracesPerHour: 480
+    flag_unset: checkout_spike
+  - service: frontend
+    route: /checkout
+    tracesPerHour: 2400
+    flag_set: checkout_spike
