@@ -59,11 +59,14 @@ func (r *ServiceRoute) load(route string) error {
 			return err
 		}
 		if cfg.IsDefault() {
+			if hasDefault {
+				return fmt.Errorf("latencyConfigs must include exactly one default config (no flag_set or flag_unset)")
+			}
 			hasDefault = true
 		}
 	}
 	if !hasDefault {
-		return fmt.Errorf("latencyConfigs must include a default (no flag_set or flag_unset)")
+		return fmt.Errorf("latencyConfigs must include exactly one default config (no flag_set or flag_unset)")
 	}
 	return nil
 }
