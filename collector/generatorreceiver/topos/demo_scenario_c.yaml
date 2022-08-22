@@ -99,7 +99,8 @@ topology:
           maxLatencyMillis: 3500
     productcatalogservice:
       tagSets:
-        - tags:
+        - weight: 1
+          tags:
             version: v52
           inherit:
             - region
@@ -156,7 +157,8 @@ topology:
           maxLatencyMillis: 400
     recommendationservice:
       tagSets:
-        - tags:
+        - weight: 1
+          tags:
             version: v234
             region: us-east-1
       resourceAttrSets:
@@ -215,11 +217,13 @@ topology:
           maxLatencyMillis: 200
     cartservice:
       tagSets:
-        - tags:
+        - weight: 1
+          tags:
             version: v5
             region: us-east-1
           flag_unset: runs_on_azure
-        - tags:
+        - weight: 1
+          tags:
             region: North_Central_US
           flag_set: runs_on_azure
       resourceAttrSets:
@@ -253,7 +257,8 @@ topology:
           maxLatencyMillis: 200
     checkoutservice:
       tagSets:
-        - tags:
+        - weight: 1
+          tags:
             version: v37
             region: us-east-1
       resourceAttrSets:
@@ -295,7 +300,8 @@ topology:
           maxLatencyMillis: 500
     paymentservice:
       tagSets:
-        - tags:
+        - weight: 1
+          tags:
             version: v177
             region: us-east-1
       resourceAttrSets:
@@ -320,7 +326,8 @@ topology:
           maxLatencyMillis: 50
     shippingservice:
       tagSets:
-        - tags:
+        - weight: 1
+          tags:
             version: v127
             region: us-east-1
       resourceAttrSets:
@@ -362,7 +369,8 @@ topology:
           maxLatencyMillis: 100
     emailservice:
       tagSets:
-        - tags:
+        - weight: 1
+          tags:
             version: v27
             region: us-east-1
       resourceAttrSets:
@@ -395,7 +403,8 @@ topology:
           maxLatencyMillis: 100
     currencyservice:
       tagSets:
-        - tags:
+        - weight: 1
+          tags:
             version: v27
             region: us-east-1
       resourceAttrSets:
@@ -437,8 +446,10 @@ topology:
           flag_set: currencyservice_oom.phase_1
     adservice:
       tagSets:
-        - version: v37
-          region: us-east-1
+        - weight: 1
+          tags:
+            version: v37
+            region: us-east-1
       resourceAttrSets:
         - weight: 1
           flag_set: product_spike

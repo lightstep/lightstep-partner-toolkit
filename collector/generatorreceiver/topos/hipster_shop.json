@@ -87,7 +87,7 @@
       },
       {
         "serviceName" : "productcatalogservice",
-        "tagSets" : [{"tags": { "version" : "v52"}, "inherit":  ["region"]}],
+        "tagSets" : [{"weight": 1, "tags": { "version" : "v52"}, "inherit":  ["region"]}],
         "resourceAttrSets": [
           { "weight": 1, "resourceAttrs": { "cloud.provider" : "azure", "cloud.region" : "Central-US", "k8s.cluster.name": "k8s-cluster-2", "host.type": "t3.medium", "host.name": "productcatalogservice-d847fdcf5-j6s2f" }},
           { "weight": 1, "resourceAttrs": { "cloud.provider" : "azure", "cloud.region" : "West-US", "k8s.cluster.name": "k8s-cluster-2", "host.type": "t3.medium", "host.name": "productcatalogservice-6b654dbf57-zq8dt" }}
@@ -114,7 +114,7 @@
       },
       {
         "serviceName" : "recommendationservice",
-        "tagSets" : [{"tags" : { "version" : "v234", "region" : "us-east-1" }}],
+        "tagSets" : [{"weight": 1, "tags" : { "version" : "v234", "region" : "us-east-1" }}],
         "resourceAttrSets": [
           { "weight": 1, "resourceAttrs": { "cloud.provider" : "aws", "cloud.region" : "us-west-2", "k8s.cluster.name": "k8s-cluster-3", "host.name": "recommendationservice-6b654dbf57-zq8dt" }},
           { "weight": 1, "resourceAttrs": { "cloud.provider" : "aws", "cloud.region" : "us-west-1", "k8s.cluster.name": "k8s-cluster-3", "host.name": "recommendationservice-d847fdcf5-j6s2f" }}
@@ -129,7 +129,7 @@
       },
       {
         "serviceName" : "cartservice",
-        "tagSets": [{"tags" : { "version" : "v5", "region" : "us-east-1" }}],
+        "tagSets": [{"weight": 1, "tags" : { "version" : "v5", "region" : "us-east-1" }}],
         "resourceAttrSets": [
           { "weight": 1, "resourceAttrs": {  "host.name": "cartservice-hostname" } }
         ],
@@ -143,7 +143,7 @@
       },
       {
         "serviceName" : "checkoutservice",
-        "tagSets": [{"tags" : { "version" : "v37", "region" : "us-east-1" }}],
+        "tagSets": [{"weight": 1, "tags" : { "version" : "v37", "region" : "us-east-1" }}],
         "resourceAttrSets": [
           { "weight": 1, "resourceAttrs": {  "host.name": "checkoutservice-hostname" } }
         ],
@@ -161,7 +161,7 @@
       },
       {
         "serviceName" : "paymentservice",
-        "tagSets": [{"tags" : { "version" : "v177", "region" : "us-east-1" }}],
+        "tagSets": [{"weight": 1, "tags" : { "version" : "v177", "region" : "us-east-1" }}],
         "resourceAttrSets": [
           { "weight": 1, "resourceAttrs": {  "host.name": "paymentservice-hostname" } }
         ],
@@ -180,7 +180,7 @@
       },
       {
         "serviceName" : "shippingservice",
-        "tagSets": [{"tags" : { "version" : "v127", "region" : "us-east-1" }}],
+        "tagSets": [{"weight": 1, "tags" : { "version" : "v127", "region" : "us-east-1" }}],
         "resourceAttrSets": [
           { "weight": 1, "resourceAttrs": {  "host.name": "shippingservice-hostname" } }
         ],
@@ -204,7 +204,7 @@
       },
       {
         "serviceName" : "emailservice",
-        "tagSets": [{"tags" : { "version" : "v27", "region" : "us-east-1" }}],
+        "tagSets": [{"weight": 1, "tags" : { "version" : "v27", "region" : "us-east-1" }}],
         "resourceAttrSets": [
           { "weight": 1, "resourceAttrs": {  "host.name": "emailservice-hostname" } }
         ],
@@ -227,7 +227,7 @@
       },
       {
         "serviceName" : "currencyservice",
-        "tagSets": [{"tags" : { "version" : "v27", "region" : "us-east-1" }}],
+        "tagSets": [{"weight": 1, "tags" : { "version" : "v27", "region" : "us-east-1" }}],
         "resourceAttrSets": [
           { "weight": 1, "resourceAttrs": {  "host.name": "currencyservice-hostname" } }
         ],
@@ -246,7 +246,7 @@
       },
       {
         "serviceName" : "adservice",
-        "tagSets" : [{ "version" : "v37", "region" : "us-east-1" }],
+        "tagSets" : [{"weight": 1, "tags": { "version" : "v37", "region" : "us-east-1" }}],
         "resourceAttrSets": [
           { "weight": 1, "resourceAttrs": {  "host.name": "adservice-hostname" } }
         ],
