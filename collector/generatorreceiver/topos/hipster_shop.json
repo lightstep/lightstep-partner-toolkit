@@ -98,7 +98,7 @@
             "downstreamCalls" : { },
             "maxLatencyMillis" : 100,
             "tagSets": [
-              {"inherit": ["starter"]}
+              {"weight": 1, "tags": { "inherit": ["starter"]}} 
             ]
           },
           {
