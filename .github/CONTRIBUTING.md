@@ -76,7 +76,7 @@ $ opentelemetry-collector-builder --config ./builder-config.yml
 $ /tmp/ls-partner-col-distribution/lightstep-partner-collector --config ./config/collector-config.yml
 ```
 
-When using the builder, you only need to re-run the first command for code changes; for config changes just re-run the second command. To run with a different topo file, change the `TOPO_FILE` environment variable. This makes this a somewhat faster option for development.
+When using the builder, you only need to re-run the first command for code changes; for config changes just re-run the second command. To run with a different topo file, change the `TOPO_FILE` environment variable. This makes this a somewhat faster option for development
 
 If you run into errors while building, ping @Nathan on slack and I can help troubleshoot.
 
