@@ -15,6 +15,14 @@ Technical toolkit for Lightstep partners that want to adopt OpenTelemetry or use
 
 <br/>
 
+---
+
+## 👨‍💻 Contributing to this project locally
+
+[Start here](./contributing.md)
+
+---
+
 ## 💻 Demo
 
 Run [Donut Shop](./demo/README.md) locally to understand how OpenTelemetry can connect different tools and solutions together. Our example app creates distributed traces that contain data related to relevant feature flags, errors, user analytics, and supporting cloud services using code in this toolkit.
