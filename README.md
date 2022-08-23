@@ -19,7 +19,7 @@ Technical toolkit for Lightstep partners that want to adopt OpenTelemetry or use
 
 ## 👨‍💻 Contributing to this project locally
 
-[Start here](./contributing.md)
+[Start here](.github/CONTRIBUTING.md)
 
 ---
 
